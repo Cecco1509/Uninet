@@ -182,10 +182,38 @@
 
     @media only screen and (max-width: 600px) {
         .form-box-container {
+            text-align: center;
             width: 100%;
             height: auto;
-            color: transparent;
+            background-color: transparent;
             height: 100svh;
+        }
+
+        h1 {
+            padding-bottom: 10%;
+            font-size: 4em;
+        }
+
+        button {
+            height: 7vh;
+        }
+
+        input {
+            height: 7vh;
+            font-size: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            height: auto;
+            background-color: transparent;
+        }
+
+        .or {
+            width: 100%;
+        }
+        p {
+            width: 100%;
         }
     }
 </style>
