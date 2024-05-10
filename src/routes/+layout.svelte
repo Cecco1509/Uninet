@@ -1,27 +1,28 @@
-<script>
-    import { onMount } from "svelte";
-    import { auth } from "../lib/firebase/firebase.client";
-    import { browser } from "$app/environment";
-    import { authStore } from "../stores/authStore";
-    onMount(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            console.log(user);
-            authStore.update((curr) => {
-                return { ...curr, isLoading: false, currentUser: user };
-            });
+<script lang="ts">
+  import { auth } from "../lib/firebase/firebase.client";
+  import { browser } from "$app/environment";
+  import { authStore } from "../stores/authStore.svelte";
 
-            if (
-                browser &&
-                !$authStore?.currentUser &&
-                !$authStore.isLoading &&
-                window.location.pathname !== "/"
-            ) {
-                window.location.href = "/";
-                //console.log(authStore.currentUser, authStore.isLoading);
-            }
-        });
-        return unsubscribe;
+  let { children } = $props();
+
+  $effect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log(user);
+
+      authStore.currentUser = user;
+
+      if (
+        browser &&
+        !authStore?.currentUser &&
+        !authStore.isLoading &&
+        window.location.pathname !== "/"
+      ) {
+        window.location.href = "/";
+        //console.log(authStore.currentUser, authStore.isLoading);
+      }
     });
+    return unsubscribe;
+  });
 </script>
 
-<slot />
+{@render children()}

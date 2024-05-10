@@ -3,10 +3,12 @@
     margin: 0px;
     padding: 0px;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: 100%;
 }
 
 h1 {
     letter-spacing: -1px;
+    font-size: 3rem;
 }
 
 body,
@@ -34,6 +36,13 @@ footer {
     justify-content: flex-start;
     align-items: center;
     padding-left: 20dvw;
+}
+
+select,
+input,
+textarea,
+button {
+    font-size: inherit;
 }
 
 @media only screen and (max-width: 600px) {
