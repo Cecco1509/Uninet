@@ -1,35 +1,42 @@
 <script lang="ts">
   import logo from "$lib/assets/hero.png";
+  import { auth } from "$lib/firebase/firebase.client";
   import { FirebaseError } from "firebase/app";
-  import { authStore } from "../stores/authStore.svelte";
+  import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    type User,
+  } from "firebase/auth";
+  import Loading from "./Loading.svelte";
+  import LoadIcon from "./LoadIcon.svelte";
 
   let register = $state(false);
   let email = $state("");
   let password = $state("");
   let confirmPassword = $state("");
   let error = $state<string | null>("");
+  let submitted = $state<boolean>(false);
 
   async function handleSubmit() {
     if (!email || !password || (register && !confirmPassword)) {
+      submitted = false;
       return;
     }
 
     if (register && password === confirmPassword) {
       try {
-        await authStore.signup(email, password);
+        await createUserWithEmailAndPassword(auth, email, password);
       } catch (e) {
         error = (e as FirebaseError).code;
+        submitted = false;
       }
     } else {
       try {
-        await authStore.login(email, password);
+        await signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
         error = (e as FirebaseError).code;
+        submitted = false;
       }
-    }
-
-    if (authStore.currentUser) {
-      window.location.href = "/feed";
     }
   }
 </script>
@@ -57,11 +64,18 @@
           </label>
         {/if}
         <br />
-        <button onclick={handleSubmit}>
-          {#if register}
-            Sign Up
+        <button
+          onclick={() => {
+            submitted = true;
+            handleSubmit();
+          }}
+        >
+          {#if submitted}
+            <LoadIcon />
+          {:else if register}
+            Crea un account
           {:else}
-            Log in
+            Accedi
           {/if}
         </button>
       </form>
@@ -93,7 +107,6 @@
     height: auto;
     background-color: rgba(33, 227, 218, 1);
     border-radius: 30px;
-    box-shadow: 0px 0px 2px teal;
   }
 
   .hero-box {
@@ -165,6 +178,9 @@
     /*font-size: 20px;       */
     color: #21e3da;
     transition: all 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   button:hover {

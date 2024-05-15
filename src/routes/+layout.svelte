@@ -1,28 +1,25 @@
 <script lang="ts">
   import { auth } from "../lib/firebase/firebase.client";
   import { browser } from "$app/environment";
-  import { authStore } from "../stores/authStore.svelte";
+  import Loading from "../Components/Loading.svelte";
+  import { createUser } from "../stores/userState.svelte";
+
+  const userState = createUser();
 
   let { children } = $props();
 
   $effect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log(user);
-
-      authStore.currentUser = user;
-
-      if (
-        browser &&
-        !authStore?.currentUser &&
-        !authStore.isLoading &&
-        window.location.pathname !== "/"
-      ) {
-        window.location.href = "/";
-        //console.log(authStore.currentUser, authStore.isLoading);
-      }
-    });
-    return unsubscribe;
+    if (
+      browser &&
+      userState.user &&
+      !userState.isLoading &&
+      window.location.pathname == "/"
+    )
+      window.location.href = "/feed";
   });
 </script>
 
+{#if userState.isLoading}
+  <Loading />
+{/if}
 {@render children()}

@@ -14,6 +14,8 @@ import {
   inMemoryPersistence,
   type Auth,
 } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, ref, type FirebaseStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -36,3 +38,5 @@ if (!getApps().length) {
 }
 
 export const auth: Auth = getAuth(firebaseApp);
+export const db: Firestore = getFirestore();
+export const storage: FirebaseStorage = getStorage();

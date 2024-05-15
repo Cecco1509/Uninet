@@ -9,9 +9,11 @@ import {
 } from "firebase/auth";
 import { auth } from "../lib/firebase/firebase.client";
 import { FirebaseError } from "firebase/app";
+import type { UserInfo } from "./db.svelte";
 
 export class UserAuth {
   currentUser = $state<User | null>(null);
+  userInfo = $state<UserInfo>();
   isLoading = $state<boolean>(false);
   error = $state<string>("");
 
@@ -75,6 +77,7 @@ export class UserAuth {
   async updateEmail(email: string) {
     try {
       this.isLoading = true;
+      console.log(auth.currentUser);
       await updateEmail(auth.currentUser!, email);
     } catch (err) {
       this.error = (err as FirebaseError).code;

@@ -27,6 +27,8 @@
 		"firebase": "^10.11.1",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
-		"types": "^0.1.1"
+		"pretty-bytes": "^6.1.1",
+		"types": "^0.1.1",
+		"uuid": "^9.0.1"
 	}
 }

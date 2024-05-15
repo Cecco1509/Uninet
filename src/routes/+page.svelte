@@ -1,9 +1,9 @@
 <script lang="ts">
-    import Auth from "../Components/Login.svelte";
+  import Login from "../Components/Login.svelte";
 </script>
 
 <svelte:head>
-    <title>Uninet | Log in</title>
+  <title>Uninet | Log in</title>
 </svelte:head>
 
-<Auth />
+<Login />
