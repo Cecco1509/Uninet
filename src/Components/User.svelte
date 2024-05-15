@@ -5,6 +5,8 @@
   import { signOut } from "firebase/auth";
   import { auth } from "$lib/firebase/firebase.client";
   import type { FirebaseError } from "firebase/app";
+  import ProfileIcon from "./ProfileIcon.svelte";
+  import LoadIcon from "./LoadIcon.svelte";
 
   let { userId } = $props<{ userId: string }>();
 
@@ -27,9 +29,94 @@
   <title>Uninet | Feed</title>
 </svelte:head>
 
-{#if userState.user}
-  <div>
-    <h1>CURRENT USER: {userInfo.data?.Nome}</h1>
-    <button onclick={handleSignOut}>Logout</button>
+<div class="user-info-box">
+  <div class="top-wrapper">
+    <ProfileIcon img={userInfo.data?.img} />
+    {#if userInfo}
+      <div class="top-info">
+        <div class="number-wrapper">
+          <span class="number">{userInfo.data?.Followers}</span><span
+            >Posts</span
+          >
+        </div>
+        <div class="number-wrapper">
+          <span class="number">{userInfo.data?.Followers}</span><span
+            >Followers</span
+          >
+        </div>
+        <div class="number-wrapper">
+          <span class="number">{userInfo.data?.seguiti}</span><span
+            >Seguiti</span
+          >
+        </div>
+      </div>
+    {:else}
+      <LoadIcon />
+    {/if}
   </div>
-{/if}
+  <br />
+  <div class="bottom-info">
+    <span class="big-text">{userInfo.data?.Nome}</span>
+    <span class="big-text">{userInfo.data?.Cognome}</span>
+    <br />
+    <span class="highlight">@{userInfo.data?.Username}</span>
+    <br /><br />
+    <p>{userInfo.data?.Bio}</p>
+  </div>
+</div>
+
+<!-- <div>
+  <h1>CURRENT USER: {userInfo.data?.Nome}</h1>
+  <button onclick={handleSignOut}>Logout</button>
+</div> -->
+<style>
+  span {
+    font-size: 1.3em;
+  }
+
+  .user-info-box {
+    width: 100%;
+    /* background-color: rgba(255, 255, 255, 0.3); */
+  }
+
+  .top-wrapper {
+    display: flex;
+  }
+
+  .top-info {
+    display: flex;
+    padding: 0px 5%;
+    justify-content: space-around;
+    /* column-gap: 20%; */
+    align-items: center;
+    width: 100%;
+  }
+
+  .bottom-info {
+    padding: 10px;
+  }
+
+  .big-text {
+    font-size: 2.5em;
+  }
+
+  .highlight {
+    font-size: 1.3em;
+    color: #e6c960;
+  }
+
+  .number {
+    font-size: 2.4em;
+    text-align: center;
+  }
+
+  .number-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  p {
+    font-size: 1.1em;
+    color: rgba(white, white, white, 0.6);
+  }
+</style>

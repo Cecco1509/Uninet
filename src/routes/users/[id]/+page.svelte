@@ -1,10 +1,42 @@
 <script lang="ts">
+  import { collection, onSnapshot } from "firebase/firestore";
   import User from "../../../Components/User.svelte";
-  export let data: { id: string };
+  import { createUser } from "../../../stores/userState.svelte";
+  import { db } from "$lib/firebase/firebase.client";
+
+  let { data } = $props();
+
+  const userState = createUser();
+  let postsArr = $state<Array<PostType>>([]);
+
+  $effect(() => {
+    const unsubscribe = onSnapshot(collection(db, "Posts"), (queryDocs) => {
+      postsArr = [];
+      queryDocs.forEach((doc) => {
+        postsArr.push(doc.data() as PostType);
+      });
+    });
+    return unsubscribe;
+  });
 </script>
 
 <svelte:head>
   <title>Uninet | User</title>
 </svelte:head>
+
+<!-- Menù a sinistra , meno importante-->
+
+<!-- Icona bro, impotante-->
+
+<!-- Followers&Seguiti -->
+
+<!-- User Infos, importante -->
+
+<div>
+  <!-- User posts, impotante -->
+  <!-- User thouths, impotante -->
+</div>
+
+<!-- Sezione voti a destra, meno importante(poi si fa)-->
 
 <User userId={data.id} />

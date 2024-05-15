@@ -13,13 +13,11 @@
     getDownloadURL(imageRef)
       .then((url) => {
         img!.src = url;
-        console.log(url);
       })
       .catch((error) => {
         console.log(error.code);
       });
   });
-  console.log(post);
 </script>
 
 <div>

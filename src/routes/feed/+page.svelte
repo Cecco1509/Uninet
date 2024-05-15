@@ -12,11 +12,8 @@
   const userState = createUser();
   let postText = $state("");
   let error = $state("");
-  //const dataTransfer = new DataTransfer();
-  //let avatar = $state(dataTransfer.files);
   let avatar = $state<FileList | null>();
   let postsArr = $state<Array<PostType>>([]);
-  let img = $state<any>();
 
   $effect(() => {
     const unsubscribe = onSnapshot(collection(db, "Posts"), (queryDocs) => {
@@ -28,33 +25,34 @@
     return unsubscribe;
   });
 
-  $effect(() => {
-    if (!avatar || avatar?.length == 0) return;
+  function uploadCurrentPhoto(): string {
+    if (!avatar || avatar.length == 0) return "";
 
-    console.log("postImages/id_generato." + avatar[0].type.split("/")[1]);
-  });
-
-  async function handleSubmit() {
-    if (!postText) return;
-    if (!avatar || avatar?.length == 0) return;
-    const id = uuidv4();
+    let url = "postImages/" + uuidv4() + "." + avatar[0].type.split("/")[1];
 
     try {
-      const imageRef = ref(
-        storage,
-        "postImages/" + id + "." + avatar[0].type.split("/")[1],
-      );
+      const imageRef = ref(storage, url);
       uploadBytes(imageRef, avatar[0]).then((snapshot) => {
         console.log("Uploaded a blob or file!");
       });
+    } catch (e) {
+      url = "";
+    }
 
+    return url;
+  }
+
+  async function handleSubmit() {
+    if (!postText) return;
+
+    try {
       await addDoc(collection(db, "Posts"), {
         data: Timestamp.fromDate(new Date()),
         text: postText,
         likes: 0,
         comments: 0,
-        img: "postImages/" + id + "." + avatar[0].type.split("/")[1],
-        userID: userState.user?.uid,
+        img: uploadCurrentPhoto(),
+        userID: userState.user!.uid,
       });
       error = "SI GODE";
     } catch (e) {
@@ -93,3 +91,9 @@ Feed {userState.user?.email}
     - Barra laterale?
 
 -->
+
+<style>
+  * {
+    max-width: 100%;
+  }
+</style>

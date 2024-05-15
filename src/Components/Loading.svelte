@@ -36,14 +36,17 @@
     position: relative;
     width: 80px;
     height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 57%, grey 43%);
   }
   .lds-ring div {
+    z-index: 1;
     box-sizing: border-box;
     display: block;
     position: absolute;
-    width: 64px;
-    height: 64px;
-    margin: 8px;
+    width: 80px;
+    height: 80px;
+    /* margin: 8px; */
     border: 8px solid currentColor;
     border-radius: 50%;
     animation: lds-ring 1.2s linear infinite;

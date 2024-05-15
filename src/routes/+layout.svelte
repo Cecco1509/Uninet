@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { auth } from "../lib/firebase/firebase.client";
   import { browser } from "$app/environment";
   import Loading from "../Components/Loading.svelte";
   import { createUser } from "../stores/userState.svelte";
+  import LoadIcon from "../Components/LoadIcon.svelte";
 
   const userState = createUser();
 
@@ -19,7 +19,8 @@
   });
 </script>
 
-{#if userState.isLoading}
+{#if !userState.user}
   <Loading />
+{:else}
+  {@render children()}
 {/if}
-{@render children()}
