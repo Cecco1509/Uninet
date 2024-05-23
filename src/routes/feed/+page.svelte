@@ -4,25 +4,24 @@
   import { addDoc, collection, onSnapshot } from "firebase/firestore";
   import { createUser } from "../../stores/userState.svelte";
   import { doc, setDoc, Timestamp } from "firebase/firestore";
-  import { getUserInfo } from "../../stores/userInfo.svelte";
   import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
   import { uuidv4 } from "@firebase/util";
   import Post from "../../Components/Post.svelte";
+  import { getUserFeed } from "../../stores/db";
 
   const userState = createUser();
   let postText = $state("");
   let error = $state("");
   let avatar = $state<FileList | null>();
-  let postsArr = $state<Array<PostType>>([]);
+  let postsArr = $state<PostSchema[]>([]);
 
   $effect(() => {
-    const unsubscribe = onSnapshot(collection(db, "Posts"), (queryDocs) => {
-      postsArr = [];
-      queryDocs.forEach((doc) => {
-        postsArr.push(doc.data() as PostType);
-      });
-    });
-    return unsubscribe;
+    if (!userState.userInfo) return;
+    getUserFeed(userState.userInfo.Username, 0)
+      .then((posts) => {
+        postsArr = posts;
+      })
+      .catch();
   });
 
   function uploadCurrentPhoto(): string {
@@ -67,7 +66,9 @@
 
 Feed {userState.user?.email}
 
-<button onclick={() => goto(`/users/${userState.user?.uid}`)}>User</button>
+<button onclick={() => goto(`/users/${userState.userInfo?.Username}`)}
+  >User</button
+>
 
 <form>
   <textarea bind:value={postText}></textarea>
@@ -76,11 +77,12 @@ Feed {userState.user?.email}
 </form>
 {error}
 <br />
-
-<br /><br /><br />
-{#each postsArr as post}
-  <Post {post} />
-{/each}
+<div onscroll={() => console.log(scroll)}>
+  <br /><br /><br />
+  {#each postsArr as post}
+    <Post {post} />
+  {/each}
+</div>
 
 <!-- Cose da fare qui
 

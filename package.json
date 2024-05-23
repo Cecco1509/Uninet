@@ -25,6 +25,7 @@
 		"eslint": "^9.2.0",
 		"eslint-config-prettier": "^9.1.0",
 		"firebase": "^10.11.1",
+		"inview": "^0.0.15",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
 		"pretty-bytes": "^6.1.1",

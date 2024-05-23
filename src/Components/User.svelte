@@ -1,24 +1,55 @@
 <script lang="ts">
-  import Loading from "../Components/Loading.svelte";
-  import { getUserInfo } from "../stores/userInfo.svelte";
-  import { createUser } from "../stores/userState.svelte";
   import { signOut } from "firebase/auth";
   import { auth } from "$lib/firebase/firebase.client";
   import type { FirebaseError } from "firebase/app";
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
+  import { getUserInfo, getUserPosts } from "../stores/db";
+  import Post from "./Post.svelte";
 
-  let { userId } = $props<{ userId: string }>();
+  let { username, userInfo } = $props<{
+    username: string;
+    userInfo: UserInfo;
+  }>();
 
-  const userInfo = getUserInfo(userId);
-  const userState = createUser();
+  let user = $state<UserInfo>();
+  let offset = $state(0);
+  let userPosts = $state<PostSchema[]>([]);
+
+  $effect(() => {
+    if (!username || !userInfo) return;
+
+    if (username !== userInfo.Username) {
+      getUserInfo(username)
+        .then((u) => {
+          if (!u) window.location.href = "/feed";
+          user = u;
+        })
+        .catch((e) => {
+          console.log("errore: ", e);
+        });
+    } else {
+      user = userInfo;
+    }
+  });
+
+  $effect(() => {
+    if (!user) return;
+
+    getUserPosts(user!.Username, offset)
+      .then((posts: PostSchema[]) => {
+        userPosts = [...userPosts, ...posts];
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  });
 
   let email = $state<string | null | undefined>();
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      window.location.href = "/";
     } catch (e) {
       console.log((e as FirebaseError).code);
     }
@@ -31,23 +62,17 @@
 
 <div class="user-info-box">
   <div class="top-wrapper">
-    <ProfileIcon img={userInfo.data?.img} />
-    {#if userInfo}
+    <ProfileIcon img={user?.img} />
+    {#if user}
       <div class="top-info">
         <div class="number-wrapper">
-          <span class="number">{userInfo.data?.Followers}</span><span
-            >Posts</span
-          >
+          <span class="number">{user?.Followers}</span><span>Posts</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{userInfo.data?.Followers}</span><span
-            >Followers</span
-          >
+          <span class="number">{user?.seguiti}</span><span>Followers</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{userInfo.data?.seguiti}</span><span
-            >Seguiti</span
-          >
+          <span class="number">{user?.seguiti}</span><span>Seguiti</span>
         </div>
       </div>
     {:else}
@@ -56,19 +81,23 @@
   </div>
   <br />
   <div class="bottom-info">
-    <span class="big-text">{userInfo.data?.Nome}</span>
-    <span class="big-text">{userInfo.data?.Cognome}</span>
+    <span class="big-text">{user?.Nome}</span>
+    <span class="big-text">{user?.Cognome}</span>
     <br />
-    <span class="highlight">@{userInfo.data?.Username}</span>
+    <span class="highlight">@{user?.Username}</span>
     <br /><br />
-    <p>{userInfo.data?.Bio}</p>
+    <p>{user?.Bio}</p>
   </div>
 </div>
-
-<!-- <div>
-  <h1>CURRENT USER: {userInfo.data?.Nome}</h1>
+<div>
+  <h1>CURRENT USER: {userInfo?.Username}</h1>
   <button onclick={handleSignOut}>Logout</button>
-</div> -->
+</div>
+
+{#each userPosts as post}
+  <Post {post} />
+{/each}
+
 <style>
   span {
     font-size: 1.3em;

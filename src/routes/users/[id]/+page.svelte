@@ -7,13 +7,13 @@
   let { data } = $props();
 
   const userState = createUser();
-  let postsArr = $state<Array<PostType>>([]);
+  let postsArr = $state<PostSchema[]>([]);
 
   $effect(() => {
     const unsubscribe = onSnapshot(collection(db, "Posts"), (queryDocs) => {
       postsArr = [];
       queryDocs.forEach((doc) => {
-        postsArr.push(doc.data() as PostType);
+        postsArr.push(doc.data() as PostSchema);
       });
     });
     return unsubscribe;
@@ -39,4 +39,4 @@
 
 <!-- Sezione voti a destra, meno importante(poi si fa)-->
 
-<User userId={data.id} />
+<User username={data.id} userInfo={userState.userInfo} />

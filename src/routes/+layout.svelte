@@ -16,10 +16,18 @@
       window.location.pathname == "/"
     )
       window.location.href = "/feed";
+
+    if (
+      browser &&
+      !userState.user &&
+      !userState.isLoading &&
+      window.location.pathname !== "/"
+    )
+      window.location.href = "/";
   });
 </script>
 
-{#if !userState.user}
+{#if userState.isLoading}
   <Loading />
 {:else}
   {@render children()}
