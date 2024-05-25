@@ -1,11 +1,21 @@
-<div class="lds-ring">
-  <div></div>
-  <div></div>
-  <div></div>
-  <div></div>
+<div class="ld-cnt">
+  <div class="lds-ring">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
 </div>
 
+
 <style>
+  .ld-cnt{
+    height: inherit;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .lds-ring,
   .lds-ring div {
     box-sizing: border-box;

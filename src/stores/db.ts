@@ -39,7 +39,7 @@ export async function getUserPosts(
   const result = await getDocs(q);
 
   result.forEach((row) => {
-    posts.push(row.data() as PostSchema);
+    posts.push({... row.data() as PostSchema, postID : row.id});
     i++;
   });
 
@@ -68,7 +68,7 @@ export async function getUserFeed(
     const result = await getDocs(q);
 
     result.forEach((row) => {
-      posts.push(row.data() as PostSchema);
+      posts.push({... row.data() as PostSchema, postID : row.id});
     });
   } catch (e) {
     console.log(e);
@@ -86,6 +86,7 @@ export async function getUserFriends(username: string): Promise<string[]> {
   try {
     const result = await getDocs(q);
     result.forEach((row) => {
+      console.log(row.id);
       friendsIDs.push((row.data() as FriendsSchema).friendUsername);
     });
   } catch (e) {
@@ -94,3 +95,12 @@ export async function getUserFriends(username: string): Promise<string[]> {
 
   return friendsIDs;
 }
+
+export async function updatePost(postId: string, userId: string) {
+  console.log(postId, userId);
+}
+
+export async function deletePost(postId: string, userId: string) {
+  console.log(postId, userId);
+}
+

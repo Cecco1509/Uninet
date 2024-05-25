@@ -1,17 +1,8 @@
 <script lang="ts">
-  import { signOut } from "firebase/auth";
-  import { auth, db } from "$lib/firebase/firebase.client";
-  import type { FirebaseError } from "firebase/app";
-  import ProfileIcon from "./ProfileIcon.svelte";
-  import LoadIcon from "./LoadIcon.svelte";
-  import { getUserInfo, getUserPosts } from "../stores/db";
-  import Post from "./Post.svelte";
-  import type { Script } from "svelte/compiler";
-  import { setDoc, doc } from "firebase/firestore";
+  import { db } from "$lib/firebase/firebase.client";
+  import { doc, setDoc } from "firebase/firestore";
 
-  let { userID } = $props<{
-    userID: string;
-  }>();
+  let { userID } : {userID: string} = $props();
 
   let username = $state("");
   let nome = $state("");

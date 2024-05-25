@@ -1,23 +1,23 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import Loading from "../Components/Loading.svelte";
-  import { createUser } from "../stores/userState.svelte";
-  import LoadIcon from "../Components/LoadIcon.svelte";
+  import { MyUser} from "../stores/userState.svelte";
+  import { goto } from "$app/navigation";
 
-  //const userState = createUser();
+  const userState = MyUser.getUser();
 
   let { children } = $props();
 
-  /*
   $effect(() => {
+    //console.log(userState.user, userState.userInfo);
     if (
       browser &&
       userState.user &&
       !userState.isLoading &&
       window.location.pathname == "/"
     ) {
-      if (userState.userInfo) window.location.href = "/feed";
-      else window.location.href = "/users";
+      if (userState.userInfo) goto("/feed");
+      else goto("/users");
     }
 
     if (
@@ -25,10 +25,16 @@
       !userState.user &&
       !userState.isLoading &&
       window.location.pathname !== "/"
-    )
-      window.location.href = "/";
+    ){
+        goto("/");
+    }
   });
-  */
 </script>
 
-{@render children()}
+{#if !userState.isLoading}
+  {@render children()}
+{:else}
+  <Loading />
+{/if}
+
+

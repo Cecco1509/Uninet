@@ -1,13 +1,13 @@
 <script lang="ts">
   import { collection, onSnapshot } from "firebase/firestore";
   import User from "../../../Components/User.svelte";
-  import { createUser } from "../../../stores/userState.svelte";
+  import { MyUser } from "../../../stores/userState.svelte";
   import { db } from "$lib/firebase/firebase.client";
   import Loading from "../../../Components/Loading.svelte";
 
   let { data } = $props();
 
-  const userState = createUser();
+  const userState = MyUser.getUser();
   let postsArr = $state<PostSchema[]>([]);
 
   $effect(() => {
@@ -39,8 +39,8 @@
 </div>
 
 <!-- Sezione voti a destra, meno importante(poi si fa)-->
-{#if userState.user}
-  <User username={data.id} userInfo={userState.userInfo} />
+{#if !userState.isLoading}
+  <User username={data.id} userInfo={userState.userInfo!} />
 {:else}
   <Loading />
 {/if}

@@ -36,12 +36,11 @@
 
 <style>
   .posts-spacer {
-    animation: fadeInAnimation ease-in-out 1.5s;
-    animation-iteration-count: 1;
+    animation: slideIn ease-in-out 1.5s;
     animation-fill-mode: forwards;
     height: 50vh;
   }
-  @keyframes fadeInAnimation {
+  @keyframes slideIn {
     0% {
       height: 50vh;
     }

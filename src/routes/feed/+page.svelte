@@ -2,14 +2,14 @@
   import { goto } from "$app/navigation";
   import { db, storage } from "$lib/firebase/firebase.client";
   import { addDoc, collection, onSnapshot } from "firebase/firestore";
-  import { createUser } from "../../stores/userState.svelte";
+  import { MyUser } from "../../stores/userState.svelte";
   import { doc, setDoc, Timestamp } from "firebase/firestore";
   import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
   import { uuidv4 } from "@firebase/util";
   import Post from "../../Components/Post.svelte";
   import { getUserFeed } from "../../stores/db";
 
-  const userState = createUser();
+  const userState = MyUser.getUser();
   let postText = $state("");
   let error = $state("");
   let avatar = $state<FileList | null>();
@@ -18,10 +18,10 @@
   $effect(() => {
     if (userState.isLoading) return;
     if (!userState.userInfo) {
-      window.location.href = "/users";
+      //goto("/users");
       return;
     }
-    getUserFeed(userState.userInfo.Username, 0)
+    getUserFeed(userState.userInfo.Username, null)
       .then((posts) => {
         postsArr = posts;
       })

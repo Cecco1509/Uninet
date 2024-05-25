@@ -16,6 +16,7 @@ declare global {
     text: string;
     userID: string;
     createdBy: string;
+    postID: string;
   };
 
   type UserInfo = {

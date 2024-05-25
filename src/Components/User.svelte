@@ -107,12 +107,14 @@
   <button onclick={handleSignOut}>Logout</button>
 </div>
 
-<Posts
-  posts={userPosts}
-  inUserPage={true}
-  editable={username == userInfo?.Username}
-  bind:atEnd
-/>
+{#if userPosts.length > 0}
+  <Posts
+    posts={userPosts}
+    inUserPage={true}
+    editable={username == userInfo?.Username}
+    bind:atEnd
+  />
+{/if}
 
 <style>
   span {
