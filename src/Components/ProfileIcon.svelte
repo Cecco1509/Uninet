@@ -3,11 +3,10 @@
   import { getDownloadURL, ref } from "firebase/storage";
   import userDefault from "$lib/assets/userDefault.png";
 
-  let { img } = $props<{ img: string }>();
+  let { img } : { img: string | null } = $props();
   let profileImg = $state<any>();
 
   $effect(() => {
-    console.log("CIAOOOOOOO");
     if (!img || !profileImg) return;
 
     try {

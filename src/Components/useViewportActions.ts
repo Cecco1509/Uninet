@@ -11,7 +11,7 @@ function ensureIntersectionObserver() {
   });
 }
 
-export default function viewport(element: HTMLElement) {
+export default function viewport(element : any) {
   ensureIntersectionObserver();
 
   intersectionObserver.observe(element);

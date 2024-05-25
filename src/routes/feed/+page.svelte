@@ -16,7 +16,11 @@
   let postsArr = $state<PostSchema[]>([]);
 
   $effect(() => {
-    if (!userState.userInfo) return;
+    if (userState.isLoading) return;
+    if (!userState.userInfo) {
+      window.location.href = "/users";
+      return;
+    }
     getUserFeed(userState.userInfo.Username, 0)
       .then((posts) => {
         postsArr = posts;
@@ -52,8 +56,9 @@
         comments: 0,
         img: uploadCurrentPhoto(),
         userID: userState.user!.uid,
+        createdBy: userState.userInfo?.Username,
       });
-      error = "SI GODE";
+      console.log("Pubblicato");
     } catch (e) {
       error = (e as Error).message;
     }
@@ -80,7 +85,7 @@ Feed {userState.user?.email}
 <div onscroll={() => console.log(scroll)}>
   <br /><br /><br />
   {#each postsArr as post}
-    <Post {post} />
+    <Post {post} inUserPage={false} editable={false} />
   {/each}
 </div>
 

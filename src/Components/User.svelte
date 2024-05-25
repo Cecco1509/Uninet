@@ -5,16 +5,28 @@
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import { getUserInfo, getUserPosts } from "../stores/db";
-  import Post from "./Post.svelte";
+  import Posts from "./Posts.svelte";
 
-  let { username, userInfo } = $props<{
-    username: string;
-    userInfo: UserInfo;
-  }>();
+  let { username, userInfo } : { username: string; userInfo: UserInfo } = $props();
 
   let user = $state<UserInfo>();
-  let offset = $state(0);
+  let offset = 0;
   let userPosts = $state<PostSchema[]>([]);
+  let atEnd = $state(false);
+  let fetchedAll = false;
+
+  $effect(() => {
+    if (!atEnd || fetchedAll) return;
+    offset += 10;
+    getUserPosts(username, userPosts[userPosts.length - 1]).then(
+      (result: { posts: PostSchema[]; fetchedAll: boolean }) => {
+        console.log(result.posts, result.fetchedAll);
+        userPosts = [...userPosts, ...result.posts];
+        atEnd = false;
+        fetchedAll = result.fetchedAll;
+      },
+    );
+  });
 
   $effect(() => {
     if (!username || !userInfo) return;
@@ -36,20 +48,21 @@
   $effect(() => {
     if (!user) return;
 
-    getUserPosts(user!.Username, offset)
-      .then((posts: PostSchema[]) => {
-        userPosts = [...userPosts, ...posts];
+    getUserPosts(user!.Username, null)
+      .then((result: { posts: PostSchema[]; fetchedAll: boolean }) => {
+        userPosts = [...userPosts, ...result.posts];
+        atEnd = result.fetchedAll;
       })
       .catch((e) => {
         console.log(e);
       });
   });
 
-  let email = $state<string | null | undefined>();
-
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      window.location.href = "/";
+      return;
     } catch (e) {
       console.log((e as FirebaseError).code);
     }
@@ -57,12 +70,12 @@
 </script>
 
 <svelte:head>
-  <title>Uninet | Feed</title>
+  <title>Uninet | {user?.Username}</title>
 </svelte:head>
 
 <div class="user-info-box">
   <div class="top-wrapper">
-    <ProfileIcon img={user?.img} />
+    <ProfileIcon img={user?.img ? user.img : null} />
     {#if user}
       <div class="top-info">
         <div class="number-wrapper">
@@ -94,9 +107,12 @@
   <button onclick={handleSignOut}>Logout</button>
 </div>
 
-{#each userPosts as post}
-  <Post {post} />
-{/each}
+<Posts
+  posts={userPosts}
+  inUserPage={true}
+  editable={username == userInfo?.Username}
+  bind:atEnd
+/>
 
 <style>
   span {

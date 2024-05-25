@@ -3,6 +3,7 @@
   import User from "../../../Components/User.svelte";
   import { createUser } from "../../../stores/userState.svelte";
   import { db } from "$lib/firebase/firebase.client";
+  import Loading from "../../../Components/Loading.svelte";
 
   let { data } = $props();
 
@@ -38,5 +39,8 @@
 </div>
 
 <!-- Sezione voti a destra, meno importante(poi si fa)-->
-
-<User username={data.id} userInfo={userState.userInfo} />
+{#if userState.user}
+  <User username={data.id} userInfo={userState.userInfo} />
+{:else}
+  <Loading />
+{/if}

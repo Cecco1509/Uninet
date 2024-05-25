@@ -4,9 +4,8 @@ import {
   query,
   where,
   getDocs,
-  endAt,
-  startAt,
   limit,
+  startAfter,
 } from "firebase/firestore";
 import { orderBy } from "firebase/firestore";
 
@@ -25,36 +24,35 @@ export async function getUserInfo(username: string): Promise<UserInfo | null> {
 
 export async function getUserPosts(
   username: string,
-  offset: number,
-): Promise<PostSchema[]> {
+  lastSeen: PostSchema | null,
+): Promise<{ posts: PostSchema[]; fetchedAll: boolean }> {
   const q = query(
     collection(db, "Posts"),
     where("createdBy", "==", username),
     orderBy("data"),
-    startAt(offset),
+    startAfter(lastSeen?.data ? lastSeen.data : null),
     limit(10),
   );
 
   let posts: PostSchema[] = [];
-
+  let i = 0;
   const result = await getDocs(q);
 
   result.forEach((row) => {
     posts.push(row.data() as PostSchema);
+    i++;
   });
 
-  return posts;
+  return { posts: posts, fetchedAll: i < 10 };
 }
 
 export async function getUserFeed(
   username: string,
-  offset: number,
+  lastSeen: PostSchema | null,
 ): Promise<PostSchema[]> {
   let posts: PostSchema[] = [];
 
   const friends: String[] = await getUserFriends(username);
-
-  console.log("friends: ", friends);
 
   if (friends.length == 0) return [];
 
@@ -64,6 +62,7 @@ export async function getUserFeed(
       where("createdBy", "in", friends),
       orderBy("data", "desc"),
       orderBy("likes", "desc"),
+      startAfter(lastSeen?.data ? lastSeen.data : null),
     );
 
     const result = await getDocs(q);

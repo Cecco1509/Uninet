@@ -1,13 +1,12 @@
 <script lang="ts">
   import logo from "$lib/assets/hero.png";
-  import { auth } from "$lib/firebase/firebase.client";
+  import { auth, db } from "$lib/firebase/firebase.client";
   import { FirebaseError } from "firebase/app";
   import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     type User,
   } from "firebase/auth";
-  import Loading from "./Loading.svelte";
   import LoadIcon from "./LoadIcon.svelte";
 
   let register = $state(false);
@@ -26,6 +25,7 @@
     if (register && password === confirmPassword) {
       try {
         await createUserWithEmailAndPassword(auth, email, password);
+        window.location.href = "/users";
       } catch (e) {
         error = (e as FirebaseError).code;
         submitted = false;
@@ -33,6 +33,8 @@
     } else {
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "/feed";
+        console.log("CIAOO");
       } catch (e) {
         error = (e as FirebaseError).code;
         submitted = false;

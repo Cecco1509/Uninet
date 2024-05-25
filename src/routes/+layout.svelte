@@ -4,18 +4,21 @@
   import { createUser } from "../stores/userState.svelte";
   import LoadIcon from "../Components/LoadIcon.svelte";
 
-  const userState = createUser();
+  //const userState = createUser();
 
   let { children } = $props();
 
+  /*
   $effect(() => {
     if (
       browser &&
       userState.user &&
       !userState.isLoading &&
       window.location.pathname == "/"
-    )
-      window.location.href = "/feed";
+    ) {
+      if (userState.userInfo) window.location.href = "/feed";
+      else window.location.href = "/users";
+    }
 
     if (
       browser &&
@@ -25,10 +28,7 @@
     )
       window.location.href = "/";
   });
+  */
 </script>
 
-{#if userState.isLoading}
-  <Loading />
-{:else}
-  {@render children()}
-{/if}
+{@render children()}
