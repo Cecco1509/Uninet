@@ -1,6 +1,6 @@
 import { auth, db } from "$lib/firebase/firebase.client";
 import type { User } from "firebase/auth";
-import { FirestoreError, doc, onSnapshot } from "firebase/firestore";
+import { FirestoreError, collection, doc, getDocs, onSnapshot, query, where } from "firebase/firestore";
 
 export class MyUser{
   private _user = $state<User | null | undefined>(undefined);
@@ -8,6 +8,7 @@ export class MyUser{
   private isUserLoading = $state(true);
   private isInfoLoading = $state(true);
   private _isLoading = $derived(this.isInfoLoading || this.isUserLoading);
+  private _friends : string[] = [];
 
   private static instance : MyUser | null = null;
 
@@ -59,6 +60,20 @@ export class MyUser{
 
   get isLoading() {
     return this._isLoading;
+  }
+
+  async getFriends() : Promise<string[]> {
+    if(this._friends.length > 0) {
+      return this._friends;
+    }
+
+    const result = await getDocs(query(collection(db, "Friends"),where("username", "==", this._userInfo!.Username)));
+
+    result.forEach(friend => {
+      this._friends.push(friend.data().friendUsername);
+    })
+
+    return this._friends;
   }
 
 }

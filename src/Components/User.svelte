@@ -4,117 +4,79 @@
   import type { FirebaseError } from "firebase/app";
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
-  import { getUserInfo, getUserPosts } from "../stores/db";
+  import { DataBasaConn} from "../stores/db.svelte";
   import Posts from "./Posts.svelte";
+  import { MyUser } from "../stores/userState.svelte";
+  import { Post } from "../stores/Post.svelte";
+  import { goto } from "$app/navigation";
 
-  let { username, userInfo } : { username: string; userInfo: UserInfo } = $props();
+  let { username } : { username: string}  = $props();
 
-  let user = $state<UserInfo>();
-  let offset = 0;
-  let userPosts = $state<PostSchema[]>([]);
-  let atEnd = $state(false);
-  let fetchedAll = false;
-
-  $effect(() => {
-    if (!atEnd || fetchedAll) return;
-    offset += 10;
-    getUserPosts(username, userPosts[userPosts.length - 1]).then(
-      (result: { posts: PostSchema[]; fetchedAll: boolean }) => {
-        console.log(result.posts, result.fetchedAll);
-        userPosts = [...userPosts, ...result.posts];
-        atEnd = false;
-        fetchedAll = result.fetchedAll;
-      },
-    );
-  });
+  const user = MyUser.getUser();
+  const db = DataBasaConn.getDB();
+  const userPosts = db.getUserPosts(user.userInfo!.Username);
+  let userInfo = $state<UserInfo>();
 
   $effect(() => {
-    if (!username || !userInfo) return;
+    if (!username || user.isLoading) return;
 
-    if (username !== userInfo.Username) {
-      getUserInfo(username)
+    if (username !== user.userInfo?.Username) {
+      db.getUserInfo(username)
         .then((u) => {
-          if (!u) window.location.href = "/feed";
-          user = u;
+          userInfo = u
         })
         .catch((e) => {
           console.log("errore: ", e);
         });
     } else {
-      user = userInfo;
+      userInfo = user.userInfo;
     }
   });
-
-  $effect(() => {
-    if (!user) return;
-
-    getUserPosts(user!.Username, null)
-      .then((result: { posts: PostSchema[]; fetchedAll: boolean }) => {
-        userPosts = [...userPosts, ...result.posts];
-        atEnd = result.fetchedAll;
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  });
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      window.location.href = "/";
-      return;
-    } catch (e) {
-      console.log((e as FirebaseError).code);
-    }
-  };
 </script>
 
 <svelte:head>
-  <title>Uninet | {user?.Username}</title>
+  <title>Uninet | {userInfo?.Username}</title>
 </svelte:head>
 
 <div class="user-info-box">
   <div class="top-wrapper">
-    <ProfileIcon img={user?.img ? user.img : null} />
-    {#if user}
+    {#if userInfo}
+    <ProfileIcon img={userInfo?.img ? userInfo.img : null} />
       <div class="top-info">
         <div class="number-wrapper">
-          <span class="number">{user?.Followers}</span><span>Posts</span>
+          <span class="number">{userInfo?.Followers}</span><span>Posts</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{user?.seguiti}</span><span>Followers</span>
+          <span class="number">{userInfo?.seguiti}</span><span>Followers</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{user?.seguiti}</span><span>Seguiti</span>
+          <span class="number">{userInfo?.seguiti}</span><span>Seguiti</span>
         </div>
       </div>
+    <br />
+    <div class="bottom-info">
+      <span class="big-text">{userInfo?.Nome}</span>
+      <span class="big-text">{userInfo?.Cognome}</span>
+      <br />
+      <span class="highlight">@{userInfo?.Username}</span>
+      <br /><br />
+      <p>{userInfo?.Bio}</p>
+    </div>
     {:else}
       <LoadIcon />
+      <p>{user.isLoading}</p>
     {/if}
-  </div>
-  <br />
-  <div class="bottom-info">
-    <span class="big-text">{user?.Nome}</span>
-    <span class="big-text">{user?.Cognome}</span>
-    <br />
-    <span class="highlight">@{user?.Username}</span>
-    <br /><br />
-    <p>{user?.Bio}</p>
-  </div>
 </div>
-<div>
-  <h1>CURRENT USER: {userInfo?.Username}</h1>
-  <button onclick={handleSignOut}>Logout</button>
 </div>
 
-{#if userPosts.length > 0}
-  <Posts
-    posts={userPosts}
-    inUserPage={true}
-    editable={username == userInfo?.Username}
-    bind:atEnd
-  />
+{#if userPosts}
+<Posts
+  feed={userPosts}
+  inUserPage={true}
+  editable={username == userInfo?.Username}
+/>
 {/if}
+
 
 <style>
   span {

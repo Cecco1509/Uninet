@@ -1,57 +1,52 @@
 <script lang="ts">
-  import { db, storage } from "$lib/firebase/firebase.client";
-  import { doc } from "firebase/firestore";
+  import { storage } from "$lib/firebase/firebase.client";
   import { getDownloadURL, ref } from "firebase/storage";
-  import { deletePost, getUserInfo, updatePost } from "../stores/db";
-  import viewport from "./useViewportActions";
-  import Loading from "./Loading.svelte";
+  import {DataBasaConn, updatePost } from "../stores/db.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
+  import type { Post } from "../stores/Post.svelte";
 
   let { post, inUserPage, editable } : {
-    post: PostSchema;
+    post: Post;
     inUserPage: boolean;
     editable: boolean;
   } = $props();
 
   let img = $state<any>();
-  let userInfo = $state<UserInfo>();
+  const db = DataBasaConn.getDB();
+  let info = $state<UserInfo>();
+
+  $effect(()=>{
+    if(info || !post) return;
+    db.getUserInfo(post.data.createdBy).then((inf) => {
+      info = inf;
+    })
+  })
 
   $effect(() => {
-    if (!post || !inUserPage) return;
-    if (!post.createdBy) return;
+    if (!post || !post.data.img) return;
 
-    getUserInfo(post.createdBy)
-      .then((userInf) => {
-        userInfo = userInf as UserInfo;
-      })
-      .catch();
-  });
-
-  $effect(() => {
-    if (!post || !inUserPage) return;
-    if (!post.img) return;
-
-    const imageRef = ref(storage, post.img);
+    const imageRef = ref(storage, post.data.img);
     getDownloadURL(imageRef)
       .then((url) => {
         img!.src = url;
       })
       .catch((error) => {
-        console.log(error.code);
+        console.log("errore", error.code);
       });
   });
+
 </script>
 
 {#if post}
   <div class="post-container">
-    {#if !inUserPage}
+    {#if !inUserPage && info}
     <div class="profile-icon">
-      <ProfileIcon img={userInfo?.img ? userInfo.img : null} />
-      <span>Nome : {post?.createdBy}</span>
+      <ProfileIcon img={info.img ? info.img : null} />
+      <span>Nome : {post?.data.createdBy}</span>
     </div>
     {/if}
-    {#if post.img}
+    {#if post.data.img}
       <div class="img-container">
         <!--  -->
         <div class="image">
@@ -63,24 +58,29 @@
       </div>
     {/if}
     <div class="numbers">
-      <span>{post.likes} likes</span>
+      <span>{post.data.likes} likes</span> <button class={post.liked ? "liked" : ""} onclick={() => {post.like()}}>Like</button>
       <span>{post.comments} comments</span>
     </div>
     {#if editable}
       <div class="actions">
-        <button onclick={() => updatePost(post.postID, post.userID)}>edit</button>
-        <button onclick={() => deletePost(post.postID, post.userID)}>delete</button>
+        <button onclick={() => console.log("ci si prova")}>edit</button>
+        <button onclick={() => db.deletePost(post.postId)}>delete</button>
       </div>
     {/if}
     <div class="description">
-      <span>{post.text}</span>
+      <span>{post.data.text}</span>
     </div>
     <br>
     <div class="comments">Commenti</div>
+
   </div>
 {/if}
 
 <style>
+
+  .liked{
+    background-color: red;
+  }
 
   .numbers{
     margin-top: 10px;
@@ -98,9 +98,6 @@
     width: 100%;
     height: fit-content;
 
-    :first-child{
-      margin-top: 10px;
-    }
   }
 
   .img-container{
@@ -129,7 +126,7 @@
 
     .loader{
       z-index: 1;
-      margin: 0px;
+      margin-top: 10px;
       width: 60vw;
       height: 400px;
       padding: 0px;

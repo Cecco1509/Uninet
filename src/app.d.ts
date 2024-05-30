@@ -1,4 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
+
+import type { Timestamp } from "firebase/firestore";
+
 // for information about these interfaces
 declare global {
   type UserSchema = {
@@ -8,15 +11,22 @@ declare global {
     email: string | null;
   };
 
+  type CommentSchema = {
+    commentID : string,
+    testo : string,
+    userID : string
+    data : Timestamp, 
+    ID : string
+}
+
   type PostSchema = {
-    comments: Number;
-    data: { seconds: Number; nanoseconds: Number };
+    comments: number;
+    data: Timestamp;
     img: string;
-    likes: Number;
+    likes: number;
     text: string;
     userID: string;
     createdBy: string;
-    postID: string;
   };
 
   type UserInfo = {

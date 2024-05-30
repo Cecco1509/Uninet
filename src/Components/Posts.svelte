@@ -1,36 +1,39 @@
 <script lang="ts">
-  import Post from "./Post.svelte";
+  import PostComponent from "./PostComponent.svelte";
   import viewport from "./useViewportActions";
+  import { Feed } from "../stores/Feed.svelte";
 
   let {
-    posts,
+    feed,
     editable,
-    inUserPage,
-    atEnd = $bindable(),
+    inUserPage
   } : {
-    posts: PostSchema[];
+    feed: Feed;
     editable: boolean;
     inUserPage: boolean;
-    atEnd: boolean;
-  }= $props();
+  } = $props();
 
-  const handleEndPage = function () {
-    atEnd = true;
-  };
+  let fetchedAll = false;
+
+  const handleEndPage = () => {
+    if (fetchedAll) return;
+    feed.loadNewPosts().then((f) =>{
+      fetchedAll = f;
+    });
+  }
 </script>
 
 <div class="posts-spacer"></div>
-{#if posts}
-  {#each { length: posts.length - 1 } as _, i}
-    <Post post={posts[i]} inUserPage {editable} />
+{#if feed.posts}
+  {#each { length: feed.posts.length - 2 } as _, i}
+    <PostComponent post={feed.posts[i]} {inUserPage} {editable} />
   {/each}
 
   <div
     use:viewport
     onenterViewport={handleEndPage}
-    onexitViewport={() => console.log("exit!")}
   >
-    <Post post={posts[posts.length - 1]} inUserPage {editable} />
+    <PostComponent post={feed.posts[feed.posts.length - 1]} {inUserPage} {editable} />
   </div>
 {/if}
 

@@ -8,17 +8,6 @@
   let { data } = $props();
 
   const userState = MyUser.getUser();
-  let postsArr = $state<PostSchema[]>([]);
-
-  $effect(() => {
-    const unsubscribe = onSnapshot(collection(db, "Posts"), (queryDocs) => {
-      postsArr = [];
-      queryDocs.forEach((doc) => {
-        postsArr.push(doc.data() as PostSchema);
-      });
-    });
-    return unsubscribe;
-  });
 </script>
 
 <svelte:head>
@@ -40,7 +29,7 @@
 
 <!-- Sezione voti a destra, meno importante(poi si fa)-->
 {#if !userState.isLoading}
-  <User username={data.id} userInfo={userState.userInfo!} />
+  <User username={data.id} />
 {:else}
   <Loading />
 {/if}
