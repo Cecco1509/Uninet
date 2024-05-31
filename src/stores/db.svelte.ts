@@ -25,16 +25,14 @@ type UserInfoMap = {
 }
 
 export class DataBasaConn{
-  private feedMap : FeedMap;
-  private _homeFeed    : Feed | null;
-  private userInfos    : UserInfoMap;
+
+  private feedMap   : FeedMap = {};
+  private _homeFeed : Feed | null = null;
+  private userInfos : UserInfoMap = {};
 
   private static instance : DataBasaConn;
 
   private constructor(){
-    this.feedMap = {};
-    this._homeFeed = null;
-    this.userInfos = {};
   }
 
   static getDB() {
@@ -75,8 +73,8 @@ export class DataBasaConn{
   }
 
   deletePost(postId : string): void {
-    this.homeFeed?.deletePost(postId);
-    this.feedMap[MyUser.getUser()!.userInfo!.Username].deletePost(postId);
+    this.homeFeed?.deletePost(postId, false);
+    this.feedMap[MyUser.getUser()!.userInfo!.Username].deletePost(postId, true);
   }
 
   async publishPost(postText: string, photoUrl: string) {
@@ -99,7 +97,8 @@ export class DataBasaConn{
       this.homeFeed!.addPost(newPost);
 
       //Aggiungo all'array dei post il post appena creato
-      this.feedMap[MyUser.getUser().userInfo!.Username].addPost(newPost);
+      if(this.feedMap[MyUser.getUser().userInfo!.Username])
+        this.feedMap[MyUser.getUser().userInfo!.Username].addPost(newPost);
 
     }catch(e){
       console.log("Errore", e);
@@ -107,15 +106,5 @@ export class DataBasaConn{
 
   }
 
-}
-
-export async function updatePost(postId: string, postUpdates : Partial<PostSchema>) {
-  try {
-    await updateDoc(doc(db, "Posts", postId), postUpdates);
-    return true;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
 }
 

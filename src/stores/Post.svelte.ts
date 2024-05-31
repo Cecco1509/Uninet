@@ -1,10 +1,10 @@
-import { db } from "$lib/firebase/firebase.client";
-import { collection, deleteDoc, doc, DocumentReference, getDoc, getDocs, limit, orderBy, query, runTransaction, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
+import { db, storage } from "$lib/firebase/firebase.client";
+import { addDoc, collection, deleteDoc, doc, DocumentReference, getDoc, getDocs, limit, orderBy, query, runTransaction, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import { MyUser } from "./userState.svelte";
+import { deleteObject, ref } from "firebase/storage";
 
 export class Post{
-
     private _data = $state<PostSchema>();
     private _id : string;
     private postRef : DocumentReference;
@@ -16,17 +16,19 @@ export class Post{
         this.postRef = postRef;
         this._data = postData;
         this._id = postID;
-        this.likeRef = doc(db, "Like", postID+"&"+ MyUser.getUser().user?.uid);
-        //this.isliked();
-        //this.initComments();
+        this.likeRef = doc(db, "/Posts/"+postID+"/Likes", MyUser.getUser().user!.uid);
+        this.isliked();
+        this.initComments();
     }
 
     get post() : PostSchema { return this._data!;}
     get postId() : string { return this._id;}
     get data() : PostSchema {return this._data!;}
     get liked() : boolean {return this._liked!}
+    get comments() : CommentSchema[] {return this._comments}
 
     private async isliked(){
+        if(!this.likeRef) return false;
         this._liked = (await getDoc(this.likeRef)).exists();
     }
 
@@ -37,15 +39,18 @@ export class Post{
 
         try{
             await runTransaction(db, async (transaction) => {
+                //chiamata per prendere i likes correnti
                 const post = await transaction.get(this.postRef);
                 if (!post.exists()) {
                     throw "Document does not exist!";
                 }
-            
-                const newLikes = post.data().likes + modifier;
-                transaction.update(this.postRef, { likes: newLikes });
+
+                transaction.update(this.postRef, { likes: post.data().likes + modifier });
+
                 if(this._liked) transaction.delete(this.likeRef);
                 else transaction.set(this.likeRef, {})
+
+                this._data = post.data() as PostSchema;
             });
             console.log("Transaction successfully committed!");
             this._liked = !this._liked;
@@ -57,26 +62,20 @@ export class Post{
 
     private async initComments(){
         
-        const result = await getDocs(query(collection(db, "Posts"),
-        where("postID", "==", this._id),
-        orderBy("data", "desc"),
-        limit(10)))
+        const result = await getDocs(query(collection(db, "/Posts/"+this._id+"/Comments"),limit(5), orderBy("data"), where("commentID","==","")))
 
         result.forEach((comment) => {
             this._comments.push(comment.data() as CommentSchema);
         })
+
+        console.log(this._comments)
     }
 
-    get comments(){
-        return this._comments;
-    }
-
-    async comment(text: string, userID : string){
+    async publishComment(text: string){
         try{
-            const newComment = { testo : text, postID : this._id, data: Timestamp.fromDate(new Date()), commentID : "", userID: userID};
-            const id = uuidv4();
-            await setDoc(doc(db, "Comments", id), newComment);
-            this._comments = [ {...newComment, ID: id}, ...this._comments];
+            const newComment = { testo : text, postID : this._id, data: Timestamp.fromDate(new Date()), commentID : "", userID: MyUser.getUser().userInfo!.Username};
+            await addDoc(collection(db, "/Posts/"+this._id+"/Comments"), newComment);
+            this._comments = [ newComment, ...this._comments];
         }catch(e){
             console.log("commento non riuscito", e);
         }
@@ -84,21 +83,17 @@ export class Post{
 
     async edit(edits : Partial<PostSchema>){
         try{
+            if (edits.img && this._data?.img) await deleteObject(ref(storage, "/PostImage/"+this._data.img));
             await updateDoc(this.postRef, edits);
             this._data = {...this._data!, ...edits};
         }catch(e){
             console.log("Not Updated", e);
         }
-        
     }
 
     async delete(){
         try{
             deleteDoc(this.postRef);
-            this._comments.forEach(comment => {
-                deleteDoc(doc(db, "Comments", comment.ID))
-            })
-            //delete likes ma boh
         }catch(e){
             console.log(e);
         }

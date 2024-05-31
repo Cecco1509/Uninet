@@ -12,7 +12,7 @@
 
   const userState = MyUser.getUser();
   const database = DataBasaConn.getDB();
-  const homeFeed = database.homeFeed;
+  let homeFeed = database.homeFeed;
   let postText = $state("");
   let error = $state("");
   let avatar = $state<FileList | null>();
@@ -68,7 +68,9 @@ Feed {userState.user?.email}
 <br />
 <div onscroll={() => console.log(scroll)}>
   <br /><br /><br />
-  <Posts feed={homeFeed} inUserPage={false} editable={false} />
+  {#key homeFeed.posts}
+    <Posts feed={homeFeed} inUserPage={false} editable={false} />
+  {/key}
 </div>
 
 <!-- Cose da fare qui

@@ -50,8 +50,8 @@
 
 .content-container {
     min-height: 95svh;
-    width: 60dvw;
-    margin: 0px 20dvw;
+    width: 50dvw;
+    margin: 0px 25dvw;
     padding-top: 5vh;
     color: white;
 }

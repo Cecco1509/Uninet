@@ -41,32 +41,33 @@
 <div class="user-info-box">
   <div class="top-wrapper">
     {#if userInfo}
-    <ProfileIcon img={userInfo?.img ? userInfo.img : null} />
+    <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
       <div class="top-info">
         <div class="number-wrapper">
-          <span class="number">{userInfo?.Followers}</span><span>Posts</span>
+          <span class="number">{userPosts.size}</span><span>Posts</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{userInfo?.seguiti}</span><span>Followers</span>
+          <span class="number">{userInfo?.Followers}</span><span>Followers</span>
         </div>
         <div class="number-wrapper">
           <span class="number">{userInfo?.seguiti}</span><span>Seguiti</span>
         </div>
       </div>
     <br />
-    <div class="bottom-info">
-      <span class="big-text">{userInfo?.Nome}</span>
-      <span class="big-text">{userInfo?.Cognome}</span>
-      <br />
-      <span class="highlight">@{userInfo?.Username}</span>
-      <br /><br />
-      <p>{userInfo?.Bio}</p>
-    </div>
     {:else}
       <LoadIcon />
       <p>{user.isLoading}</p>
     {/if}
-</div>
+  </div>
+
+  <div class="bottom-info">
+    <span class="big-text">{userInfo?.Nome}</span>
+    <span class="big-text">{userInfo?.Cognome}</span>
+    <br />
+    <span class="highlight">@{userInfo?.Username}</span>
+    <br /><br />
+    <p>{userInfo?.Bio}</p>
+  </div>
 </div>
 
 {#if userPosts}

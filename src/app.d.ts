@@ -15,8 +15,7 @@ declare global {
     commentID : string,
     testo : string,
     userID : string
-    data : Timestamp, 
-    ID : string
+    data : Timestamp
 }
 
   type PostSchema = {
