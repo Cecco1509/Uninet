@@ -8,6 +8,7 @@ import {
   updateDoc,
   addDoc,
   Timestamp,
+  runTransaction,
 } from "firebase/firestore";
 import { MyUser } from "./userState.svelte";
 import { Feed } from "./Feed.svelte";
@@ -90,6 +91,7 @@ export class DataBasaConn{
     }
 
     try{
+
       const ref = await addDoc(collection(db, "Posts"), newPostSchema);
 
       const newPost = new Post(ref, newPostSchema, ref.id)
@@ -100,6 +102,9 @@ export class DataBasaConn{
       if(this.feedMap[MyUser.getUser().userInfo!.Username])
         this.feedMap[MyUser.getUser().userInfo!.Username].addPost(newPost);
 
+
+      await MyUser.getUser().addPost();
+      console.log("ADD request");
     }catch(e){
       console.log("Errore", e);
     }

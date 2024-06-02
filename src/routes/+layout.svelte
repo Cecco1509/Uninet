@@ -31,20 +31,43 @@
         window.location.href="/"
     }
   });
+
+  // $effect(() => {
+  //   if (!("Notification" in window)) {
+  //     alert("This browser does not support desktop notification");
+  //   }else if (Notification.permission === "granted") {
+  //     var notification = new Notification( "Hello!", {
+  //       lang : "it",
+  //       body: "Testo della notifica", //200ms pausa, 200ms, image: 'imgurl',
+  //       } );
+
+  //   } else if (Notification.permission !== "denied") {
+
+  //     Notification.requestPermission().then((permission) => {
+  //       if (permission === "granted") {
+  //         const notification = new Notification("Hi there!", {body : "ciao", icon: "", requireInteraction: true});
+  //         notification.close();
+  //       }
+  //     });
+  //   }
+  // })
+
 </script>
-{#if !userState.isLoading}
-  {#if userState.userInfo}
-    <Menu userID={userState.userInfo!.Username} />
+
+  {#if !userState.isLoading}
+    {#if userState.userInfo}
+      <Menu userID={userState.userInfo!.Username} />
+    {/if}
+    
+    <div class="content-container">
+      {@render children()}
+    </div>
+    <!-- <footer>
+      <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
+    </footer> -->
+  {:else}
+    <Loading />
   {/if}
-  <div class="content-container">
-    {@render children()}
-  </div>
-  <footer>
-    <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
-  </footer>
-{:else}
-  <Loading />
-{/if}
 
 <style>
 
@@ -52,8 +75,9 @@
     min-height: 95svh;
     width: 50dvw;
     margin: 0px 25dvw;
-    padding-top: 5vh;
     color: white;
+    border-left: 1px solid rgba(255, 255, 255, 0.201);
+    border-right: 1px solid rgba(255, 255, 255, 0.201);
 }
 
 footer {
@@ -67,13 +91,6 @@ footer {
     justify-content: flex-start;
     align-items: center;
     padding-left: 20dvw;
-}
-
-select,
-input,
-textarea,
-button {
-    font-size: inherit;
 }
 
 @media only screen and (max-width: 600px) {

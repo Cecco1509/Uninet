@@ -22,14 +22,26 @@
       console.log("Errore durante il caricamento dell'immagine profilo");
     }
   });
+  //
 </script>
 
-<img bind:this={profileImg} src={userDefault} alt="" />
+<img class={inFeed ? "border userPostImg" : "border userPageImg"} bind:this={profileImg} src={userDefault} alt="" />
 
 <style>
-  img {
+
+  .border{
+    border: 2px solid #393e41;
+  }
+
+  .userPageImg {
     height: 150px;
     width: 150px;
+    border-radius: 50%;
+  }
+
+  .userPostImg {
+    height: 70px;
+    width: 70px;
     border-radius: 50%;
   }
 </style>

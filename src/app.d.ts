@@ -40,6 +40,7 @@ declare global {
     seguiti: number;
     Followers: number;
     Username: string;
+    posts: number;
   } | null;
 
   type FriendsSchema = {

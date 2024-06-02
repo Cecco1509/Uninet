@@ -23,6 +23,7 @@
   {#if !feed.isLoading}
     {#each { length: feed.posts.length - 1 } as _, i}
       <PostComponent post={feed.posts[i]} {inUserPage} {editable} />
+      <hr>
     {/each}
 
     {#if feed.size >= 10} 
@@ -37,7 +38,15 @@
   {:else}
     <LoadIcon/>
   {/if}
+
 <style>
+
+hr{
+    height: 1px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.201);
+  }
+
   .posts-spacer {
     animation: slideIn ease-in-out 1.5s;
     animation-fill-mode: forwards;

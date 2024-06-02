@@ -1,6 +1,6 @@
 import { auth, db } from "$lib/firebase/firebase.client";
 import type { User } from "firebase/auth";
-import { FirestoreError, collection, doc, getDocs, onSnapshot, query, where } from "firebase/firestore";
+import { FirestoreError, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 
 export class MyUser{
   private _user = $state<User | null | undefined>(undefined);
@@ -74,6 +74,10 @@ export class MyUser{
     })
 
     return this._friends;
+  }
+
+  async addPost() {
+    await updateDoc(doc(db, "Users", this._user!.uid), {posts : this._userInfo!.posts + 1});
   }
 
 }

@@ -14,8 +14,9 @@
 
   const user = MyUser.getUser();
   const db = DataBasaConn.getDB();
-  const userPosts = db.getUserPosts(user.userInfo!.Username);
+  const userPosts = db.getUserPosts(username);
   let userInfo = $state<UserInfo>();
+  let showPost = $state(true);
 
   $effect(() => {
     if (!username || user.isLoading) return;
@@ -44,13 +45,13 @@
     <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
       <div class="top-info">
         <div class="number-wrapper">
-          <span class="number">{userPosts.size}</span><span>Posts</span>
+          <span class="number">{userInfo.posts}</span><span>Posts</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{userInfo?.Followers}</span><span>Followers</span>
+          <span class="number">{userInfo.Followers}</span><span>Followers</span>
         </div>
         <div class="number-wrapper">
-          <span class="number">{userInfo?.seguiti}</span><span>Seguiti</span>
+          <span class="number">{userInfo.seguiti}</span><span>Seguiti</span>
         </div>
       </div>
     <br />
@@ -70,22 +71,65 @@
   </div>
 </div>
 
-{#if userPosts}
-<Posts
-  feed={userPosts}
-  inUserPage={true}
-  editable={username == userInfo?.Username}
-/>
+<br>
+<br>
+<hr>
+
+<div class="choice-cnt">
+  <h1 class={showPost ? "active" : ""}>Posts</h1>
+  <h1 class={showPost ? "" : "active"}>Volantini</h1>
+</div>
+
+
+<hr>
+{#if userPosts && showPost}
+  <Posts
+    feed={userPosts}
+    inUserPage={true}
+    editable={username == user.userInfo?.Username}
+  />
 {/if}
 
 
 <style>
+
+  .choice-cnt{
+    display: flex;
+    gap: 0px;
+
+    h1{
+      width: 50%;
+      text-align: center;
+      transition: all 0.5s;
+
+
+      &:first-child{
+        width: calc(50%);
+        border-right: 1px solid rgb(51,51,51);
+      }
+
+      &:hover{
+        background-color: #21e3d950;
+        border-color: rgb(51,51,51);
+        outline: 0;
+        cursor: pointer;
+      }
+    }
+
+    .active{
+      background-color: #21e3d950;
+      outline: 0;
+      cursor: pointer;
+    }
+  }
+
   span {
     font-size: 1.3em;
   }
 
   .user-info-box {
     width: 100%;
+    padding: 10px;
     /* background-color: rgba(255, 255, 255, 0.3); */
   }
 

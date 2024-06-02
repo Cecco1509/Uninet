@@ -52,26 +52,23 @@
 <svelte:head>
   <title>Uninet | Feed</title>
 </svelte:head>
-
-Feed {userState.user?.email}
-
-<button onclick={() => goto(`/users/${userState.userInfo?.Username}`)}
-  >User</button
->
-
-<form>
-  <textarea bind:value={postText}></textarea>
-  <input bind:this={input} bind:files={avatar} type="file" accept="image/*" />
-  <button onclick={handleSubmit}>Pubblica</button>
-</form>
-{error}
-<br />
-<div onscroll={() => console.log(scroll)}>
-  <br /><br /><br />
-  {#key homeFeed.posts}
-    <Posts feed={homeFeed} inUserPage={false} editable={false} />
-  {/key}
-</div>
+  <div class="publish">
+    <br>
+    <h1>Feed</h1>
+    <br>
+    <br>
+    <textarea placeholder="Che succede?" bind:value={postText}></textarea>
+    <div class="inp-spacer">
+      <input bind:this={input} bind:files={avatar} type="file" accept="image/*" />
+    </div>
+    <button onclick={handleSubmit}>Pubblica</button>
+  </div>
+  <div>
+    <hr>
+    {#key homeFeed.posts}
+      <Posts feed={homeFeed} inUserPage={false} editable={false} />
+    {/key}
+  </div>
 
 <!-- Cose da fare qui
 
@@ -84,6 +81,58 @@ Feed {userState.user?.email}
 -->
 
 <style>
+
+  .inp-spacer{
+    margin: 10px 0px;
+  }
+
+  .publish{
+    padding: 10px;
+  }
+
+  textarea{
+    resize: none;
+    width: 100%;
+    height: 150px;
+    background-color: transparent;
+    outline: none;
+    border: 1px solid rgba(255, 255, 255, 0.201);
+    border-radius: 5px;
+    color: white;
+    font-size: 2em;
+    padding: 10px;
+    transition: all 0.5s;
+
+    &:focus{
+      border: 1px solid #e6c960;
+    }
+  }
+
+  button{
+    border-radius: 10px;
+    background-color: transparent;
+    cursor: pointer;
+    width: 100px;
+    height: 50px;
+    border-color: #21e3da;
+    border: 2px solid #21e3da;
+    margin: 5px 0px;
+    background-color: rgba(33, 227, 218, 0.1);
+    /*font-size: 20px;       */
+    color: #21e3da;
+    transition: all 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: calc(100% - 100px);
+  }
+
+  button:hover {
+    background-color: #20e1d0;
+    color: #393e41;
+    box-shadow: 0px 0px 6px #21e3da;
+  }
+
   * {
     max-width: 100%;
   }
