@@ -38,7 +38,10 @@
         <PostComponent post={feed.posts[feed.posts.length - 1]} {inUserPage} {editable} />
       </div>
     {:else}
-      Non c'è niente qui
+    <div class="nothing">
+      <span>Non c'è niente qui</span>
+    </div>
+      
     {/if}
   {:else}
     <LoadIcon/>
@@ -46,10 +49,23 @@
 {/if}
 <style>
 
-hr{
+  hr{
     height: 1px;
     border: none;
     background-color: rgba(255, 255, 255, 0.201);
+  }
+
+  .nothing{
+    height: 30vh;
+    background-color: transparent;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  span{
+    font-size: large;
   }
 
   @keyframes slideIn {
