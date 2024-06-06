@@ -6,7 +6,6 @@
   import Menu from "../Components/Menu.svelte";
 
   const userState = MyUser.getUser();
-  console.log("user created");
 
   let { children } = $props();
 
@@ -80,29 +79,11 @@
     border-right: 1px solid rgba(255, 255, 255, 0.201);
 }
 
-footer {
-    height: 5svh;
-    width: 100dvw;
-    left: 0px;
-    color: white;
-    background-color: transparent;
-    backdrop-filter: blur(2px);
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding-left: 20dvw;
-}
-
 @media only screen and (max-width: 600px) {
     .content-container {
         margin: 0px 0px;
         width: 100%;
         padding: 0px 5dvw;
-    }
-
-    footer {
-        display: none;
-        padding-left: 5dvw;
     }
 }
 </style>

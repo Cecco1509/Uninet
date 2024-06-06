@@ -279,7 +279,7 @@
     button{
       display: inline-block;
       width: 100px;
-      transform: translateY(-100%);
+      transform: translateY(calc(-100% - 4px));
       margin-top: 0px !important;
       margin-bottom: 0px !important;
       height: 50px !important;
@@ -444,11 +444,13 @@
   }
 
   .post-container{
+    min-height: 300px;
     height: auto;
     display: block;
     padding: 10px;
     opacity: 0;
     width: 100%;
+    transition: all 0.3s;
     height: fit-content;
     animation: slideInPost ease-in-out 1s;
     animation-fill-mode: forwards;
@@ -456,12 +458,10 @@
 
   @keyframes slideInPost {
     0% {
-      margin-top: 50px;
       opacity: 0;
     }
     100% {
       opacity: 1;
-      margin-top: 0px;
     }
   }
 

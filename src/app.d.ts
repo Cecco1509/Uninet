@@ -1,6 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
 
 import type { Timestamp } from "firebase/firestore";
+import type { Chat } from "./stores/Chat.svelte";
 
 // for information about these interfaces
 declare global {
@@ -42,6 +43,21 @@ declare global {
     Username: string;
     posts: number;
   } | null;
+
+  type message = {
+    text : string;
+    timestamp : Database.Timestamp;
+    sender : string
+  }
+
+  type chat = {
+    lastMessage : string;
+    timestamp : string
+  }
+
+  type chatList = {
+    [key : string] : Chat
+  }
 
   type FriendsSchema = {
     username: string;

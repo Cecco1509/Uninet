@@ -14,6 +14,7 @@ import {
   inMemoryPersistence,
   type Auth,
 } from "firebase/auth";
+import { Database, getDatabase } from "firebase/database";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, ref, type FirebaseStorage } from "firebase/storage";
 
@@ -22,6 +23,7 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_APIKEY,
   authDomain: import.meta.env.VITE_AUTHDOMAIN,
   projectId: import.meta.env.VITE_PROJECTID,
+  databaseURL: import.meta.env.VITE_DATABASEURL,
   storageBucket: import.meta.env.VITE_STORAGEBUCKET,
   messagingSenderId: import.meta.env.VITE_MESSAGINGSENDERID,
   appId: import.meta.env.VITE_APPID,
@@ -40,3 +42,4 @@ if (!getApps().length) {
 export const auth: Auth = getAuth(firebaseApp);
 export const db: Firestore = getFirestore();
 export const storage: FirebaseStorage = getStorage();
+export const realtimeDB: Database = getDatabase();

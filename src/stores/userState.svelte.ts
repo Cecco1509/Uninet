@@ -3,6 +3,7 @@ import type { User } from "firebase/auth";
 import { FirestoreError, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 
 export class MyUser{
+  
   private _user = $state<User | null | undefined>(undefined);
   private _userInfo = $state<UserInfo | null | undefined>(undefined);
   private isUserLoading = $state(true);
@@ -36,7 +37,7 @@ export class MyUser{
         return;
       }
       let unsubscribe = onSnapshot(doc(db, "Users", this._user.uid), (doc) => {
-        this._userInfo = doc.data() as UserInfo;;
+        this._userInfo = doc.data() as UserInfo;
         this.isInfoLoading = false;
       });
   
@@ -78,6 +79,14 @@ export class MyUser{
 
   async addPost() {
     await updateDoc(doc(db, "Users", this._user!.uid), {posts : this._userInfo!.posts + 1});
+  }
+
+  async isFriend(username: string) : Promise<boolean>{
+    await this.getFriends();
+    this._friends.forEach((friend) => {
+      if(friend == username) return true;
+    })
+    return false;
   }
 
 }

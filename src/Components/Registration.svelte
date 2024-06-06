@@ -24,6 +24,7 @@
         Followers: 0,
         Username: username,
         private: false,
+        posts: 0,
       });
       window.location.href = "/users/" + username;
     } catch (e) {

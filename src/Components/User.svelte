@@ -1,22 +1,26 @@
 <script lang="ts">
-  import { signOut } from "firebase/auth";
-  import { auth } from "$lib/firebase/firebase.client";
-  import type { FirebaseError } from "firebase/app";
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import { DataBasaConn} from "../stores/db.svelte";
   import Posts from "./Posts.svelte";
   import { MyUser } from "../stores/userState.svelte";
-  import { Post } from "../stores/Post.svelte";
   import { goto } from "$app/navigation";
+  import { ChatStore } from "../stores/ChatList.svelte";
+  import type { Feed } from "../stores/Feed.svelte";
 
   let { username } : { username: string}  = $props();
 
   const user = MyUser.getUser();
   const db = DataBasaConn.getDB();
-  const userPosts = db.getUserPosts(username);
+  let userPosts = $state<Feed>();
+  const chatStore = ChatStore.getChatStote();
   let userInfo = $state<UserInfo>();
   let showPost = $state(true);
+
+  $effect(() => {
+    username;
+    userPosts = db.getUserPosts(username);
+  })
 
   $effect(() => {
     if (!username || user.isLoading) return;
@@ -33,6 +37,12 @@
       userInfo = user.userInfo;
     }
   });
+
+  async function goToChat(){
+    let id = await chatStore.addChat(username)
+    if(id) goto("/messages/"+id);
+    else console.log("errore")
+  }
 </script>
 
 <svelte:head>
@@ -57,7 +67,6 @@
     <br />
     {:else}
       <LoadIcon />
-      <p>{user.isLoading}</p>
     {/if}
   </div>
 
@@ -70,6 +79,12 @@
     <p>{userInfo?.Bio}</p>
   </div>
 </div>
+{#if !user.isLoading && user.userInfo?.Username != username}
+  <button onclick={async () => await goToChat()}> invia un messaggio </button>
+  {#if !user.isFriend(username)}
+    <button> segui </button>
+  {/if}
+{/if}
 
 <br>
 <br>

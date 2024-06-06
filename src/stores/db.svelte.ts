@@ -15,6 +15,7 @@ import { Feed } from "./Feed.svelte";
 import { Post } from "./Post.svelte";
 import { HomeFeedQueryBuilder } from "./QueryBuilders/HomeFeedQueryBuilder";
 import { UserFeedQueryBuilder } from "./QueryBuilders/UserFeedQueryBuilder";
+import { ChatStore } from "./ChatList.svelte";
 
 
 type FeedMap = {
@@ -33,8 +34,7 @@ export class DataBasaConn{
 
   private static instance : DataBasaConn;
 
-  private constructor(){
-  }
+  private constructor(){}
 
   static getDB() {
     if(!this.instance) {console.log("db created");this.instance = new DataBasaConn();}

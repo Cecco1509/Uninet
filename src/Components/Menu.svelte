@@ -13,7 +13,7 @@
 
   let { userID } : {userID : string;} = $props();
 
-  let page = $state(window.location.pathname.split("/")[1]);
+  let page = $state("");
  
   const handleSignOut = async () => {
     try {
@@ -25,6 +25,10 @@
     }
   };
 
+  $effect(() => {
+    page = window.location.pathname.split("/")[1];
+  })
+
   const handleClick = () => {
 
   }
@@ -32,7 +36,7 @@
 </script>
 
 <div class="menu-container">
-    <button class={page == "feed" ? "active" : ""} onclick={() => {goto("/feed"); page = "feed"}}>
+    <button class={page == "feed" || page == "" ? "active" : ""} onclick={() => {goto("/feed"); page = "feed"}}>
       <div class="icon">
         <HomeIcon/>
       </div>
@@ -44,7 +48,7 @@
       </div>
       <span class="btn-span">Profilo</span>
     </button>
-    <button class={page == "messages" ? "active" : ""} >
+    <button class={page == "messages" ? "active" : ""} onclick={() => {goto("/messages"); page = "messages"}} >
       <div class="icon">
         <MessIcon/>
       </div>
@@ -95,7 +99,7 @@
       left: 0;
       width: 25dvw;
       padding: 2dvw 7dvw 2dvw 3dvw;
-      gap: 6dvh;
+      gap: 100px;
     }
 
     button{
@@ -135,6 +139,11 @@
 
       span{
         color: #21e3da;
+      }
+
+      &:hover{
+        fill: #21e3d9c7;
+        span{color: #21e3d9c7;}
       }
     }
 
