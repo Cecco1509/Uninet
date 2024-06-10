@@ -42,6 +42,7 @@ declare global {
     Followers: number;
     Username: string;
     posts: number;
+    id : string;
   } | null;
 
   type message = {
@@ -50,13 +51,13 @@ declare global {
     sender : string
   }
 
-  type chat = {
+  type chatInfo = {
     lastMessage : string;
     timestamp : string
   }
 
   type chatList = {
-    [key : string] : Chat
+    [key : string] : Chat | undefined
   }
 
   type FriendsSchema = {

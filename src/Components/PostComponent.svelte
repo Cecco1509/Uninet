@@ -94,7 +94,7 @@
   function calcExpiredTime(date2 : Date) : string {
     const date1 : Date = new Date();
 
-    let diffTime = ((date1 - date2) / (1000 * 60 * 60 * 24));
+    let diffTime = ((date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24));
     let word = " anni fa"
     if(diffTime > 365) return Math.floor(diffTime/365)+" anni fa";
     if(diffTime > 30) return Math.floor(diffTime/30)+" mesi fa";
@@ -469,7 +469,7 @@
     display: block;
     height: 400px;
     width: 100%;
-    margin: 0px;
+    margin: 3vh 0px 0px 0px;
     padding: 0px;
 
     .image{

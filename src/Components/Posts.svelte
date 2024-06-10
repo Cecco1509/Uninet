@@ -2,7 +2,6 @@
   import PostComponent from "./PostComponent.svelte";
   import viewport from "./useViewportActions";
   import { Feed } from "../stores/Feed.svelte";
-  import Loading from "./Loading.svelte";
   import LoadIcon from "./LoadIcon.svelte";
 
   let {
@@ -14,6 +13,8 @@
     editable: boolean;
     inUserPage: boolean;
   } = $props();
+
+  $inspect(feed);
 
   const handleEndPage = () => {
     console.log("Tried fetching", feed.fetchedAll)
@@ -44,6 +45,7 @@
       
     {/if}
   {:else}
+    Loading
     <LoadIcon/>
   {/if}
 {/if}

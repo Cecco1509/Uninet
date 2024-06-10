@@ -2,8 +2,8 @@
 
 <style>
 .icon{
-        padding:5px;
-        height: 50px;
-        width: 50px;
-    }
+    padding: 5px;
+    height: 35px;
+    width: 40px;
+  }
 </style>

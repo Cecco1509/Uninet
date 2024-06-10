@@ -27,9 +27,17 @@
       !userState.isLoading &&
       window.location.pathname !== "/"
     ){
-        window.location.href="/"
+      window.location.href="/"
     }
   });
+
+  let page = $state("");
+
+  $inspect(page)
+
+  $effect(() => {
+    page = window.location.pathname.split("/")[1];
+  })
 
   // $effect(() => {
   //   if (!("Notification" in window)) {
@@ -55,10 +63,10 @@
 
   {#if !userState.isLoading}
     {#if userState.userInfo}
-      <Menu userID={userState.userInfo!.Username} />
+      <Menu userID={userState.userInfo!.Username} bind:page={page}/>
     {/if}
     
-    <div class="content-container">
+    <div class={page != "messages" ? "content-container" : "content-container plus"}>
       {@render children()}
     </div>
     <!-- <footer>
@@ -70,6 +78,8 @@
 
 <style>
 
+
+
 .content-container {
     min-height: 95svh;
     width: 50dvw;
@@ -77,7 +87,16 @@
     color: white;
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
+    transition: all 0.5s;
 }
+
+.plus{
+    transition: all 0.5s;
+    padding: 0px !important;
+    margin: 0px 0px 0px 80px!important;
+    width: calc(100dvw - 80px) ;
+    border: none;
+  }
 
 @media only screen and (max-width: 600px) {
     .content-container {

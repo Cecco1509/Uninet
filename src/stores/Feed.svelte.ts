@@ -19,6 +19,10 @@ export class Feed{
         this.queryBuilder = queryBuilder;
         this._isLoading = true;
         this.queryBuilder.getQuery().then(q => {
+            if(!q) {
+                this._isLoading = false;
+                return;
+            }
             getDocs(q).then(result => {
                 result.forEach(post => {
                     this._posts.push(new Post(post.ref, post.data() as PostSchema, post.id));
@@ -51,7 +55,10 @@ export class Feed{
     async loadNewPosts() : Promise<boolean>{
         if(this._fetchedAll) return true;
 
-        const result = await getDocs(await this.queryBuilder.getFetchQuery(this._posts[this._posts.length - 1]));
+        const q = await this.queryBuilder.getFetchQuery(this._posts[this._posts.length - 1]);
+        if(!q) return false;
+
+        const result = await getDocs(q);
 
         result.forEach(post => {
             this._posts.push(new Post(post.ref, post.data() as PostSchema, post.id))

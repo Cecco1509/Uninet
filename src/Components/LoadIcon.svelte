@@ -10,8 +10,8 @@
 
 <style>
   .ld-cnt{
-    height: inherit;
-    width: inherit;
+    height: 100%;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,7 +25,6 @@
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: radial-gradient(circle, transparent 54%, grey 46%);
   }
   .lds-ring div {
     box-sizing: border-box;

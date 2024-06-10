@@ -13,17 +13,16 @@
   const user = MyUser.getUser();
   const db = DataBasaConn.getDB();
   let userPosts = $state<Feed>();
-  const chatStore = ChatStore.getChatStote();
+  const chatStore = ChatStore.getChatStore();
   let userInfo = $state<UserInfo>();
   let showPost = $state(true);
-
-  $effect(() => {
-    username;
-    userPosts = db.getUserPosts(username);
-  })
+  let reload = $state(false);
+  let lastUser = "";
 
   $effect(() => {
     if (!username || user.isLoading) return;
+
+    userPosts = db.getUserPosts(username);
 
     if (username !== user.userInfo?.Username) {
       db.getUserInfo(username)
@@ -38,10 +37,9 @@
     }
   });
 
-  async function goToChat(){
-    let id = await chatStore.addChat(username)
-    if(id) goto("/messages/"+id);
-    else console.log("errore")
+  async function follow(){
+    await user.follow(username);
+    reload = !reload
   }
 </script>
 
@@ -51,23 +49,25 @@
 
 <div class="user-info-box">
   <div class="top-wrapper">
-    {#if userInfo}
-    <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
-      <div class="top-info">
-        <div class="number-wrapper">
-          <span class="number">{userInfo.posts}</span><span>Posts</span>
-        </div>
-        <div class="number-wrapper">
-          <span class="number">{userInfo.Followers}</span><span>Followers</span>
-        </div>
-        <div class="number-wrapper">
-          <span class="number">{userInfo.seguiti}</span><span>Seguiti</span>
-        </div>
-      </div>
-    <br />
-    {:else}
-      <LoadIcon />
-    {/if}
+    {#key userInfo}
+      {#if userInfo}
+          <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
+          <div class="top-info">
+            <div class="number-wrapper">
+              <span class="number">{userInfo.posts}</span><span>Posts</span>
+            </div>
+            <div class="number-wrapper">
+              <span class="number">{userInfo.Followers}</span><span>Followers</span>
+            </div>
+            <div class="number-wrapper">
+              <span class="number">{userInfo.seguiti}</span><span>Seguiti</span>
+            </div>
+          </div>
+          <br />
+      {:else}
+        <LoadIcon />
+      {/if}
+    {/key}
   </div>
 
   <div class="bottom-info">
@@ -80,15 +80,22 @@
   </div>
 </div>
 {#if !user.isLoading && user.userInfo?.Username != username}
-  <button onclick={async () => await goToChat()}> invia un messaggio </button>
-  {#if !user.isFriend(username)}
-    <button> segui </button>
-  {/if}
+  <button class="btn" onclick={() => goto("/messages#"+username)}> Scrivi </button>
+  {#key reload}
+    {#await user.isFriend(username)}
+      <button class="btn"> <LoadIcon/> </button>
+    {:then isFriend} 
+      {#if !isFriend}
+        <button class="btn" onclick={follow}> segui </button>
+      {:else}
+      <button class="btn" onclick={follow}> seguito </button>
+      {/if}
+  {/await}
+  {/key}
 {/if}
 
 <br>
 <br>
-<hr>
 
 <div class="choice-cnt">
   <h1 class={showPost ? "active" : ""}>Posts</h1>
@@ -108,33 +115,54 @@
 
 <style>
 
+  .btn{
+    padding: 7px 10px;
+    border: none;
+    border-radius: 5px;
+    width: 100px;
+    background-color: transparent;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.119);
+    cursor: pointer;
+    font-size: 1.4em;
+    transition: all 0.3s;
+    margin: 20px;
+
+    &:hover{
+      background-color: #e6c960;
+    }
+  }
+
   .choice-cnt{
     display: flex;
     gap: 0px;
+    transition: all 0.3s;
 
     h1{
+      opacity: 0.3;
       width: 50%;
       text-align: center;
-      transition: all 0.5s;
+      transition: all 0.3s;
+    }
 
+    &:hover h1 {
+      opacity: 0.3;
+    }
 
-      &:first-child{
-        width: calc(50%);
-        border-right: 1px solid rgb(51,51,51);
-      }
-
-      &:hover{
-        background-color: #21e3d950;
-        border-color: rgb(51,51,51);
-        outline: 0;
-        cursor: pointer;
-      }
+    & h1:hover {
+      
+      opacity: 1;
+      outline: 0;
+      cursor: pointer;
+      border-bottom: 0.5px solid #21e3da;
+      
     }
 
     .active{
-      background-color: #21e3d950;
+      opacity: 1;
       outline: 0;
       cursor: pointer;
+      border-bottom: 0.5px solid #21e3da;
     }
   }
 

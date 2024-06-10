@@ -30,7 +30,7 @@ export class DataBasaConn{
 
   private feedMap   : FeedMap = {};
   private _homeFeed : Feed | null = null;
-  private userInfos : UserInfoMap = {};
+  private userInfos = $state<UserInfoMap>({});
 
   private static instance : DataBasaConn;
 
@@ -66,7 +66,7 @@ export class DataBasaConn{
   
     if (result.empty) return null;
     result.forEach((row) => {
-      userData = row.data() as UserInfo;
+      userData = {...row.data(), id: row.id} as UserInfo;
     });
   
     this.userInfos[username] = userData;

@@ -12,10 +12,14 @@ export class HomeFeedQueryBuilder implements QueryBuilder{
         this.param = param;
     }
 
-    async getFetchQuery(post : Post): Promise<Query> {
+    async getFetchQuery(post : Post): Promise<Query | null> {
+        const result = await this.param;
+        if(!result || result.length == 0) return null;
+
+
         return query(
             collection(db, "Posts"),
-            where("createdBy", "in", await this.param),
+            where("createdBy", "in", result),
             orderBy("data", "desc"),
             orderBy("likes", "desc"),
             startAfter(post.data.data),
@@ -24,10 +28,13 @@ export class HomeFeedQueryBuilder implements QueryBuilder{
     }
 
 
-    async getQuery(): Promise<Query>{
+    async getQuery(): Promise<Query | null>{
+        const result = await this.param;
+        if(!result || result.length == 0) return null;
+
         return query(
             collection(db, "Posts"),
-            where("createdBy", "in", await this.param),
+            where("createdBy", "in", result),
             orderBy("data", "desc"),
             orderBy("likes", "desc"),
             limit(10)

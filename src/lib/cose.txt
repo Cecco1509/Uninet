@@ -1,0 +1,50 @@
+<script lang="ts">
+  import { limitToFirst, onValue, query, ref, startAfter } from "firebase/database";
+  import Messages from "../../Components/Messages.svelte";
+  import { DataBasaConn } from "../../stores/db.svelte";
+  import { MyUser } from "../../stores/userState.svelte";
+  import { realtimeDB } from "$lib/firebase/firebase.client";
+  import { set } from "firebase/database"
+  import { uuidv4 } from "@firebase/util";
+  import { ChatStore } from "../../stores/ChatList.svelte";
+
+    const userState = MyUser.getUser();
+    const db = DataBasaConn.getDB();
+    let chatStore = ChatStore.getChatStote();
+    let searchUser = $state<string>("");
+
+    const handleChange = function(){
+
+    }
+
+</script>
+
+Messaggi
+
+<form autocomplete="off">
+  <input autocomplete="off"  type="search" bind:value={searchUser} onkeyup={handleChange} placeholder="Cerca per username">
+</form>
+
+<Messages chats={chatStore.chats} />
+
+
+<style>
+  input{
+        padding: 20px;
+        margin: 10px;
+        width: calc(100% - 20px);
+        background-color: #e6c96021;
+        border: 1px solid #e6c960;
+        border-radius: 5px;
+        color: white;
+        font-size: 1.5em;
+        outline: none;
+        transition: all 0.3s;
+
+        &:focus{
+            box-shadow: 0px 0px 7px #e6c960;
+        }
+    }
+
+    
+</style>
