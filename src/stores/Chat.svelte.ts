@@ -10,6 +10,7 @@ import {
   ref,
   set,
   startAfter,
+  startAt,
 } from "firebase/database";
 import { Timestamp } from "firebase/firestore";
 import { MyUser } from "./userState.svelte";
@@ -23,6 +24,8 @@ export class Chat {
   private _to: string;
   private _id = $state<string>();
 
+  private static pageSize: number = 20;
+
   constructor(id: string, to: string, chatInfo: chatInfo) {
     this._id = id;
     this.currentUnsubscriber = null;
@@ -31,22 +34,41 @@ export class Chat {
     this._to = to;
   }
 
-  get messages() {
-    if (this.currentUnsubscriber) return this._messages;
+  async getMessages(): Promise<message[]> {
+    if (this.currentUnsubscriber || this._messages.length > 0)
+      return this._messages;
 
-    console.log("CHAT ID " + this.id);
+    console.log("CHAT ID " + this._id);
 
-    this.currentUnsubscriber = onChildAdded(
+    const q = query(
       ref(realtimeDB, "messages/" + this._id),
-      (snapshot) => {
-        if (Number(snapshot.key) == this._messages.length) {
-          this._messages.push(snapshot.val() as message);
-          console.log(snapshot.key);
-        } else {
-          console.log(snapshot.val().text);
-        }
-      },
+      orderByKey(),
+      limitToLast(Chat.pageSize),
     );
+
+    const result = await get(q);
+
+    result.forEach((snapshot) => {
+      this._messages.push({
+        ...(snapshot.val() as message),
+        id: snapshot.key!,
+      });
+      console.log(Number(snapshot.key), this._messages.length);
+      console.log("TESTO", snapshot.val().text);
+    });
+
+    const q1 = query(
+      ref(realtimeDB, "messages/" + this._id),
+      orderByKey(),
+      startAfter(this._messages[this._messages.length - 1].id),
+    );
+
+    this.currentUnsubscriber = onChildAdded(q1, (snapshot) => {
+      this._messages.push({
+        ...(snapshot.val() as message),
+        id: snapshot.key!,
+      });
+    });
 
     return this._messages;
   }
@@ -75,7 +97,7 @@ export class Chat {
     const q = query(
       ref(realtimeDB, "messages/" + this._id),
       limitToLast(20),
-      startAfter(this._messages[this._messages.length].timestamp),
+      startAfter(this._messages[this._messages.length - 1].timestamp),
     );
 
     const result = get(q);
@@ -105,14 +127,23 @@ export class Chat {
       this._id == "" ? this : null,
     );
 
-    console.log(this._id);
+    console.log(Number(this._messages[this._messages.length - 1].id) + 1);
 
     //this._chatInfo = { lastMessage: text, timestamp: strDate };
 
-    set(ref(realtimeDB, "messages/" + this._id + "/" + this._messages.length), {
-      text: text,
-      timestamp: strDate,
-      sender: MyUser.getUser().userInfo!.Username,
-    });
+    set(
+      ref(
+        realtimeDB,
+        "messages/" +
+          this._id +
+          "/" +
+          (Number(this._messages[this._messages.length - 1].id) + 1),
+      ),
+      {
+        text: text,
+        timestamp: strDate,
+        sender: MyUser.getUser().userInfo!.Username,
+      },
+    );
   }
 }

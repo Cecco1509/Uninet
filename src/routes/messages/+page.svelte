@@ -21,7 +21,6 @@
   let searchUser = $state<string>("");
   let bindId = $state("");
   let chatId = $state("");
-  let selectedChat = $state("");
 
   const handleChange = function () {};
 
@@ -30,8 +29,6 @@
     if (chatId == "") chatId = bindId;
     //if(chatId == selectedChat) return
   });
-
-  $inspect(selectedChat);
 </script>
 
 <div class="cnt">

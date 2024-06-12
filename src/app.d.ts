@@ -13,11 +13,11 @@ declare global {
   };
 
   type CommentSchema = {
-    commentID : string,
-    testo : string,
-    userID : string
-    data : Timestamp
-}
+    commentID: string;
+    testo: string;
+    userID: string;
+    data: Timestamp;
+  };
 
   type PostSchema = {
     comments: number;
@@ -42,23 +42,24 @@ declare global {
     Followers: number;
     Username: string;
     posts: number;
-    id : string;
+    id: string;
   } | null;
 
   type message = {
-    text : string;
-    timestamp : Database.Timestamp;
-    sender : string
-  }
+    id: string;
+    text: string;
+    timestamp: Database.Timestamp;
+    sender: string;
+  };
 
   type chatInfo = {
-    lastMessage : string;
-    timestamp : string
-  }
+    lastMessage: string;
+    timestamp: string;
+  };
 
   type chatList = {
-    [key : string] : Chat | undefined
-  }
+    [key: string]: Chat | undefined;
+  };
 
   type FriendsSchema = {
     username: string;

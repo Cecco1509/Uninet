@@ -51,30 +51,42 @@
 <div class="msgs-cnt" bind:this={messagesBox}>
   <div>
     {#if chat && chat.id != ""}
-      {#each chat.messages as message}
-        {#if printDate(message.timestamp?.split(" ")[1])}
-          <div class="msg-cnt">
-            <div class="day">
-              {before}
-            </div>
-          </div>
-        {/if}
+      {#await chat.getMessages()}
+        <LoadIcon />
+      {:then messages}
         <div class="msg-cnt">
-          <div
-            class={message.sender == MyUser.getUser().userInfo?.Username
-              ? "sended msg-box"
-              : "received msg-box"}
-          >
-            <div class="msg-text">
-              {message.text}
+            <div class="day">
+              <button class="load">
+                Carica
+              </button>
             </div>
-            <div class="time">
-              {message.timestamp?.split(" ")[0]}
+          
+        </div>
+        {#each messages as message}
+          {#if printDate(message.timestamp?.split(" ")[1])}
+            <div class="msg-cnt">
+              <div class="day">
+                {before}
+              </div>
+            </div>
+          {/if}
+          <div class="msg-cnt">
+            <div
+              class={message.sender == MyUser.getUser().userInfo?.Username
+                ? "sended msg-box"
+                : "received msg-box"}
+            >
+              <div class="msg-text">
+                {message.text}
+              </div>
+              <div class="time">
+                {message.timestamp?.split(" ")[0]}
+              </div>
             </div>
           </div>
-        </div>
-        <br />
-      {/each}
+          <br />
+        {/each}
+      {/await}
     {:else if chat?.id == ""}
       NUOVA CHAT
     {/if}
@@ -87,6 +99,22 @@
 </form>
 
 <style>
+
+  .load{
+    border: none;
+    background: transparent;
+    width: 100%;
+    color: grey !important;
+    margin: 0px;
+    justify-self: center;
+    text-align: center;
+    font-size: 1.1em;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
   .link-name {
     border: none;
     background: transparent;
@@ -214,7 +242,7 @@
   }
 
   .day {
-    color: grey;
+    color: grey !important;
     justify-self: center;
     text-align: center;
     width: 100px;
