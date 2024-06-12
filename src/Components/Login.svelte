@@ -1,10 +1,10 @@
 <script lang="ts">
   import logo from "$lib/assets/hero.png";
-  import { auth} from "$lib/firebase/firebase.client";
+  import { auth } from "$lib/firebase/firebase.client";
   import { FirebaseError } from "firebase/app";
   import {
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
   } from "firebase/auth";
   import LoadIcon from "./LoadIcon.svelte";
 
@@ -81,15 +81,14 @@
     <div class="or">or</div>
     {#if register}
       <p>
-        Sei già iscritto? Esegui il <span onclick={() => (register = false)}
-          >log in!</span
-        >
+        Sei già iscritto? Esegui il <button onclick={() => (register = false)}>
+          <span>log in!</span>
+        </button>
       </p>
     {:else}
       <p>
-        Non hai un account? <span onclick={() => (register = true)}
-          >Registrati!</span
-        >
+        Non hai un account? <button onclick={() => (register = true)}>
+        </button><span>Registrati!</span>
       </p>
     {/if}
   </div>
@@ -187,13 +186,6 @@
     box-shadow: 0px 0px 6px #21e3da;
   }
 
-  h1 {
-    align-self: flex-start;
-    padding-left: 25%;
-    padding-bottom: 10%;
-    /*font-size: 50px;       */
-  }
-
   .or {
     display: flex;
     color: white;
@@ -232,11 +224,6 @@
       height: 100svh;
     }
 
-    h1 {
-      padding-bottom: 10%;
-      /*font-size: 4em;       */
-    }
-
     button {
       height: 7vh;
     }
@@ -255,6 +242,7 @@
     .or {
       width: 100%;
     }
+
     p {
       width: 100%;
     }

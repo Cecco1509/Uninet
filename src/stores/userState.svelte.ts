@@ -1,14 +1,27 @@
 import { auth, db } from "$lib/firebase/firebase.client";
 import type { User } from "firebase/auth";
-import { FirestoreError, Transaction, addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, runTransaction, updateDoc, where } from "firebase/firestore";
+import {
+  FirestoreError,
+  Transaction,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  runTransaction,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { DataBasaConn } from "./db.svelte";
 
 type friends = {
-  [key : string]: string | undefined
-}
+  [key: string]: string | undefined;
+};
 
-export class MyUser{
-  
+export class MyUser {
   private _user = $state<User | null | undefined>(undefined);
   private _userInfo = $state<UserInfo | null | undefined>(undefined);
   private isUserLoading = $state(true);
@@ -17,21 +30,21 @@ export class MyUser{
   private _friends = $state<friends>({});
   private _friendsSize = 0;
 
-  private static instance : MyUser | null = null;
+  private static instance: MyUser | null = null;
 
-  public static getUser(): MyUser{
-    if(!MyUser.instance) MyUser.instance = new MyUser();
+  public static getUser(): MyUser {
+    if (!MyUser.instance) MyUser.instance = new MyUser();
     return MyUser.instance;
   }
 
-  private constructor(){
+  private constructor() {
     $effect(() => {
       this.isUserLoading = true;
       let fn = auth.onAuthStateChanged((new_user) => {
         this._user = new_user;
         this.isUserLoading = false;
       });
-  
+
       return () => fn?.();
     });
 
@@ -46,7 +59,7 @@ export class MyUser{
         this._userInfo = doc.data() as UserInfo;
         this.isInfoLoading = false;
       });
-  
+
       return () => {
         try {
           unsubscribe?.();
@@ -61,7 +74,7 @@ export class MyUser{
     return this._userInfo;
   }
 
-  get user(){
+  get user() {
     return this._user;
   }
 
@@ -69,69 +82,80 @@ export class MyUser{
     return this._isLoading;
   }
 
-  async getFriends() : Promise<string[]> {
-    if(this._friendsSize > 0) {
+  async getFriends(): Promise<string[]> {
+    if (this._friendsSize > 0) {
       return Object.keys(this._friends);
     }
 
-    const result = await getDocs(query(collection(db, "Friends"),where("username", "==", this._userInfo!.Username)));
+    const result = await getDocs(
+      query(
+        collection(db, "Friends"),
+        where("username", "==", this._userInfo!.Username),
+      ),
+    );
 
-    result.forEach(friend => {
+    result.forEach((friend) => {
       this._friends[friend.data().friendUsername] = friend.id;
       this._friendsSize++;
-    })
+    });
 
     return Object.keys(this._friends);
   }
 
   async addPost() {
-    await updateDoc(doc(db, "Users", this._user!.uid), {posts : this._userInfo!.posts + 1});
+    await updateDoc(doc(db, "Users", this._user!.uid), {
+      posts: this._userInfo!.posts + 1,
+    });
   }
 
-  async isFriend(username: string) : Promise<boolean>{
+  async isFriend(username: string): Promise<boolean> {
     await this.getFriends();
 
     return this._friends[username] != undefined ? true : false;
   }
 
   async follow(username: string): Promise<void> {
-
-    if(this._friends[username]){
-
+    if (this._friends[username]) {
       await runTransaction(db, async (transaction) => {
-    
-        transaction.update(doc(db, "Users", this._user!.uid), {seguiti : this.userInfo!.seguiti - 1})
+        transaction.update(doc(db, "Users", this._user!.uid), {
+          seguiti: this.userInfo!.seguiti - 1,
+        });
         let f_user = await DataBasaConn.getDB().getUserInfo(username);
-        transaction.update(doc(db, "Users", f_user!.id), { Followers: f_user!.Followers - 1});
-        f_user!.Followers -= 1
-     });
+        transaction.update(doc(db, "Users", f_user!.id), {
+          Followers: f_user!.Followers - 1,
+        });
+        f_user!.Followers -= 1;
+      });
 
-      await deleteDoc(doc(db, "Friends", this._friends[username]))
+      await deleteDoc(doc(db, "Friends", this._friends[username]!));
       this._friends[username] = undefined;
 
-      
       return;
     }
 
-    console.log(this._friends)
-    let res = await addDoc(collection(db, "Friends"), {username: this._userInfo?.Username, friendUsername: username})
-    if(!res) return;
+    console.log(this._friends);
+    let res = await addDoc(collection(db, "Friends"), {
+      username: this._userInfo?.Username,
+      friendUsername: username,
+    });
+    if (!res) return;
 
     //ADD 1 FOLLOWER E 1 SEGUITO
 
     await runTransaction(db, async (transaction) => {
-      
-      transaction.update(doc(db, "Users", this._user!.uid), {seguiti : this.userInfo!.seguiti + 1})
+      transaction.update(doc(db, "Users", this._user!.uid), {
+        seguiti: this.userInfo!.seguiti + 1,
+      });
       let f_user = await DataBasaConn.getDB().getUserInfo(username);
-      transaction.update(doc(db, "Users", f_user!.id), { Followers: f_user!.Followers + 1});
-      f_user!.Followers += 1
+      transaction.update(doc(db, "Users", f_user!.id), {
+        Followers: f_user!.Followers + 1,
+      });
+      f_user!.Followers += 1;
     });
-    
+
     this._friends[username] = res.id;
     return;
-
   }
-
 }
 /*
 export function createUser() {

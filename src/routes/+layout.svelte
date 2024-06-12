@@ -1,11 +1,13 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import Loading from "../Components/Loading.svelte";
-  import { MyUser} from "../stores/userState.svelte";
+  import { MyUser } from "../stores/userState.svelte";
   import { goto } from "$app/navigation";
+  import { MenuStore, Positions } from "../stores/Menu.svelte";
   import Menu from "../Components/Menu.svelte";
 
   const userState = MyUser.getUser();
+  let menu = MenuStore.getMenu(null);
 
   let { children } = $props();
 
@@ -17,8 +19,13 @@
       !userState.isLoading &&
       window.location.pathname == "/"
     ) {
-      if (userState.userInfo) goto("/feed");
-      else goto("/users");
+      if (userState.userInfo) {
+        goto("/feed");
+        menu.currentSection = Positions.Feed;
+      } else {
+        goto("/users");
+        menu.currentSection = Positions.Registration;
+      }
     }
 
     if (
@@ -26,18 +33,18 @@
       !userState.user &&
       !userState.isLoading &&
       window.location.pathname !== "/"
-    ){
-      window.location.href="/"
+    ) {
+      window.location.href = "/";
     }
   });
 
-  let page = $state("");
-
-  $inspect(page)
+  $inspect(menu.currentSection);
 
   $effect(() => {
-    page = window.location.pathname.split("/")[1];
-  })
+    menu.currentSection = MenuStore.toPosition(
+      window.location.pathname.split("/")[1],
+    );
+  });
 
   // $effect(() => {
   //   if (!("Notification" in window)) {
@@ -58,54 +65,51 @@
   //     });
   //   }
   // })
-
 </script>
 
-  {#if !userState.isLoading}
-    {#if userState.userInfo}
-      <Menu userID={userState.userInfo!.Username} bind:page={page}/>
-    {/if}
-    
-    <div class={page != "messages" ? "content-container" : "content-container plus"}>
-      {@render children()}
-    </div>
-    <!-- <footer>
-      <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
-    </footer> -->
-  {:else}
-    <Loading />
+{#if !userState.isLoading}
+  {#if userState.userInfo && menu.currentSection}
+    <Menu userID={userState.userInfo!.Username} page={menu.currentSection} />
   {/if}
 
+  <div
+    class={menu.currentSection != Positions.Messages
+      ? "content-container"
+      : "content-container plus"}
+  >
+    {@render children()}
+  </div>
+  <!-- <footer>
+      <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
+    </footer> -->
+{:else}
+  <Loading />
+{/if}
+
 <style>
-
-
-
-.content-container {
+  .content-container {
     min-height: 95svh;
     width: 50dvw;
     margin: 0px 25dvw;
     color: white;
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
-    transition: all 0.5s;
-}
+    transition: all 0.4s;
+  }
 
-.plus{
-    transition: all 0.5s;
+  .plus {
+    transition: all 0.4s;
     padding: 0px !important;
-    margin: 0px 0px 0px 80px!important;
-    width: calc(100dvw - 80px) ;
+    margin: 0px 0px 0px 80px !important;
+    width: calc(100dvw - 80px);
     border: none;
   }
 
-@media only screen and (max-width: 600px) {
+  @media only screen and (max-width: 600px) {
     .content-container {
-        margin: 0px 0px;
-        width: 100%;
-        padding: 0px 5dvw;
+      margin: 0px 0px;
+      width: 100%;
+      padding: 0px 5dvw;
     }
-}
+  }
 </style>
-
-
-

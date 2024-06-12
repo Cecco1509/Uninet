@@ -1,14 +1,15 @@
 <script lang="ts">
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
-  import { DataBasaConn} from "../stores/db.svelte";
+  import { DataBasaConn } from "../stores/db.svelte";
   import Posts from "./Posts.svelte";
   import { MyUser } from "../stores/userState.svelte";
   import { goto } from "$app/navigation";
   import { ChatStore } from "../stores/ChatList.svelte";
   import type { Feed } from "../stores/Feed.svelte";
+  import { Positions, MenuStore } from "../stores/Menu.svelte";
 
-  let { username } : { username: string}  = $props();
+  let { username }: { username: string } = $props();
 
   const user = MyUser.getUser();
   const db = DataBasaConn.getDB();
@@ -27,7 +28,7 @@
     if (username !== user.userInfo?.Username) {
       db.getUserInfo(username)
         .then((u) => {
-          userInfo = u
+          userInfo = u;
         })
         .catch((e) => {
           console.log("errore: ", e);
@@ -37,9 +38,9 @@
     }
   });
 
-  async function follow(){
+  async function follow() {
     await user.follow(username);
-    reload = !reload
+    reload = !reload;
   }
 </script>
 
@@ -51,19 +52,21 @@
   <div class="top-wrapper">
     {#key userInfo}
       {#if userInfo}
-          <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
-          <div class="top-info">
-            <div class="number-wrapper">
-              <span class="number">{userInfo.posts}</span><span>Posts</span>
-            </div>
-            <div class="number-wrapper">
-              <span class="number">{userInfo.Followers}</span><span>Followers</span>
-            </div>
-            <div class="number-wrapper">
-              <span class="number">{userInfo.seguiti}</span><span>Seguiti</span>
-            </div>
+        <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
+        <div class="top-info">
+          <div class="number-wrapper">
+            <span class="number">{userInfo.posts}</span><span>Posts</span>
           </div>
-          <br />
+          <div class="number-wrapper">
+            <span class="number">{userInfo.Followers}</span><span
+              >Followers</span
+            >
+          </div>
+          <div class="number-wrapper">
+            <span class="number">{userInfo.seguiti}</span><span>Seguiti</span>
+          </div>
+        </div>
+        <br />
       {:else}
         <LoadIcon />
       {/if}
@@ -80,30 +83,37 @@
   </div>
 </div>
 {#if !user.isLoading && user.userInfo?.Username != username}
-  <button class="btn" onclick={() => goto("/messages#"+username)}> Scrivi </button>
+  <button
+    class="btn"
+    onclick={() => {
+      goto("/messages#" + username);
+      MenuStore.getMenu(null).currentSection = Positions.Messages;
+    }}
+  >
+    Scrivi
+  </button>
   {#key reload}
     {#await user.isFriend(username)}
-      <button class="btn"> <LoadIcon/> </button>
-    {:then isFriend} 
+      <button class="btn"> <LoadIcon /> </button>
+    {:then isFriend}
       {#if !isFriend}
         <button class="btn" onclick={follow}> segui </button>
       {:else}
-      <button class="btn" onclick={follow}> seguito </button>
+        <button class="btn" onclick={follow}> seguito </button>
       {/if}
-  {/await}
+    {/await}
   {/key}
 {/if}
 
-<br>
-<br>
+<br />
+<br />
 
 <div class="choice-cnt">
   <h1 class={showPost ? "active" : ""}>Posts</h1>
   <h1 class={showPost ? "" : "active"}>Volantini</h1>
 </div>
 
-
-<hr>
+<hr />
 {#if userPosts && showPost}
   <Posts
     feed={userPosts}
@@ -112,10 +122,8 @@
   />
 {/if}
 
-
 <style>
-
-  .btn{
+  .btn {
     padding: 7px 10px;
     border: none;
     border-radius: 5px;
@@ -128,17 +136,17 @@
     transition: all 0.3s;
     margin: 20px;
 
-    &:hover{
+    &:hover {
       background-color: #e6c960;
     }
   }
 
-  .choice-cnt{
+  .choice-cnt {
     display: flex;
     gap: 0px;
     transition: all 0.3s;
 
-    h1{
+    h1 {
       opacity: 0.3;
       width: 50%;
       text-align: center;
@@ -150,15 +158,13 @@
     }
 
     & h1:hover {
-      
       opacity: 1;
       outline: 0;
       cursor: pointer;
       border-bottom: 0.5px solid #21e3da;
-      
     }
 
-    .active{
+    .active {
       opacity: 1;
       outline: 0;
       cursor: pointer;

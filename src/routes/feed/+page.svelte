@@ -28,8 +28,8 @@
       await uploadBytes(imageRef, avatar[0]);
     } catch (e) {
       url = "";
-    }finally{
-      input!.value = '';
+    } finally {
+      input!.value = "";
     }
 
     return url;
@@ -43,7 +43,7 @@
       console.log("Pubblicato");
     } catch (e) {
       error = (e as Error).message;
-    }finally{
+    } finally {
       postText = "";
     }
   }
@@ -52,23 +52,22 @@
 <svelte:head>
   <title>Uninet | Feed</title>
 </svelte:head>
-  <div class="publish">
-    <br>
-    <h1>Feed</h1>
-    <br>
-    <br>
-    <textarea placeholder="Che succede?" bind:value={postText}></textarea>
-    <div class="inp-spacer">
-      <input bind:this={input} bind:files={avatar} type="file" accept="image/*" />
-    </div>
-    <button onclick={handleSubmit}>Pubblica</button>
+<div class="publish">
+  <br />
+  <h1>Feed</h1>
+  <br />
+  <br />
+  <textarea placeholder="Che succede?" bind:value={postText}></textarea>
+  <div class="inp-spacer">
+    <input bind:this={input} bind:files={avatar} type="file" accept="image/*" />
   </div>
-  <div>
-    <hr>
-    {#key homeFeed.posts}
-      <Posts feed={homeFeed} inUserPage={false} editable={false} />
-    {/key}
-  </div>
+  <button onclick={handleSubmit}>Pubblica</button>
+</div>
+<div>
+  <hr />
+
+  <Posts feed={homeFeed} inUserPage={false} editable={false} />
+</div>
 
 <!-- Cose da fare qui
 
@@ -81,16 +80,15 @@
 -->
 
 <style>
-
-  .inp-spacer{
+  .inp-spacer {
     margin: 10px 0px;
   }
 
-  .publish{
+  .publish {
     padding: 10px;
   }
 
-  textarea{
+  textarea {
     resize: none;
     width: 100%;
     height: 150px;
@@ -103,12 +101,12 @@
     padding: 10px;
     transition: all 0.5s;
 
-    &:focus{
+    &:focus {
       border: 1px solid #e6c960;
     }
   }
 
-  button{
+  button {
     border-radius: 10px;
     background-color: transparent;
     cursor: pointer;

@@ -3,17 +3,20 @@ export enum Positions {
     Registration,
     Messages,
     Profile,
-    MessGroups
+    MessGroups,
+    Feed,
+    Search,
+    Notify
 }
 
-export class Menu{
+export class MenuStore{
     private _currentSection = $state<Positions | null>();
     
-    private static instance: Menu;
+    private static instance: MenuStore;
 
 
-    static getMenu(position : Positions | null) : Menu{
-        if(!this.instance) this.instance = new Menu(position);
+    static getMenu(position : Positions | null) : MenuStore{
+        if(!this.instance) this.instance = new MenuStore(position);
         return this.instance;
     }
 
@@ -25,7 +28,26 @@ export class Menu{
     public get currentSection() : Positions | null | undefined{
         return this._currentSection;
     }
+
+
     public set currentSection(value : Positions) {
         this._currentSection = value;
+    }
+
+
+    static toPosition(url : string): Positions{
+
+        switch (url) {
+            case "feed":
+                return Positions.Feed
+            case "users":
+                return Positions.Profile
+            case "messages":
+                return Positions.Messages
+            case "search":
+                return Positions.Search
+            default:
+                return Positions.Login
+        }
     }
 }
