@@ -1,6 +1,7 @@
 <script lang="ts">
   import { db } from "$lib/firebase/firebase.client";
   import { doc, setDoc } from "firebase/firestore";
+  import ProfileIcon from "./ProfileIcon.svelte";
 
   let { userID } : {userID: string} = $props();
 
@@ -33,18 +34,51 @@
   };
 </script>
 
-<form>
-  <label>
-    <input bind:value={username} type="text" placeholder="Username" />
-  </label>
-  <label>
-    <input bind:value={nome} type="text" placeholder="Nome" />
-  </label>
-  <label>
-    <input bind:value={cognome} type="text" placeholder="Cognome" />
-  </label>
-  <label>
-    <input bind:value={data} type="date" placeholder="Data di nascita" />
-  </label>
-  <button onclick={handleSubmit}>Completa registrazione</button>
-</form>
+<div class="cnt">
+
+  <span class="reg-text"> Completa la registrazione ed inizia ad usare Uninet! </span>
+  <br>
+  <div class="profile-img">
+   <ProfileIcon img={""} inFeed={false}/>
+  </div>
+  
+  <input type="file" name="profilePic" id="profileImg">
+
+  <form>
+    <label>
+      <input bind:value={username} type="text" placeholder="Username" />
+    </label>
+    <label>
+      <input bind:value={nome} type="text" placeholder="Nome" />
+    </label>
+    <label>
+      <input bind:value={cognome} type="text" placeholder="Cognome" />
+    </label>
+    <label>
+      <input bind:value={data} type="date" placeholder="Data di nascita" />
+    </label>
+    <button onclick={handleSubmit}>Completa registrazione</button>
+  </form>
+</div>
+
+
+
+<style>
+
+  .reg-text{
+    font-size: 2em;
+    padding-bottom: 20px;
+    height: fit-content;
+  }
+
+  .cnt{
+    width: 100%;
+    min-height: 100dvh;
+    padding: 20px 20px;
+    display: block;
+  }
+
+  .profile-img{
+    padding-top: 40px;
+  }
+</style>

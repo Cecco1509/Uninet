@@ -1,6 +1,9 @@
 import { realtimeDB } from "$lib/firebase/firebase.client";
 import {
+  endAt,
+  endBefore,
   get,
+  limitToFirst,
   limitToLast,
   onChildAdded,
   onValue,
@@ -11,6 +14,7 @@ import {
   set,
   startAfter,
   startAt,
+  type Query,
 } from "firebase/database";
 import { Timestamp } from "firebase/firestore";
 import { MyUser } from "./userState.svelte";
@@ -19,12 +23,14 @@ import { format } from "prettier";
 
 export class Chat {
   private _messages = $state<message[]>([]);
+  private _newMessages = $state<message[]>([])
   private _chatInfo = $state<chatInfo>();
   private currentUnsubscriber: (() => void) | null;
   private _to: string;
   private _id = $state<string>();
+  private _fetchedAll = $state(false);
 
-  private static pageSize: number = 20;
+  private static pageSize: number = 30;
 
   constructor(id: string, to: string, chatInfo: chatInfo) {
     this._id = id;
@@ -35,10 +41,8 @@ export class Chat {
   }
 
   async getMessages(): Promise<message[]> {
-    if (this.currentUnsubscriber || this._messages.length > 0)
-      return this._messages;
 
-    console.log("CHAT ID " + this._id);
+    if (this._messages.length > 0) return this._messages;
 
     const q = query(
       ref(realtimeDB, "messages/" + this._id),
@@ -53,24 +57,37 @@ export class Chat {
         ...(snapshot.val() as message),
         id: snapshot.key!,
       });
-      console.log(Number(snapshot.key), this._messages.length);
-      console.log("TESTO", snapshot.val().text);
     });
 
-    const q1 = query(
-      ref(realtimeDB, "messages/" + this._id),
-      orderByKey(),
-      startAfter(this._messages[this._messages.length - 1].id),
-    );
+    this._fetchedAll = this._messages.length < Chat.pageSize;
 
-    this.currentUnsubscriber = onChildAdded(q1, (snapshot) => {
+    if(this._messages.length > 0)
+      this.currentUnsubscriber = this.getUnsubscriber();
+
+    return this._messages;
+  }
+
+  private getUnsubscriber() : (() => void){
+    let q1 :  Query | null = null;
+
+    if(this._messages.length > 0){
+      q1 = query(
+        ref(realtimeDB, "messages/" + this._id),
+        orderByKey(),
+        startAfter(this._messages[this._messages.length - 1].id),
+      );
+    }
+
+    return onChildAdded(q1 ? q1 : ref(realtimeDB, "messages/" + this._id), (snapshot) => {
       this._messages.push({
         ...(snapshot.val() as message),
         id: snapshot.key!,
       });
     });
+  }
 
-    return this._messages;
+  get newMessages(){
+    return this._newMessages;
   }
 
   setId(arg0: string) {
@@ -93,21 +110,45 @@ export class Chat {
     return this._to;
   }
 
+  get fetchedAll(){
+    return this._fetchedAll;
+  }
+
   async loadMoreMessages() {
+    if (this._fetchedAll) return;
+
+    const start = Number(this._newMessages.length > 0 ? this._newMessages[0].id : this._messages[0].id) - Chat.pageSize;
+    const end : string = this._newMessages.length > 0 ? this._newMessages[0].id : this._messages[0].id
+    
+    console.log("startAt", start, "endBefore", end);
+
     const q = query(
       ref(realtimeDB, "messages/" + this._id),
-      limitToLast(20),
-      startAfter(this._messages[this._messages.length - 1].timestamp),
+      orderByKey(),
+      startAt(start > 0 ? ""+start : "0"),
+      endBefore(end),
     );
 
-    const result = get(q);
+    const result = await get(q);
+    let newMessages : message[] = []
 
-    (await result).forEach((message) => {
-      this._messages.push(message.val());
+    result.forEach((message) => {
+      newMessages.push({...message.val(), id: message.key})
+      console.log(message.key)
     });
+
+    if(this._newMessages.length == 0) this._newMessages = newMessages;
+    else {
+      this._messages = [...this._newMessages, ...this._messages];
+      this._newMessages = newMessages;
+    }
+    
+
+    this._fetchedAll = newMessages[0].id == "0";
   }
 
   async send(text: string) {
+
     const date = new Date();
 
     const strDate =
@@ -127,17 +168,19 @@ export class Chat {
       this._id == "" ? this : null,
     );
 
-    console.log(Number(this._messages[this._messages.length - 1].id) + 1);
-
     //this._chatInfo = { lastMessage: text, timestamp: strDate };
 
-    set(
+    let id = 0;
+    if(this._newMessages.length == 0 && this._messages.length > 0) id = Number(this._messages[this._messages.length-1].id) + 1;
+    else if(this._newMessages.length > 0) id = Number(this._messages[this._messages.length-1].id) + 1;
+
+    await set(
       ref(
         realtimeDB,
         "messages/" +
           this._id +
           "/" +
-          (Number(this._messages[this._messages.length - 1].id) + 1),
+          id,
       ),
       {
         text: text,
@@ -145,5 +188,9 @@ export class Chat {
         sender: MyUser.getUser().userInfo!.Username,
       },
     );
+
+    if(this._messages.length == 0)
+      this.currentUnsubscriber = this.getUnsubscriber()
+
   }
 }

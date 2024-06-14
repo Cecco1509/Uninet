@@ -89,7 +89,6 @@
     getDownloadURL(imageRef)
       .then((url) => {
         img!.src = url;
-        console.log("hey");
       })
       .catch((error) => {
         console.log("errore", error.code);
@@ -101,19 +100,33 @@
 
     let diffTime = (date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24);
     let word = " anni fa";
-    if (diffTime > 365) return Math.floor(diffTime / 365) + " anni fa";
-    if (diffTime > 30) return Math.floor(diffTime / 30) + " mesi fa";
-    if (diffTime > 7) return Math.floor(diffTime / 7) + " settimane fa";
-    if (diffTime > 2) return Math.floor(diffTime) + " giorni fa";
+    
+    if (diffTime >= 365)  {
+      diffTime = Math.round(diffTime/365);
+      return diffTime == 1 ? "un anno fa" : diffTime+" anni fa";
+    }
+    if (diffTime >= 31)  {
+      diffTime = Math.round(diffTime / 30);
+      return diffTime == 1 ? "un mese fa" : diffTime+" mesi fa";
+    }
+    if (diffTime >= 7)  {
+      diffTime = Math.round(diffTime / 7);
+      return diffTime == 1 ? "una settimana fa" : diffTime+" settimane fa";
+    }
+
+    if (diffTime >= 1)  {
+      diffTime = Math.round(diffTime);
+      return diffTime == 1 ? "un giorno fa" : diffTime+" giorni fa";
+    }
 
     if (diffTime < 1) {
       diffTime *= 24;
-      word = " ore fa";
+      word = diffTime == 1 ? " ora fa" : " ore fa";
     }
 
     if (diffTime < 1) {
       diffTime *= 60;
-      word = " minuti fa";
+      word = diffTime == 1 ? " minuto fa" : " minuti fa";
     }
 
     if (diffTime < 1) return "adesso";
@@ -137,7 +150,6 @@
   }
 </script>
 
-{#if post}
   <div class="post-container">
     {#if !inUserPage && info}
       <div class="profile-icon">
@@ -183,8 +195,14 @@
       <div class="lk-cnt">
         <button
           class="heart-btn"
-          onclick={() => {
-            post.like();
+          onclick={async (e) => {
+
+            const el = (e.currentTarget as HTMLButtonElement);
+
+            el.disabled = true;
+            await post.like();
+            el.disabled = false;
+
           }}
         >
           <LikeIcon liked={post.liked} />
@@ -269,7 +287,6 @@
       {/if}
     </div>
   </div>
-{/if}
 
 <style>
   .description-edit {

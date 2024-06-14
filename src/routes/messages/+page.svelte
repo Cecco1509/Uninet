@@ -22,6 +22,15 @@
   let bindId = $state("");
   let chatId = $state("");
 
+
+  let messagesList = $derived(
+    Object.keys(chatStore.chats).filter((chatId) => {
+      return chatId.includes(searchUser)
+    }
+  ))
+
+  $inspect(messagesList);
+
   const handleChange = function () {};
 
   $effect(() => {
@@ -43,11 +52,11 @@
       />
     </form>
 
-    <Messages chats={chatStore.chats} {chatId} bind:bindId />
+    <Messages chats={messagesList} {chatId} bind:bindId />
   </div>
   <div class="cht-cnt">
     {#if !bindId && !chatId}
-      <div>
+      <div class="nothing">
         <span>Seleziona una chat</span>
       </div>
     {:else if !bindId && chatId}
@@ -59,6 +68,18 @@
 </div>
 
 <style>
+
+  .nothing{
+    display: grid;
+    place-content: center;
+    width: 100%;
+    height: 100%;
+
+    span{
+      color: rgba(255, 255, 255, 0.74);
+    }
+  }
+
   .cht-cnt {
     width: 100%;
     height: 100dvh;
@@ -78,14 +99,15 @@
     overflow-y: auto;
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
+    background-color: rgba(0, 255, 255, 0.043);
   }
 
   input {
     padding: 20px;
     margin: 10px;
     width: calc(100% - 20px);
-    background-color: #e6c96021;
-    border: 1px solid #e6c960;
+    background-color: rgba(255, 255, 255, 0.128);
+    border: 1px solid #21e3da;
     border-radius: 5px;
     color: white;
     font-size: 1.5em;
@@ -93,7 +115,7 @@
     transition: all 0.3s;
 
     &:focus {
-      box-shadow: 0px 0px 7px #e6c960;
+      box-shadow: 0px 0px 7px #21e3da;
     }
   }
 </style>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Chat } from "../stores/Chat.svelte";
+  import { ChatStore } from "../stores/ChatList.svelte";
   import { DataBasaConn } from "../stores/db.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
@@ -7,35 +9,58 @@
     chats,
     chatId,
     bindId = $bindable(),
-  }: { chats: chatList; chatId: string; bindId: string } = $props();
+  }: { chats: string[]; chatId: string; bindId: string } = $props();
 
-  $effect(() => {
-    console.log("cID", chatId, "bID", bindId);
+  let chatsMap : chatList = $state(ChatStore.getChatStore().chats);
+
+  let chatsValues = $derived(() =>{
+    let arr : Chat[] = []
+    chats.forEach(chatID => {
+      if(chatsMap[chatID]) arr.push(chatsMap[chatID]!)
+    });
+    return arr;
   });
 
-  const comparator = (a: string, b: string): number => {
+  function stringToTimeDate(srtDate : string) : number{
+    const values = srtDate.split(" ");
+    const time = values[0].split(":");
+    const date = values[1].split("/");
+
+    return new Date(Number(date[2]), Number(date[1]), Number(date[0]), Number(time[0]), Number(time[1])).getTime();
+
+  }
+
+  const comparator = (a: Chat, b: Chat): number => {
     return (
-      new Date(chats[b]?.chatInfo?.timestamp!).getTime() -
-      new Date(chats[a]?.chatInfo?.timestamp!).getTime()
+      stringToTimeDate(b?.chatInfo?.timestamp!) >= stringToTimeDate(a?.chatInfo?.timestamp!) ? 1 : -1
     );
   };
+
+  let orderedChats = $derived.by(() => {
+    return chatsValues().sort(comparator)
+  });
+
+
+  $inspect(orderedChats)
+
+  
 </script>
 
 {#if chats}
-  {#each Object.keys(chats).sort(comparator) as chatId_}
+  {#each orderedChats as chat}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- goto("/messages/"+chats[chatId]?.to -->
     <div
-      class={chatId == chatId_ ? "usr-cnt active" : "usr-cnt"}
+      class={chatId == chat.to ? "usr-cnt active" : "usr-cnt"}
       onclick={() => {
-        bindId = chatId_;
-        chatId = chatId_;
+        bindId = chat.to!;
+        chatId = chat.to!;
         window.location.href =
           window.location.href.split("#")[0] + "#" + bindId;
       }}
     >
-      {#await DataBasaConn.getDB().getUserInfo(chats[chatId_]!.to)}
+      {#await DataBasaConn.getDB().getUserInfo(chat!.to)}
         <LoadIcon />
       {:then userInfo}
         <div class="info">
@@ -45,17 +70,19 @@
               {userInfo?.Username}
             </span><br />
             <span class="flws">
-              {chats[chatId_]?.chatInfo?.lastMessage.slice(
+              {chat?.chatInfo?.lastMessage.slice(
                 0,
                 10,
-              )}{chats[chatId_]?.chatInfo?.lastMessage.length! > 10 ? "..." : ""}
-              • {chats[chatId_]?.chatInfo?.timestamp}
+              )}{chat?.chatInfo?.lastMessage.length! > 10 ? "..." : ""}
+              • {chat?.chatInfo?.timestamp}
             </span>
           </div>
         </div>
       {/await}
     </div>
   {/each}
+{:else}
+    <LoadIcon />
 {/if}
 
 <style>
@@ -66,8 +93,8 @@
   }
 
   .active {
-    border-color: #e6c9606a !important;
-    box-shadow: 0px 0px 10px #e6c9606a;
+    border-color: #21e3da !important;
+    box-shadow: 0px 0px 10px #21e3da;
   }
 
   span {
@@ -107,14 +134,15 @@
     border-radius: 5px;
     padding: 10px 20px;
     width: calc(100% - 20px);
-    background-color: rgba(255, 255, 255, 0.086);
+    background-color: rgba(255, 255, 255, 0.128);
+    backdrop-filter: blur(3px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all 0.3s;
 
     &:hover {
-      border-color: #e6c9606a;
+      border-color: #21e3da;
       cursor: pointer;
     }
   }

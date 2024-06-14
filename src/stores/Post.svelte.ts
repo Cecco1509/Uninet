@@ -37,6 +37,7 @@ export class Post{
     }
 
     async like(){
+
         let modifier = 0;
         if(this._liked) modifier = -1;
         else modifier = 1;
@@ -56,7 +57,8 @@ export class Post{
                 if(!this._liked) transaction.delete(this.likeRef);
                 else transaction.set(this.likeRef, {})
 
-                this._data = {...post.data() as PostSchema, likes : post.data().likes + modifier}
+                this._data!.likes = post.data().likes + modifier
+                this._data!.comments = post.data().comments;
             });
             console.log("Transaction successfully committed!");
         } catch (e) {
@@ -89,7 +91,8 @@ export class Post{
 
                 transaction.update(this.postRef, { comments: post.data().comments + 1 });
 
-                this._data = {...post.data() as PostSchema, comments : post.data().comments + 1}
+                this._data!.likes = post.data().likes
+                this._data!.comments = post.data().comments;
             });
             console.log("Commento riuscito");
             this._comments = [ newComment, ...this._comments];

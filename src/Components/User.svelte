@@ -18,7 +18,6 @@
   let userInfo = $state<UserInfo>();
   let showPost = $state(true);
   let reload = $state(false);
-  let lastUser = "";
 
   $effect(() => {
     if (!username || user.isLoading) return;
@@ -38,9 +37,13 @@
     }
   });
 
+  $inspect(userInfo)
+
   async function follow() {
     await user.follow(username);
-    reload = !reload;
+    if (await user.isFriend(username)) userInfo!.Followers += 1;
+    else userInfo!.Followers -= 1;
+
   }
 </script>
 
@@ -109,8 +112,8 @@
 <br />
 
 <div class="choice-cnt">
-  <h1 class={showPost ? "active" : ""}>Posts</h1>
-  <h1 class={showPost ? "" : "active"}>Volantini</h1>
+  <span class={showPost ? "active" : ""}>Posts</span>
+  <span class={showPost ? "" : "active"}>Volantini</span>
 </div>
 
 <hr />
@@ -146,18 +149,20 @@
     gap: 0px;
     transition: all 0.3s;
 
-    h1 {
+    span {
       opacity: 0.3;
       width: 50%;
       text-align: center;
       transition: all 0.3s;
+      padding-bottom: 10px;
+      font-size: 1.3em;
     }
 
-    &:hover h1 {
+    &:hover span {
       opacity: 0.3;
     }
 
-    & h1:hover {
+    & span:hover {
       opacity: 1;
       outline: 0;
       cursor: pointer;

@@ -111,10 +111,13 @@ export class MyUser {
   async isFriend(username: string): Promise<boolean> {
     await this.getFriends();
 
+    console.log(this._friends);
+
     return this._friends[username] != undefined ? true : false;
   }
 
   async follow(username: string): Promise<void> {
+    
     if (this._friends[username]) {
       await runTransaction(db, async (transaction) => {
         transaction.update(doc(db, "Users", this._user!.uid), {

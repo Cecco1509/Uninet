@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { fade } from "svelte/transition";
   import { Chat } from "../stores/Chat.svelte";
   import { ChatStore } from "../stores/ChatList.svelte";
   import { MenuStore, Positions } from "../stores/Menu.svelte";
@@ -12,6 +13,7 @@
   let text = $state("");
   let messagesBox = $state<HTMLDivElement>();
   let before = "";
+  let times = 1;
 
   let chat = $derived<Chat | undefined>(
     ChatStore.getChatStore().getChat(chatId)
@@ -33,72 +35,117 @@
   };
 </script>
 
-<div class="info">
-  {#await DataBasaConn.getDB().getUserInfo(chat!.to)}
-    <LoadIcon />
-  {:then userInfo}
-    <ProfileIcon img={userInfo!.img} inFeed={true} />
-    <button
-      class="link-name"
-      onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}}
-    >
-      <span>
-        {userInfo?.Username}
-      </span>
-    </button>
-  {/await}
-</div>
-<div class="msgs-cnt" bind:this={messagesBox}>
-  <div>
-    {#if chat && chat.id != ""}
-      {#await chat.getMessages()}
-        <LoadIcon />
-      {:then messages}
-        <div class="msg-cnt">
-            <div class="day">
-              <button class="load">
-                Carica
-              </button>
-            </div>
-          
+<!-- svelte-ignore non_reactive_update -->
+<!-- svelte-ignore non_reactive_update -->
+<!-- svelte-ignore non_reactive_update -->
+<div id="chat">
+  <div class="info">
+    {#await DataBasaConn.getDB().getUserInfo(chat!.to)}
+      <LoadIcon />
+    {:then userInfo}
+      <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={true} />
+      <button
+        class="link-name"
+        onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}}
+      >
+        <span>
+          {userInfo?.Username}
+        </span>
+      </button>
+    {/await}
+  </div>
+  <div class="msgs-cnt" bind:this={messagesBox} >
+    <div  class="inner">
+      {#if chat && chat.id != ""}
+        {#await chat.getMessages()}
+        <div class="loading">
+          <LoadIcon />
         </div>
-        {#each messages as message}
-          {#if printDate(message.timestamp?.split(" ")[1])}
+        {:then messages}
+          {#if !chat.fetchedAll}
             <div class="msg-cnt">
+              <div class="day">
+                <button class="load" onclick={
+                  async () => 
+                    { 
+                        await chat.loadMoreMessages();
+                        //setTimeout(() => messagesBox!.scrollBy({top : 600, behavior: "smooth"}), 1000);
+                        //console.log(-100/times);
+                        //messagesBox!.scrollTop = -900
+                }}>
+                  Carica
+                </button>
+              </div>
+            </div>
+          {/if}
+          <!-- Nuovi messaggi -->
+          {#each chat.newMessages as message}
+            {#if printDate(message.timestamp?.split(" ")[1])}
+            <div class="msg-cnt" in:fade>
               <div class="day">
                 {before}
               </div>
             </div>
-          {/if}
-          <div class="msg-cnt">
-            <div
-              class={message.sender == MyUser.getUser().userInfo?.Username
-                ? "sended msg-box"
-                : "received msg-box"}
-            >
-              <div class="msg-text">
-                {message.text}
-              </div>
-              <div class="time">
-                {message.timestamp?.split(" ")[0]}
+            {/if}
+            <div class="msg-cnt fade">
+              <div
+                class={message.sender == MyUser.getUser().userInfo?.Username
+                  ? "sended msg-box"
+                  : "received msg-box"}
+              >
+                <div class="msg-text">
+                  {message.text}
+                </div>
+                <div class="time">
+                  {message.timestamp?.split(" ")[0]}
+                </div>
               </div>
             </div>
-          </div>
-          <br />
-        {/each}
-      {/await}
-    {:else if chat?.id == ""}
-      NUOVA CHAT
-    {/if}
+          {/each}
+          <!-- Vecchi messaggi -->
+          {#each messages as message}
+            {#if printDate(message.timestamp?.split(" ")[1])}
+              <div class="msg-cnt">
+                <div class="day">
+                  {before}
+                </div>
+              </div>
+            {/if}
+            <div class="msg-cnt">
+              <div
+                class={message.sender == MyUser.getUser().userInfo?.Username
+                  ? "sended msg-box"
+                  : "received msg-box"}
+              >
+                <div class="msg-text">
+                  {message.text}
+                </div>
+                <div class="time">
+                  {message.timestamp?.split(" ")[0]}
+                </div>
+              </div>
+            </div>
+          {/each}
+        {/await}
+      {:else if chat?.id == ""}
+        NUOVA CHAT
+      {/if}
+    </div>
   </div>
+  
+  <form class="text-box">
+    <input type="text" bind:value={text} />
+    <button onclick={() => {chat!.send(text); text = ""}}> Invia </button>
+  </form>
+  
 </div>
 
-<form class="text-box">
-  <input type="text" bind:value={text} />
-  <button onclick={() => {chat!.send(text); text = ""}}> Invia </button>
-</form>
-
 <style>
+
+  .loading{
+    width: 100%;
+    height: 100dvh;
+  }
 
   .load{
     border: none;
@@ -167,6 +214,11 @@
     padding: 10px 0px;
   }
 
+  .inner{
+    display: flex;
+    flex-direction: column;
+  }
+
   input {
     height: auto;
     padding: 5px;
@@ -185,6 +237,22 @@
     width: 100%;
     padding: 10px;
     font-size: 1.1em;
+  }
+
+  .fade{
+    animation: fade-in .5s forwards ease-in-out;
+    transform: translateY(-5dvh);
+  }
+
+  @keyframes fade-in{
+    0%{
+      opacity: 0;
+      transform: translateY(-5dvh);
+    }
+    100%{
+      opacity: 1;
+      transform: translateY(0dvh);
+    }
   }
 
   button {
