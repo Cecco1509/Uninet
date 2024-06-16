@@ -22,6 +22,7 @@
   });
 
   function stringToTimeDate(srtDate : string) : number{
+    if(!srtDate) return Number.MAX_VALUE
     const values = srtDate.split(" ");
     const time = values[0].split(":");
     const date = values[1].split("/");

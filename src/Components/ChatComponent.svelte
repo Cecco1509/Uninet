@@ -127,15 +127,13 @@
             </div>
           {/each}
         {/await}
-      {:else if chat?.id == ""}
-        NUOVA CHAT
       {/if}
     </div>
   </div>
   
   <form class="text-box">
     <input type="text" bind:value={text} />
-    <button onclick={() => {chat!.send(text); text = ""}}> Invia </button>
+    <button onclick={() => {if(!text) return; chat!.send(text); text = ""}}> Invia </button>
   </form>
   
 </div>

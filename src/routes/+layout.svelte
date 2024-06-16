@@ -5,9 +5,12 @@
   import { goto } from "$app/navigation";
   import { MenuStore, Positions } from "../stores/Menu.svelte";
   import Menu from "../Components/Menu.svelte";
+  import PostComponent from "../Components/PostComponent.svelte";
+  import User from "../Components/User.svelte";
 
   const userState = MyUser.getUser();
-  let menu = MenuStore.getMenu(null);
+  let menu = MenuStore.getMenu();
+  let loading = $state(true)
 
   let { children } = $props();
 
@@ -22,9 +25,10 @@
       if (userState.userInfo) {
         goto("/feed");
         menu.currentSection = Positions.Feed;
-      } else {
-        goto("/users");
-        menu.currentSection = Positions.Registration;
+        loading = false;
+      }else{
+        Positions.Registration;
+        loading = false;
       }
     }
 
@@ -34,8 +38,34 @@
       !userState.isLoading &&
       window.location.pathname !== "/"
     ) {
-      window.location.href = "/";
+      goto("/");
+      menu.currentSection = Positions.Login;
+      loading = false;
     }
+
+    if (
+      browser &&
+      userState.user &&
+      !userState.isLoading &&
+      !userState.userInfo &&
+      window.location.pathname !== "/"
+    ) {
+      goto("/");
+      menu.currentSection = Positions.Registration;
+      loading = false;
+    }
+
+    if (
+      browser &&
+      userState.user &&
+      !userState.isLoading &&
+      userState.userInfo
+    ){
+      loading = false
+    }
+
+    loading  = false;
+
   });
 
   $inspect(menu.currentSection);
@@ -67,18 +97,25 @@
   // })
 </script>
 
-{#if !userState.isLoading}
+{#if !userState.isLoading && !loading}
   {#if userState.userInfo && menu.currentSection}
     <Menu userID={userState.userInfo!.Username} page={menu.currentSection} />
   {/if}
 
-  <div
+  {#if menu.currentSection == Positions.Login || menu.currentSection == Positions.Registration}
+    <div class="content-container extended">
+      {@render children()}
+    </div>
+  {:else if userState.userInfo}
+    <div
     class={menu.currentSection != Positions.Messages
-      ? "content-container"
-      : "content-container plus"}
-  >
-    {@render children()}
-  </div>
+        ? "content-container"
+        : "content-container plus"}
+    >
+      {@render children()}
+    </div>
+  {/if}
+  
   <!-- <footer>
       <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
     </footer> -->
@@ -95,6 +132,15 @@
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
     transition: all 0.4s;
+  }
+
+  .extended{
+    border: none;
+    width: 70dvw;
+    padding: 0px;
+    margin: 0px 15dvw;
+    display: grid;
+    place-content: center;
   }
 
   .plus {

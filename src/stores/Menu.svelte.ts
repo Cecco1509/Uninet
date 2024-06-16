@@ -15,8 +15,8 @@ export class MenuStore{
     private static instance: MenuStore;
 
 
-    static getMenu(position : Positions | null) : MenuStore{
-        if(!this.instance) this.instance = new MenuStore(position);
+    static getMenu(position? : Positions | null | undefined) : MenuStore{
+        if(!this.instance) this.instance = new MenuStore(position ? position : null);
         return this.instance;
     }
 

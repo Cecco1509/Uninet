@@ -1,13 +1,9 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { db, storage } from "$lib/firebase/firebase.client";
-  import { addDoc, collection } from "firebase/firestore";
+  import { storage } from "$lib/firebase/firebase.client";
   import { MyUser } from "../../stores/userState.svelte";
-  import { Timestamp } from "firebase/firestore";
   import { ref, uploadBytes } from "firebase/storage";
   import { uuidv4 } from "@firebase/util";
   import { DataBasaConn } from "../../stores/db.svelte";
-  import { Post } from "../../stores/Post.svelte";
   import Posts from "../../Components/Posts.svelte";
 
   const userState = MyUser.getUser();
