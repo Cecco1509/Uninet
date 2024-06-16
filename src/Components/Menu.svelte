@@ -13,6 +13,7 @@
   import SearchIcon from "./Icons/SearchIcon.svelte";
   import { MenuStore, Positions } from "../stores/Menu.svelte";
   import Messages from "./Messages.svelte";
+  import BoardIcon from "./Icons/boardIcon.svelte";
 
   let { userID, page = $bindable() } : {userID : string; page : number} = $props();
 
@@ -31,7 +32,7 @@
 
 </script>
 
-<div class={menu.currentSection == Positions.Messages ? "menu-container collapsed" : "menu-container"}>
+<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini ? "menu-container collapsed" : "menu-container"}>
     <button class={menu.currentSection == Positions.Feed ? "active" : ""} onclick={() => {goto("/feed"); menu.currentSection = Positions.Feed}}>
       <HomeIcon/>
       <span class="btn-span">Home</span>
@@ -48,6 +49,10 @@
       <MessIcon/>
       <span class="btn-span">Messaggi</span>
     </button>
+    <button class={menu.currentSection == Positions.Volantini ? "active" : ""} onclick={() => {goto("/volantini"); menu.currentSection = Positions.Volantini}} >
+      <BoardIcon />
+      <span class="btn-span">Volantini</span>
+    </button>
     <button class={menu.currentSection == Positions.MessGroups ? "active" : ""} >
       <UserGroup/>
       <span class="btn-span">Gruppi</span>
@@ -62,7 +67,7 @@
     </button>
 </div>
 
-<div class={menu.currentSection == Positions.Messages ? "hidden" : "footer"}>
+<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini ? "hidden" : "footer"}>
   <span>created with ❤️ by Lorenzo Ceccotti</span>
 </div>
 

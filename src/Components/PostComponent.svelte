@@ -186,7 +186,7 @@
           <span>{post.data.text}</span>
         </div>
       {:else}
-        <textarea bind:value={text} class="pensiero input-pensiero"
+        <textarea spellcheck="false" bind:value={text} class="pensiero input-pensiero"
           >{post.data.text.trim()}</textarea
         >
       {/if}
@@ -249,14 +249,14 @@
         {#if !editing}
           <span>{post.data.text}</span>
         {:else}
-          <textarea class="description-edit" bind:value={text}></textarea>
+          <textarea spellcheck="false" class="description-edit" bind:value={text}></textarea>
         {/if}
       </div>
     {/if}
     <br />
 
     <div class="pub-cmt-cnt">
-      <textarea
+      <textarea spellcheck="false"
         onfocusin={() => {
           commenting = true;
           sendingComment = true;
@@ -309,6 +309,12 @@
   }
 
   .pub-cmt-cnt {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+
     .cmt-input {
       border: none;
       border: 1px solid #e6c96057;
@@ -316,9 +322,9 @@
       outline: none;
       color: white;
       transition: all 0.5s;
-      margin: 0px 16px 0px 16px;
+      margin: 0px 0px 0px 0px;
       resize: none;
-      width: calc((100% - 32px) - 110px);
+      min-width: calc(100% - 110px);
       height: 50px;
       padding: 10px;
       border-radius: 5px;
@@ -330,9 +336,10 @@
     }
 
     button {
-      display: inline-block;
-      width: 100px;
-      transform: translateY(calc(-100% - 4px));
+      display: block;
+      width: 100%;
+      /* transform: translateY(-100%);
+      -webkit-transform: -webkit-translateY(-100%); */
       margin-top: 0px !important;
       margin-bottom: 0px !important;
       height: 50px !important;
@@ -354,12 +361,11 @@
     text-align: center;
     padding-top: 10px;
     cursor: pointer;
-    transform: translateY(10px);
   }
 
   .comments {
-    transform: translateY(-25px);
     margin-top: 20px;
+    margin-bottom: 20px;
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -387,9 +393,8 @@
   }
 
   .send-cmt-btn {
-    margin-top: 5px;
-    width: 100px;
-    margin-left: calc((100% - 100px) - 16px);
+    width: 100px !important;
+    /* margin-left: calc((100% - 100px) - 16px); */
     border: 1px solid #e6c960;
     padding: 10px;
     border-radius: 15px;
@@ -519,12 +524,13 @@
 
   .img-container {
     display: block;
-    height: 400px;
-    width: 100%;
+    height: 500px;
+    width: 500px;
     margin: 3vh 0px 0px 0px;
     padding: 0px;
 
     .image {
+      object-fit: cover;
       position: relative;
       z-index: 10;
       background-color: rgba(255, 255, 255, 0.122);
@@ -546,7 +552,7 @@
     .loader {
       z-index: 1;
       width: calc(50dvw - 32px);
-      height: 400px;
+      height: 500px;
       padding: 0px;
       transform: translateY(-100%);
       position: absolute;

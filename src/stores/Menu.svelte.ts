@@ -6,7 +6,8 @@ export enum Positions {
     MessGroups,
     Feed,
     Search,
-    Notify
+    Notify,
+    Volantini
 }
 
 export class MenuStore{
@@ -46,6 +47,8 @@ export class MenuStore{
                 return Positions.Messages
             case "search":
                 return Positions.Search
+            case "volantini":
+                return Positions.Volantini
             default:
                 return Positions.Login
         }

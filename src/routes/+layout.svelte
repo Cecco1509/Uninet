@@ -108,9 +108,9 @@
     </div>
   {:else if userState.userInfo}
     <div
-    class={menu.currentSection != Positions.Messages
-        ? "content-container"
-        : "content-container plus"}
+    class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini
+        ? "content-container plus"
+        : "content-container"}
     >
       {@render children()}
     </div>
@@ -126,11 +126,12 @@
 <style>
   .content-container {
     min-height: 95svh;
-    width: 50dvw;
+    width: 525px;
     margin: 0px 25dvw;
     color: white;
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
+    background-color: rgba(128, 128, 128, 0.102);
     transition: all 0.4s;
   }
 
@@ -149,13 +150,14 @@
     margin: 0px 0px 0px 80px !important;
     width: calc(100dvw - 80px);
     border: none;
+    min-height: 100dvh;
   }
 
   @media only screen and (max-width: 600px) {
     .content-container {
       margin: 0px 0px;
       width: 100%;
-      padding: 0px 5dvw;
+      padding: 0px 10px;
     }
   }
 </style>
