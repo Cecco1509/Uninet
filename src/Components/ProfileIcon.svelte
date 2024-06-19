@@ -35,8 +35,8 @@
   .border{
     background: linear-gradient(white, white) padding-box,
               linear-gradient(60deg, #ffffff8d, #21d2b5) border-box;
-  border-radius: 50em;
-  border: 2px solid transparent;
+    border-radius: 50px;
+    border: 2px solid transparent;
     /* border-image: linear-gradient(to right, #ffffff8d, #21d2b5) 1; */
   }
 

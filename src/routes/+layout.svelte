@@ -125,7 +125,7 @@
 
 <style>
   .content-container {
-    min-height: 95svh;
+    min-height: 100dvh;
     width: 525px;
     margin: 0px 25dvw;
     color: white;
@@ -148,9 +148,9 @@
     transition: all 0.4s;
     padding: 0px !important;
     margin: 0px 0px 0px 80px !important;
-    width: calc(100dvw - 80px);
+    width: calc(100% - 80px);
     border: none;
-    min-height: 100dvh;
+    background-color: transparent !important;
   }
 
   @media only screen and (max-width: 600px) {
