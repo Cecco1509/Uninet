@@ -6,11 +6,11 @@
   import { MyUser } from "../stores/userState.svelte";
   import { goto } from "$app/navigation";
   import { ChatStore } from "../stores/ChatList.svelte";
-  import type { Feed } from "../stores/Feed.svelte";
   import { Positions, MenuStore } from "../stores/Menu.svelte";
   import Loading from "./Loading.svelte";
   import { CacheVolantini } from "../stores/CacheVolantini.svelte";
   import Volantini from "./Volantini.svelte";
+  import type { Feed } from "../stores/Feeds/Feed";
 
   let { username }: { username: string } = $props();
 
