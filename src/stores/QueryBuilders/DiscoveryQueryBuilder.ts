@@ -10,10 +10,10 @@ import {
 } from "firebase/firestore";
 import type { QueryBuilder } from "./QueryBuilder";
 import { db } from "$lib/firebase/firebase.client";
-import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 import type { FeedObject } from "../FeedElements/FeedObject";
+import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
-export class HomeFeedQueryBuilder implements QueryBuilder {
+export class DiscoveryQueryBuilder implements QueryBuilder {
   private param: Promise<string[]>;
   public collection: string;
   public loadSize: number;
@@ -34,7 +34,7 @@ export class HomeFeedQueryBuilder implements QueryBuilder {
 
     return query(
       collection(db, this.collection),
-      where("createdBy", "in", result),
+      where("createdBy", "not-in", result),
       orderBy("data", "desc"),
       orderBy("likes", "desc"),
       startAfter(element.data.data),
@@ -48,7 +48,7 @@ export class HomeFeedQueryBuilder implements QueryBuilder {
 
     return query(
       collection(db, this.collection),
-      where("createdBy", "in", result),
+      where("createdBy", "not-in", result),
       orderBy("data", "desc"),
       orderBy("likes", "desc"),
       limit(this.loadSize)

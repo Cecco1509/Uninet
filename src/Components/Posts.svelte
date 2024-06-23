@@ -1,15 +1,16 @@
 <script lang="ts">
   import PostComponent from "./PostComponent.svelte";
   import viewport from "./useViewportActions";
-  import { Feed } from "../stores/Feed.svelte";
   import LoadIcon from "./LoadIcon.svelte";
+  import VolantinoComponent from "./VolantinoComponent.svelte";
+  import type { PostsFeed } from "../stores/Feeds/PostsFeed.svelte";
 
   let {
     feed,
     editable,
     inUserPage
   } : {
-    feed: Feed;
+    feed: PostsFeed;
     editable: boolean;
     inUserPage: boolean;
   } = $props();
@@ -18,14 +19,16 @@
 
   const handleEndPage = () => {
     console.log("Tried fetching", feed.fetchedAll)
-    feed.loadNewPosts();
+    feed.loadMore();
   }
 </script>
-{#if feed}
-  {#if !feed.isLoading}
-    {#if feed.size > 0}
-      {#each { length: feed.posts.length - 1 } as _, i}
-        <PostComponent post={feed.posts[i]} {inUserPage} {editable} />
+
+  {#await feed.getElements()}
+    <LoadIcon />
+  {:then elements} 
+    {#if elements.length > 0}
+      {#each { length: elements.length - 1 } as _, i}
+        <PostComponent post={elements[i]} {inUserPage} {editable} />
         <hr>
       {/each}
 
@@ -36,19 +39,15 @@
         use:viewport
         onenterViewport={handleEndPage}
       >
-        <PostComponent post={feed.posts[feed.posts.length - 1]} {inUserPage} {editable} />
+        <PostComponent post={elements[elements.length - 1]} {inUserPage} {editable} />
       </div>
     {:else}
-    <div class="nothing">
-      <span>Non c'è niente qui</span>
-    </div>
+      <div class="nothing">
+        <span>Non c'è niente qui</span>
+      </div>
       
     {/if}
-  {:else}
-    Loading
-    <LoadIcon/>
-  {/if}
-{/if}
+  {/await}
 <style>
 
   hr{

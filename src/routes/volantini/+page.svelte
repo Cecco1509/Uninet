@@ -3,16 +3,12 @@
   import { db, storage } from "$lib/firebase/firebase.client";
   import CanceIcon from "../../Components/Icons/CanceIcon.svelte";
   import LoadIcon from "../../Components/LoadIcon.svelte";
-  import viewport from "../../Components/useViewportActions";
   import { CacheVolantini } from "../../stores/CacheVolantini.svelte";
-  import { MenuStore, Positions } from "../../stores/Menu.svelte";
   import { uuidv4 } from "@firebase/util";
   import { ref, uploadBytes } from "firebase/storage";
-  import { Timestamp, addDoc, collection } from "firebase/firestore";
-  import { MyUser } from "../../stores/userState.svelte";
+  import Volantini from "../../Components/Volantini.svelte";
 
-
-  const cacheVolantini = CacheVolantini.getCache();
+    ////////////////////////////////////////////////////////
   let modal = $state<HTMLDivElement>()
   let content = $state<HTMLDivElement>()
   const body = window.document.querySelector("body");
@@ -63,7 +59,7 @@
 
   function handleEndOfPage(){
     console.log("called")
-    cacheVolantini.loadMore();
+    feed.loadMore();
   }
 
   function openModal(){
@@ -77,11 +73,11 @@
   async function uploadCurrentPhoto(): Promise<string> {
     if(!avatar || avatar.length != 1) return "";
 
-    let url = "postImages/" + uuidv4() + "." + avatar[0].type.split("/")[1];
+    let url = "volantiniImages/" + uuidv4() + "." + avatar[0].type.split("/")[1];
 
     try {
       const imageRef = ref(storage, url);
-      await uploadBytes(imageRef, avatar[0]);
+      const result = await uploadBytes(imageRef, avatar[0]);
     } catch (e) {
       url = "";
       console.log("ERRORE UPLOAD")
@@ -93,16 +89,7 @@
   async function handlePublish() {
     if(!profileImage || !titolo) return;
 
-    addDoc(collection(db, "Volantini"), {
-      createdBy : MyUser.getUser().userInfo!.Username,
-      data : Timestamp.fromDate(new Date()),
-      img : await uploadCurrentPhoto(),
-      tags : tagList.reduce((prev, curr, i, arr) => {
-        if(i == 0) return curr;
-        return prev + "," + curr
-      }, ""),
-      titolo : titolo
-    })
+    cacheVolantini.publishVolantino(await uploadCurrentPhoto(), titolo, tagList);
 
     titolo = ""
     tags = {}
@@ -110,6 +97,12 @@
     closeModal(null);
 
   }
+
+    /////////////////////////////////////////////////////
+
+  const cacheVolantini = CacheVolantini.getCache()
+  let feed = $state(cacheVolantini.getFeedSeguiti());
+  
 </script>
 
 <div class="top-bar-cnt">
@@ -162,7 +155,7 @@
                   {/if}
                 </div>
             </div>
-            <button onclick={handlePublish}>
+            <button class="complete" onclick={handlePublish}>
               Pubblica
             </button>
         </div>
@@ -170,62 +163,7 @@
 </div>
 
 <div class="cnt"  bind:this={content}>
-    {#await cacheVolantini.getVolantini()}
-        <LoadIcon />
-    {:then volantini}
-        {#if volantini.length > 0}
-            {#each { length: volantini.length - 1 } as _, i}
-                <div class="volantino">
-                    <div class="info">
-                        <span class="titolo">{volantini[i].titolo}</span>
-
-                        <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantini[i].createdBy)}} >Contatta</button>
-                    </div>
-                    <img src={volantini[i].img} alt="">
-                    
-                </div>
-            {/each}
-
-            {#each { length: volantini.length - 1 } as _, i}
-                <div class="volantino">
-                    <div class="info">
-                        <span class="titolo">{volantini[i].titolo}</span>
-
-                        <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantini[i].createdBy)}} >Contatta</button>
-                    </div>
-                    <img src={volantini[i].img} alt="">
-                    
-                </div>
-            {/each}
-
-            {#each { length: volantini.length - 1 } as _, i}
-                <div class="volantino">
-                    <div class="info">
-                        <span class="titolo">{volantini[i].titolo}</span>
-
-                        <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantini[i].createdBy)}} >Contatta</button>
-                    </div>
-                    <img src={volantini[i].img} alt="">
-                    
-                </div>
-            {/each}
-
-            <div class="volantino"
-                use:viewport
-                onenterViewport={handleEndOfPage}
-            >
-                <div class="info">
-                    <span class="titolo">{volantini[volantini.length-1].titolo}</span>
-
-                    <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantini[volantini.length-1].createdBy);}} >Contatta</button>
-                    
-                </div>
-                <img src={volantini[volantini.length-1].img} alt="">
-                
-            </div>
-        {/if}
-    {/await}
-    
+    <Volantini {feed} inUserPage={false} editable={false}/>
 </div>
 
 
@@ -270,6 +208,7 @@
         padding: 10px;
         border-radius: 20px;
         display: flex;
+        
         
 
         .img-cnt{
@@ -331,67 +270,41 @@
         gap: 30px;
         background-color: transparent;
         height: 100%;
-    }
-
-    .volantino{
-        height: 500px;
-        width: 100%;
-        max-width: 500px;
-        background-color: antiquewhite;
-        margin: 0 8px 8px 0; /* Some gutter */
-        border-radius: 10px;
-
-        img{
-            width: 100%;
-            height: 100%;
-            background-color: grey;
-        }
-
-        .info{
-            position:absolute;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 100px;
-            margin-top: 400px;
-        }
-
-        .titolo{
-            color: white;
-            margin: 10px;
-            z-index: 2;
-        }
+        min-height: 100dvh;
+        overflow: hidden;
     }
 
     .top-bar-cnt{
         height: 60px;
-        width: calc(100% - 80px);
-        position: fixed;
-        display: grid;
-        place-items: center;
-        top : 20px;
-        left: 60px;
-        
-        animation: fadeIn 0.5s forwards;
-        
-
-        .top-bar{
-            
-            width: 40%;
-            height: 100%;
-            border-radius: 25px;
-            background-color: rgba(252, 252, 252, 0.138);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1;
-        }
-
     }
 
-    input[type = text], input[type=date]{
+    .top-bar-cnt{
+        height: 60px;
+        width: 100%;
+        top : 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .top-bar{
+        position: fixed;
+        top : 20px;
+        width: 700px;
+        height: 60px;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.17);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 999;
+    }
+
+    input[type = text]{
         outline: none;
         width: calc(100% - 10px);
         margin: 5px 5px;

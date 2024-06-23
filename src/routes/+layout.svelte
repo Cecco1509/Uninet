@@ -7,6 +7,7 @@
   import Menu from "../Components/Menu.svelte";
   import PostComponent from "../Components/PostComponent.svelte";
   import User from "../Components/User.svelte";
+  import firebase from "firebase/compat/app";
 
   const userState = MyUser.getUser();
   let menu = MenuStore.getMenu();
@@ -65,7 +66,6 @@
     }
 
     loading  = false;
-
   });
 
   $inspect(menu.currentSection);

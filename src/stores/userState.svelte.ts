@@ -90,8 +90,8 @@ export class MyUser {
     const result = await getDocs(
       query(
         collection(db, "Friends"),
-        where("username", "==", this._userInfo!.Username),
-      ),
+        where("username", "==", this._userInfo!.Username)
+      )
     );
 
     result.forEach((friend) => {
@@ -117,7 +117,6 @@ export class MyUser {
   }
 
   async follow(username: string): Promise<void> {
-    
     if (this._friends[username]) {
       await runTransaction(db, async (transaction) => {
         transaction.update(doc(db, "Users", this._user!.uid), {

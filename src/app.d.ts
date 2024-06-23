@@ -5,6 +5,15 @@ import type { Chat } from "./stores/Chat.svelte";
 
 // for information about these interfaces
 declare global {
+  type VolantinoSchema = {
+    img: string;
+    tags: string;
+    text: string;
+    createdBy: string;
+    likes: number;
+    data: Timestamp;
+  };
+
   type UserSchema = {
     displayName: string | null;
     photoURL: string | null;

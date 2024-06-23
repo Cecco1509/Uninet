@@ -4,7 +4,6 @@
   import { DataBasaConn } from "../stores/db.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
-  import type { Post } from "../stores/Post.svelte";
   import { MyUser } from "../stores/userState.svelte";
   import { uuidv4 } from "@firebase/util";
   import { goto } from "$app/navigation";
@@ -14,6 +13,7 @@
   import DeleteIcon from "./Icons/DeleteIcon.svelte";
   import CheckIcon from "./Icons/CheckIcon.svelte";
   import CanceIcon from "./Icons/CanceIcon.svelte";
+  import type { Post } from "../stores/FeedElements/Post.svelte";
 
   let {
     post,
@@ -25,7 +25,6 @@
     editable: boolean;
   } = $props();
 
-  let img = $state<HTMLImageElement>();
   const user = MyUser.getUser();
   const db = DataBasaConn.getDB();
   let info = $state<UserInfo>();
@@ -42,7 +41,7 @@
   async function handleSubmit() {
     if (deleting) {
       deleting = false;
-      db.deletePost(post.postId);
+      db.deletePost(post.id);
       return;
     }
 
@@ -80,20 +79,6 @@
   });
 
   $inspect(count);
-
-  $effect(() => {
-    if (!post || !post.data.img || !img) return;
-    img.src = "";
-
-    const imageRef = ref(storage, post.data.img);
-    getDownloadURL(imageRef)
-      .then((url) => {
-        img!.src = url;
-      })
-      .catch((error) => {
-        console.log("errore", error.code);
-      });
-  });
 
   function calcExpiredTime(date2: Date): string {
     const date1: Date = new Date();
@@ -166,7 +151,7 @@
     {#if post.data.img && !editing}
       <div class="img-container">
         <div class="image">
-          <img bind:this={img} src="" alt="" />
+          <img src={post.data.img} alt="" />
         </div>
         <div class="loader">
           <LoadIcon />
@@ -205,7 +190,11 @@
 
           }}
         >
-          <LikeIcon liked={post.liked} />
+          {#await post.isLiked()}
+            <LikeIcon liked={false} />
+          {:then like} 
+            <LikeIcon liked={like} />
+          {/await}
         </button>
         <span>{post.data.likes}</span>
       </div>

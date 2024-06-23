@@ -8,6 +8,9 @@
   import { ChatStore } from "../stores/ChatList.svelte";
   import type { Feed } from "../stores/Feed.svelte";
   import { Positions, MenuStore } from "../stores/Menu.svelte";
+  import Loading from "./Loading.svelte";
+  import { CacheVolantini } from "../stores/CacheVolantini.svelte";
+  import Volantini from "./Volantini.svelte";
 
   let { username }: { username: string } = $props();
 
@@ -18,6 +21,7 @@
   let userInfo = $state<UserInfo>();
   let showPost = $state(true);
   let reload = $state(false);
+  let cacheVolantini = $state(CacheVolantini.getCache().getFeedUser(username));
 
   $effect(() => {
     if (!username || user.isLoading) return;
@@ -111,9 +115,14 @@
 <br />
 <br />
 
+
 <div class="choice-cnt">
-  <span class={showPost ? "active" : ""}>Posts</span>
-  <span class={showPost ? "" : "active"}>Volantini</span>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span class={showPost ? "active" : ""} onclick={() => showPost = true}>Posts</span>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <span class={showPost ? "" : "active"} onclick={() => showPost = false}>Volantini</span>
 </div>
 
 <hr />
@@ -123,6 +132,12 @@
     inUserPage={true}
     editable={username == user.userInfo?.Username}
   />
+{:else if !showPost}
+  <Volantini
+    feed = {cacheVolantini}
+    inUserPage={true}
+    editable={username == user.userInfo?.Username}
+  ></Volantini>
 {/if}
 
 <style>

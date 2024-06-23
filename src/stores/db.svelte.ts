@@ -11,14 +11,15 @@ import {
   runTransaction,
 } from "firebase/firestore";
 import { MyUser } from "./userState.svelte";
-import { Feed } from "./Feed.svelte";
-import { Post } from "./Post.svelte";
 import { HomeFeedQueryBuilder } from "./QueryBuilders/HomeFeedQueryBuilder";
 import { UserFeedQueryBuilder } from "./QueryBuilders/UserFeedQueryBuilder";
 import { ChatStore } from "./ChatList.svelte";
+import { CacheVolantini } from "./CacheVolantini.svelte";
+import { Post } from "./FeedElements/Post.svelte";
+import { PostsFeed } from "./Feeds/PostsFeed.svelte";
 
 type FeedMap = {
-  [key: string]: Feed;
+  [key: string]: PostsFeed;
 };
 
 type UserInfoMap = {
@@ -27,7 +28,7 @@ type UserInfoMap = {
 
 export class DataBasaConn {
   private feedMap: FeedMap = {};
-  private _homeFeed: Feed | null = null;
+  private _homeFeed: PostsFeed | null = null;
   private userInfos: UserInfoMap = {};
 
   private static instance: DataBasaConn;
@@ -44,15 +45,17 @@ export class DataBasaConn {
 
   getUserPosts(userId: string) {
     if (!this.feedMap[userId])
-      this.feedMap[userId] = new Feed(new UserFeedQueryBuilder(userId));
+      this.feedMap[userId] = new PostsFeed(
+        new UserFeedQueryBuilder("Posts", userId)
+      );
     else console.log("not user");
     return this.feedMap[userId];
   }
 
   get homeFeed() {
     if (!this._homeFeed)
-      this._homeFeed = new Feed(
-        new HomeFeedQueryBuilder(MyUser.getUser().getFriends()),
+      this._homeFeed = new PostsFeed(
+        new HomeFeedQueryBuilder("Posts", MyUser.getUser().getFriends())
       );
     else console.log("not feed");
     return this._homeFeed;
@@ -79,8 +82,8 @@ export class DataBasaConn {
   }
 
   deletePost(postId: string): void {
-    this.homeFeed?.deletePost(postId, false);
-    this.feedMap[MyUser.getUser()!.userInfo!.Username].deletePost(postId, true);
+    this.homeFeed?.delete(postId, false);
+    this.feedMap[MyUser.getUser()!.userInfo!.Username].delete(postId, true);
   }
 
   async publishPost(postText: string, photoUrl: string) {
@@ -99,11 +102,11 @@ export class DataBasaConn {
 
       const newPost = new Post(ref, newPostSchema, ref.id);
       //Aggiungo al feed il post appena creato
-      this.homeFeed!.addPost(newPost);
+      this.homeFeed!.add(newPost);
 
       //Aggiungo all'array dei post il post appena creato
       if (this.feedMap[MyUser.getUser().userInfo!.Username])
-        this.feedMap[MyUser.getUser().userInfo!.Username].addPost(newPost);
+        this.feedMap[MyUser.getUser().userInfo!.Username].add(newPost);
 
       await MyUser.getUser().addPost();
       console.log("ADD request");
