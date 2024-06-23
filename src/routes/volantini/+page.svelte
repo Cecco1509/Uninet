@@ -3,7 +3,7 @@
   import { db, storage } from "$lib/firebase/firebase.client";
   import CanceIcon from "../../Components/Icons/CanceIcon.svelte";
   import LoadIcon from "../../Components/LoadIcon.svelte";
-  import { CacheVolantini } from "../../stores/CacheVolantini.svelte";
+  import { CacheVolantini } from "../../stores/caches/CacheVolantini.svelte";
   import { uuidv4 } from "@firebase/util";
   import { ref, uploadBytes } from "firebase/storage";
   import Volantini from "../../Components/Volantini.svelte";
@@ -101,13 +101,32 @@
     /////////////////////////////////////////////////////
 
   const cacheVolantini = CacheVolantini.getCache()
-  let feed = $state(cacheVolantini.getFeedSeguiti());
+  let feed = $state(cacheVolantini.getHomeFeed());
+  let feedType = $state(0);
+
+  function updateFeed(){
+    switch (feedType) {
+      case 0:
+        feed = cacheVolantini.getHomeFeed();
+        break;
+      case 1:
+        feed = cacheVolantini.getDiscoveryFeed();
+        console.log("discovery");
+        break;
+      default:
+        break;
+    }
+  }
+
   
 </script>
 
 <div class="top-bar-cnt">
     <div class="top-bar">
-        <span>CIAO</span>
+        <select name="opt" id="opt" bind:value={feedType} onchange={updateFeed}>
+            <option value={0} selected >Per te</option>
+            <option value={1}>Discovery</option>
+        </select>
         <span>Volantini</span>
         <button class="plus-btn" onclick={openModal}>+</button>
         

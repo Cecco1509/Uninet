@@ -5,7 +5,17 @@ export interface Feed {
   fetchedAll: boolean;
 
   getElements(): Promise<FeedElement<FeedObject>[]>;
-  loadMore(): Promise<boolean>;
-  add(new_element: FeedElement<FeedObject>): void;
+  loadMore(): Promise<void>;
+}
+
+export interface Delete {
   delete(id: string, deleteFromDB: boolean): void;
+}
+
+export interface Add {
+  add(new_element: FeedElement<FeedObject>): void;
+}
+
+export interface Send {
+  send(text: string): void;
 }

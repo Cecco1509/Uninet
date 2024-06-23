@@ -11,6 +11,7 @@ import {
 import type { QueryBuilder } from "./QueryBuilder";
 import { db } from "$lib/firebase/firebase.client";
 import type { FeedObject } from "../FeedElements/FeedObject";
+import { MyUser } from "../userState.svelte";
 import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
 export class DiscoveryQueryBuilder implements QueryBuilder {
@@ -30,7 +31,7 @@ export class DiscoveryQueryBuilder implements QueryBuilder {
 
   async getFetchQuery(element: FeedElement<FeedObject>): Promise<Query | null> {
     const result = await this.param;
-    if (!result || result.length == 0) return null;
+    result.push(MyUser.getUser().userInfo!.Username);
 
     return query(
       collection(db, this.collection),
@@ -44,7 +45,7 @@ export class DiscoveryQueryBuilder implements QueryBuilder {
 
   async getQuery(): Promise<Query | null> {
     const result = await this.param;
-    if (!result || result.length == 0) return null;
+    result.push(MyUser.getUser().userInfo!.Username);
 
     return query(
       collection(db, this.collection),

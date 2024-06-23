@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Chat } from "../stores/Chat.svelte";
-  import { ChatStore } from "../stores/ChatList.svelte";
-  import { DataBasaConn } from "../stores/db.svelte";
+  import type { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
+  import { ChatCache, type chatMap } from "../stores/caches/ChatCache.svelte";
+  import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
 
@@ -11,10 +11,13 @@
     bindId = $bindable(),
   }: { chats: string[]; chatId: string; bindId: string } = $props();
 
-  let chatsMap : chatList = $state(ChatStore.getChatStore().chats);
+  const chatsStore = ChatCache.getCache();
+  const usersInfoStore = UserInfosCache.getCache();
+
+  let chatsMap : chatMap = $state(chatsStore.chats);
 
   let chatsValues = $derived(() =>{
-    let arr : Chat[] = []
+    let arr : ChatFeed[] = []
     chats.forEach(chatID => {
       if(chatsMap[chatID]) arr.push(chatsMap[chatID]!)
     });
@@ -31,7 +34,7 @@
 
   }
 
-  const comparator = (a: Chat, b: Chat): number => {
+  const comparator = (a: ChatFeed, b: ChatFeed): number => {
     return (
       stringToTimeDate(b?.chatInfo?.timestamp!) >= stringToTimeDate(a?.chatInfo?.timestamp!) ? 1 : -1
     );
@@ -61,7 +64,7 @@
           window.location.href.split("#")[0] + "#" + bindId;
       }}
     >
-      {#await DataBasaConn.getDB().getUserInfo(chat!.to)}
+      {#await usersInfoStore.getUserInfo(chat!.to)}
         <LoadIcon />
       {:then userInfo}
         <div class="info">

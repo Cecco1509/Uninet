@@ -3,13 +3,24 @@
   import { MyUser } from "../../stores/userState.svelte";
   import { ref, uploadBytes } from "firebase/storage";
   import { uuidv4 } from "@firebase/util";
-  import { DataBasaConn } from "../../stores/db.svelte";
   import Posts from "../../Components/Posts.svelte";
   import CanceIcon from "../../Components/Icons/CanceIcon.svelte";
+  import { PostCache } from "../../stores/caches/PostCache.svelte";
+  import { CacheVolantini } from "../../stores/caches/CacheVolantini.svelte";
+  import { ChatCache } from "../../stores/caches/ChatCache.svelte";
+  import { UserInfosCache } from "../../stores/caches/UserInfosCache.svelte";
 
   const userState = MyUser.getUser();
-  const database = DataBasaConn.getDB();
-  let homeFeed = database.homeFeed;
+  
+  const user = MyUser.getUser();
+  const postStore = PostCache.getCache();
+  // const userInfosStore = UserInfosCache.getCache();
+  // const volantiniStore = CacheVolantini.getCache();
+  // const chatStore = ChatCache.getCache();
+
+  let feed = $state(postStore.getHomeFeed());
+  let feedType = $state(0);
+
   let postText = $state("");
   let error = $state("");
   let avatar = $state<FileList | null>();
@@ -56,12 +67,25 @@
     if (!postText && !postImage) return;
 
     try {
-      await database.publishPost(postText, await uploadCurrentPhoto());
+      await postStore.publishPost(postText, await uploadCurrentPhoto());
       console.log("Pubblicato");
     } catch (e) {
       error = (e as Error).message;
     } finally {
       postText = "";
+    }
+  }
+
+  function updateFeed(){
+    switch (feedType) {
+      case 0:
+        feed = postStore.getHomeFeed();
+        break;
+      case 1:
+        feed = postStore.getDiscoveryFeed();
+        break;
+      default:
+        break;
     }
   }
 
@@ -73,6 +97,10 @@
 <div class="publish">
   <br />
   <h1>Feed</h1>
+  <select name="feedOpt" id="opt" bind:value={feedType} onchange={updateFeed}>
+    <option value={0}>Per te</option>
+    <option value={1}>Discover</option>
+  </select>
   <br />
   <br />
   {#if postImage}
@@ -101,7 +129,7 @@
   <hr>
   <div class="consigliati"></div>
   <hr />
-  <Posts feed={homeFeed} inUserPage={false} editable={false} />
+  <Posts feed={feed} inUserPage={false} editable={false} />
 </div>
 
 <!-- Cose da fare qui

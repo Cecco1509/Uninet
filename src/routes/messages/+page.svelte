@@ -7,17 +7,17 @@
     startAfter,
   } from "firebase/database";
   import Messages from "../../Components/Messages.svelte";
-  import { DataBasaConn } from "../../stores/db.svelte";
   import { MyUser } from "../../stores/userState.svelte";
   import { realtimeDB } from "$lib/firebase/firebase.client";
   import { set } from "firebase/database";
   import { uuidv4 } from "@firebase/util";
-  import { ChatStore } from "../../stores/ChatList.svelte";
   import ChatComponent from "../../Components/ChatComponent.svelte";
+  import { UserInfosCache } from "../../stores/caches/UserInfosCache.svelte";
+  import { ChatCache } from "../../stores/caches/ChatCache.svelte";
 
   const userState = MyUser.getUser();
-  const db = DataBasaConn.getDB();
-  let chatStore = ChatStore.getChatStore();
+  const db = UserInfosCache.getCache();
+  let chatStore = ChatCache.getCache();
   let searchUser = $state<string>("");
   let bindId = $state("");
   let chatId = $state("");

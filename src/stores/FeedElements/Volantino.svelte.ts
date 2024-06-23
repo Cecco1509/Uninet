@@ -2,8 +2,9 @@ import { storage } from "$lib/firebase/firebase.client";
 import { DocumentReference, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { FeedElement } from "./FeedElement.svelte";
+import { FeedPostLikeElement } from "./FeedPostLikeElement.svelte";
 
-export class Volantino extends FeedElement<VolantinoSchema> {
+export class Volantino extends FeedPostLikeElement<VolantinoSchema> {
   constructor(reference: DocumentReference, data: VolantinoSchema, id: string) {
     super(reference, data, id);
   }

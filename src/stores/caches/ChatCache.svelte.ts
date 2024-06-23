@@ -6,9 +6,9 @@ import {
   set,
   update,
 } from "firebase/database";
-import { MyUser } from "./userState.svelte";
+import { MyUser } from "../userState.svelte";
 import { db, realtimeDB } from "$lib/firebase/firebase.client";
-import { Chat } from "./Chat.svelte";
+import { ChatFeed } from "../Feeds/ChatFeed.svelte";
 import {
   addDoc,
   collection,
@@ -24,17 +24,21 @@ import {
   where,
 } from "firebase/firestore";
 import { onIdChange } from "firebase/installations";
-import { DataBasaConn } from "./db.svelte";
+import { UserInfosCache } from "./UserInfosCache.svelte";
 
-export class ChatStore {
-  private _chats = $state<chatList>({});
+export type chatMap = {
+  [key: string]: ChatFeed | undefined;
+};
+
+export class ChatCache {
+  private _chats = $state<chatMap>({});
   private unsubscribers: (() => void)[] = [];
   private unsubscriber: (() => void) | null = null;
 
-  private static instance: ChatStore | null = null;
+  private static instance: ChatCache | null = null;
 
-  static getChatStore() {
-    if (!this.instance) this.instance = new ChatStore();
+  static getCache() {
+    if (!this.instance) this.instance = new ChatCache();
     return this.instance;
   }
 
@@ -55,10 +59,10 @@ export class ChatStore {
                     this._chats[partecipants[1]]!.chatInfo =
                       snapshot.val() as chatInfo;
                   } else {
-                    this._chats[partecipants[1]] = new Chat(
+                    this._chats[partecipants[1]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[1],
-                      snapshot.val() as chatInfo,
+                      snapshot.val() as chatInfo
                     );
                     this.unsubscribers.push(unsubscribe);
                   }
@@ -68,20 +72,20 @@ export class ChatStore {
                     this._chats[partecipants[0]]!.chatInfo =
                       snapshot.val() as chatInfo;
                   } else {
-                    this._chats[partecipants[0]] = new Chat(
+                    this._chats[partecipants[0]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[0],
-                      snapshot.val() as chatInfo,
+                      snapshot.val() as chatInfo
                     );
                     this.unsubscribers.push(unsubscribe);
                   }
                   console.log(partecipants[0]);
                 }
               }
-            },
+            }
           );
         });
-      },
+      }
     );
   }
 
@@ -106,16 +110,16 @@ export class ChatStore {
   async addChat(id: string, username: string) {
     await setDoc(
       doc(db, "Users/" + MyUser.getUser().user?.uid + "/chats", id),
-      {},
+      {}
     );
-    const userInfo = await DataBasaConn.getDB().getUserInfo(username);
+    const userInfo = await UserInfosCache.getCache().getUserInfo(username);
     await setDoc(doc(db, "Users/" + userInfo?.id + "/chats", id), {});
   }
 
   async setLastMessage(
     username: string,
     newInfo: chatInfo,
-    newChat: Chat | null = null,
+    newChat: ChatFeed | null = null
   ) {
     if (!this._chats[username] && newChat) {
       this._chats[username] = newChat;

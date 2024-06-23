@@ -1,16 +1,14 @@
 import { Query, getDocs } from "firebase/firestore";
-import type { FeedElement } from "../FeedElements/FeedElement.svelte";
-import type { FeedObject } from "../FeedElements/FeedObject";
 import { Post } from "../FeedElements/Post.svelte";
 import type { QueryBuilder } from "../QueryBuilders/QueryBuilder";
 import { MyUser } from "../userState.svelte";
-import type { Feed } from "./Feed";
+import type { Add, Delete, Feed } from "./Feed";
 
-export class PostsFeed implements Feed {
+export class PostsFeed implements Feed, Add, Delete {
   private _posts = $state<Post[]>([]);
   private queryBuilder: QueryBuilder;
   private _size = $state(0);
-  private _fetchedAll = false;
+  private _fetchedAll = $state(false);
 
   constructor(queryBuilder: QueryBuilder) {
     this.queryBuilder = queryBuilder;
@@ -58,13 +56,13 @@ export class PostsFeed implements Feed {
     return this._fetchedAll;
   }
 
-  async loadMore(): Promise<boolean> {
-    if (this._fetchedAll) return true;
+  async loadMore(): Promise<void> {
+    if (this._fetchedAll) return;
 
     const q = await this.queryBuilder.getFetchQuery(
       this._posts[this._posts.length - 1]
     );
-    if (!q) return false;
+    if (!q) return;
 
     const result = await getDocs(q);
 
@@ -75,8 +73,6 @@ export class PostsFeed implements Feed {
 
     this._size += result.size;
     this._fetchedAll = result.size < this.queryBuilder.loadSize;
-
-    return this._fetchedAll;
   }
 
   add(new_element: Post) {

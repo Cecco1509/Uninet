@@ -1,7 +1,6 @@
 <script lang="ts">
   import { storage } from "$lib/firebase/firebase.client";
   import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-  import { DataBasaConn } from "../stores/db.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
   import { MyUser } from "../stores/userState.svelte";
@@ -14,6 +13,8 @@
   import CheckIcon from "./Icons/CheckIcon.svelte";
   import CanceIcon from "./Icons/CanceIcon.svelte";
   import type { Post } from "../stores/FeedElements/Post.svelte";
+  import { PostCache } from "../stores/caches/PostCache.svelte";
+  import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
 
   let {
     post,
@@ -26,7 +27,9 @@
   } = $props();
 
   const user = MyUser.getUser();
-  const db = DataBasaConn.getDB();
+  const postStore = PostCache.getCache();
+  const userInfoStore = UserInfosCache.getCache();
+
   let info = $state<UserInfo>();
   let editing = $state(false);
   let avatar = $state<FileList | null>();
@@ -41,7 +44,7 @@
   async function handleSubmit() {
     if (deleting) {
       deleting = false;
-      db.deletePost(post.id);
+      postStore.deletePost(post.id);
       return;
     }
 
@@ -72,7 +75,7 @@
       return;
     }
 
-    db.getUserInfo(post.data.createdBy).then((inf) => {
+    userInfoStore.getUserInfo(post.data.createdBy).then((inf : UserInfo) => {
       info = inf;
       count++;
     });

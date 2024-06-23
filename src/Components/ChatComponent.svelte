@@ -1,24 +1,29 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { fade } from "svelte/transition";
-  import { Chat } from "../stores/Chat.svelte";
-  import { ChatStore } from "../stores/ChatList.svelte";
   import { MenuStore, Positions } from "../stores/Menu.svelte";
-  import { DataBasaConn } from "../stores/db.svelte";
   import { MyUser } from "../stores/userState.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
+  import { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
+  import { ChatCache } from "../stores/caches/ChatCache.svelte";
+  import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
+  import type { Timestamp } from "firebase/firestore";
 
   let { chatId }: { chatId: string } = $props();
+
+  const chatsStore = ChatCache.getCache();
+  const usersInfoStore = UserInfosCache.getCache();
+
   let text = $state("");
   let messagesBox = $state<HTMLDivElement>();
-  let before = "";
+  let before : Timestamp;
   let times = 1;
 
-  let chat = $derived<Chat | undefined>(
-    ChatStore.getChatStore().getChat(chatId)
-      ? ChatStore.getChatStore().getChat(chatId)
-      : new Chat("", chatId, { timestamp: "", lastMessage: "" }),
+  let chat = $derived<ChatFeed | undefined>(
+    chatsStore.getChat(chatId)
+      ? chatsStore.getChat(chatId)
+      : new ChatFeed("", chatId, { timestamp: "", lastMessage: "" }),
   );
   // $effect(() => {
   //   // console.log("CHAT ID =>" + chatId);
@@ -28,19 +33,17 @@
   //   // }
   // });
 
-  const printDate = (date: string): boolean => {
+  const printDate = (date: Timestamp): boolean => {
     if (date == before) return false;
     before = date;
     return true;
   };
 </script>
 
-<!-- svelte-ignore non_reactive_update -->
-<!-- svelte-ignore non_reactive_update -->
-<!-- svelte-ignore non_reactive_update -->
+
 <div id="chat">
   <div class="info">
-    {#await DataBasaConn.getDB().getUserInfo(chat!.to)}
+    {#await usersInfoStore.getUserInfo(chat!.to)}
       <LoadIcon />
     {:then userInfo}
       <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={true} />
@@ -57,7 +60,7 @@
   <div class="msgs-cnt" bind:this={messagesBox} >
     <div  class="inner">
       {#if chat && chat.id != ""}
-        {#await chat.getMessages()}
+        {#await chat.getElements()}
         <div class="loading">
           <LoadIcon />
         </div>
@@ -68,7 +71,7 @@
                 <button class="load" onclick={
                   async () => 
                     { 
-                        await chat.loadMoreMessages();
+                        await chat.loadMore();
                         //setTimeout(() => messagesBox!.scrollBy({top : 600, behavior: "smooth"}), 1000);
                         //console.log(-100/times);
                         //messagesBox!.scrollTop = -900
@@ -80,7 +83,7 @@
           {/if}
           <!-- Nuovi messaggi -->
           {#each chat.newMessages as message}
-            {#if printDate(message.timestamp?.split(" ")[1])}
+           {#if false }  <!-- printDate(message.data?.data?.split(" ")[1]) -->
             <div class="msg-cnt" in:fade>
               <div class="day">
                 {before}
@@ -89,22 +92,22 @@
             {/if}
             <div class="msg-cnt fade">
               <div
-                class={message.sender == MyUser.getUser().userInfo?.Username
+                class={message.data.sender == MyUser.getUser().userInfo?.Username
                   ? "sended msg-box"
                   : "received msg-box"}
               >
                 <div class="msg-text">
-                  {message.text}
+                  {message.data.text}
                 </div>
                 <div class="time">
-                  {message.timestamp?.split(" ")[0]}
+                  {message.data.data}
                 </div>
               </div>
             </div>
           {/each}
           <!-- Vecchi messaggi -->
           {#each messages as message}
-            {#if printDate(message.timestamp?.split(" ")[1])}
+            {#if printDate(message.data.data)}
               <div class="msg-cnt">
                 <div class="day">
                   {before}
@@ -113,15 +116,15 @@
             {/if}
             <div class="msg-cnt">
               <div
-                class={message.sender == MyUser.getUser().userInfo?.Username
+                class={message.data.sender == MyUser.getUser().userInfo?.Username
                   ? "sended msg-box"
                   : "received msg-box"}
               >
                 <div class="msg-text">
-                  {message.text}
+                  {message.data.text}
                 </div>
                 <div class="time">
-                  {message.timestamp?.split(" ")[0]}
+                  {message.data.data.toString}
                 </div>
               </div>
             </div>

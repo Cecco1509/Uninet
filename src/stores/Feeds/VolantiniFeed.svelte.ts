@@ -1,14 +1,13 @@
 import { getDocs, getDocsFromCache, Query } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";
 import { storage } from "$lib/firebase/firebase.client";
-import type { Feed } from "./Feed";
+import type { Add, Delete, Feed } from "./Feed";
 import type { QueryBuilder } from "../QueryBuilders/QueryBuilder";
 import type { FeedObject } from "../FeedElements/FeedObject";
-import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 import { Volantino } from "../FeedElements/Volantino.svelte";
 import { MyUser } from "../userState.svelte";
 
-export class VolantiniFeed implements Feed {
+export class VolantiniFeed implements Feed, Add, Delete {
   private _cache = $state<Volantino[]>([]);
   private queryBuilder: QueryBuilder;
   private _size = $state(0);
@@ -52,15 +51,15 @@ export class VolantiniFeed implements Feed {
     return this._fetchedAll;
   }
 
-  async loadMore(): Promise<boolean> {
-    if (this._fetchedAll) return true;
+  async loadMore(): Promise<void> {
+    if (this._fetchedAll) return;
 
     console.log("LOAD!!!!!!!");
 
     const q = await this.queryBuilder.getFetchQuery(
       this._cache[this._cache.length - 1]
     );
-    if (!q) return false;
+    if (!q) return;
 
     const result = await getDocs(q);
 
@@ -78,7 +77,7 @@ export class VolantiniFeed implements Feed {
     this._size += result.size;
     this._fetchedAll = result.size < this.queryBuilder.loadSize;
 
-    return this._fetchedAll;
+    return;
   }
 
   add(new_element: Volantino) {

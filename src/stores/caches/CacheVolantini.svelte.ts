@@ -10,20 +10,22 @@ import {
   Timestamp,
   where,
 } from "firebase/firestore";
-import { MyUser } from "./userState.svelte";
+import { MyUser } from "../userState.svelte";
 import type { NumericRange } from "@sveltejs/kit";
 import { getDownloadURL, ref } from "firebase/storage";
-import { HomeFeedQueryBuilder } from "./QueryBuilders/HomeFeedQueryBuilder";
-import { DiscoveryQueryBuilder } from "./QueryBuilders/DiscoveryQueryBuilder";
-import { UserFeedQueryBuilder } from "./QueryBuilders/UserFeedQueryBuilder";
-import { Volantino } from "./FeedElements/Volantino.svelte";
-import { VolantiniFeed } from "./Feeds/VolantiniFeed.svelte";
+import { HomeFeedQueryBuilder } from "../QueryBuilders/HomeFeedQueryBuilder";
+import { DiscoveryQueryBuilder } from "../QueryBuilders/DiscoveryQueryBuilder";
+import { UserFeedQueryBuilder } from "../QueryBuilders/UserFeedQueryBuilder";
+import { Volantino } from "../FeedElements/Volantino.svelte";
+import { VolantiniFeed } from "../Feeds/VolantiniFeed.svelte";
+import type { FeedsCache } from "./Cache";
+import type { Feed } from "../Feeds/Feed";
 
 type userMap = {
   [key: string]: VolantiniFeed;
 };
 
-export class CacheVolantini {
+export class CacheVolantini implements FeedsCache {
   private _cache = $state<VolantiniFeed>(); // Volantini di chi segue
   private _usersCache = $state<userMap>({}); // Volantini degli utenti volantini
   private _discover = $state<VolantiniFeed>(); // Volantini più recenti e popolari
@@ -37,7 +39,7 @@ export class CacheVolantini {
 
   constructor() {}
 
-  getFeedSeguiti() {
+  getHomeFeed() {
     if (!this._cache)
       this._cache = new VolantiniFeed(
         new HomeFeedQueryBuilder("Volantini", MyUser.getUser().getFriends())
@@ -45,15 +47,15 @@ export class CacheVolantini {
     return this._cache;
   }
 
-  getFeedDiscover() {
+  getDiscoveryFeed() {
     if (!this._discover)
-      this._cache = new VolantiniFeed(
+      this._discover = new VolantiniFeed(
         new DiscoveryQueryBuilder("Volantini", MyUser.getUser().getFriends())
       );
     return this._discover;
   }
 
-  getFeedUser(user: string) {
+  getUserFeed(user: string) {
     if (!this._usersCache[user])
       this._usersCache[user] = new VolantiniFeed(
         new UserFeedQueryBuilder("Volantini", user)
@@ -79,7 +81,12 @@ export class CacheVolantini {
     const volantino: Volantino = new Volantino(ref, new_volantino, ref.id);
 
     this._usersCache[MyUser.getUser().userInfo!.Username].add(volantino);
-    this.getFeedSeguiti().add(volantino);
+    this.getHomeFeed().add(volantino);
+  }
+
+  delete(id: string): void {
+    this.getHomeFeed().delete(id, false);
+    this._usersCache[MyUser.getUser()!.userInfo!.Username].delete(id, true);
   }
 
   // async addVolantino(new_volantino: Volantino) {

@@ -10,8 +10,8 @@ import {
 } from "firebase/firestore";
 import type { QueryBuilder } from "./QueryBuilder";
 import { db } from "$lib/firebase/firebase.client";
-import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 import type { FeedObject } from "../FeedElements/FeedObject";
+import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
 export class HomeFeedQueryBuilder implements QueryBuilder {
   private param: Promise<string[]>;

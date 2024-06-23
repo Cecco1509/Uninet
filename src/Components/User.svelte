@@ -1,35 +1,40 @@
 <script lang="ts">
   import ProfileIcon from "./ProfileIcon.svelte";
   import LoadIcon from "./LoadIcon.svelte";
-  import { DataBasaConn } from "../stores/db.svelte";
   import Posts from "./Posts.svelte";
   import { MyUser } from "../stores/userState.svelte";
   import { goto } from "$app/navigation";
-  import { ChatStore } from "../stores/ChatList.svelte";
   import { Positions, MenuStore } from "../stores/Menu.svelte";
   import Loading from "./Loading.svelte";
-  import { CacheVolantini } from "../stores/CacheVolantini.svelte";
+  import { CacheVolantini } from "../stores/caches/CacheVolantini.svelte";
   import Volantini from "./Volantini.svelte";
-  import type { Feed } from "../stores/Feeds/Feed";
+  import type { PostsFeed } from "../stores/Feeds/PostsFeed.svelte";
+  import { ChatCache } from "../stores/caches/ChatCache.svelte";
+  import { PostCache } from "../stores/caches/PostCache.svelte";
+  import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
 
   let { username }: { username: string } = $props();
 
   const user = MyUser.getUser();
-  const db = DataBasaConn.getDB();
-  let userPosts = $state<Feed>();
-  const chatStore = ChatStore.getChatStore();
+  const postStore = PostCache.getCache();
+  const userInfosStore = UserInfosCache.getCache();
+  const volantiniStore = CacheVolantini.getCache()
+  const chatStore = ChatCache.getCache();
+
   let userInfo = $state<UserInfo>();
   let showPost = $state(true);
   let reload = $state(false);
-  let cacheVolantini = $state(CacheVolantini.getCache().getFeedUser(username));
+
+  let userPosts = $state(postStore.getUserFeed(username));
+  let cacheVolantini = $state(CacheVolantini.getCache().getUserFeed(username));
 
   $effect(() => {
     if (!username || user.isLoading) return;
 
-    userPosts = db.getUserPosts(username);
+    //userPosts = userInfosStore.getUserPosts(username);
 
     if (username !== user.userInfo?.Username) {
-      db.getUserInfo(username)
+      userInfosStore.getUserInfo(username)
         .then((u) => {
           userInfo = u;
         })

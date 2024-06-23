@@ -20,8 +20,9 @@ import { deleteObject, ref } from "firebase/storage";
 import { MyUser } from "../userState.svelte";
 import { FeedElement } from "./FeedElement.svelte";
 import type { Likable } from "../Interfaces/likable";
+import { FeedPostLikeElement } from "./FeedPostLikeElement.svelte";
 
-export class Post extends FeedElement<PostSchema> implements Likable {
+export class Post extends FeedPostLikeElement<PostSchema> implements Likable {
   private _isLiked = $state(false);
   private likeRef: DocumentReference;
   private _comments = $state<CommentSchema[]>([]);

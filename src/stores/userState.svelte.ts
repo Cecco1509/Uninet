@@ -15,7 +15,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { DataBasaConn } from "./db.svelte";
+import { UserInfosCache } from "./caches/UserInfosCache.svelte";
 
 type friends = {
   [key: string]: string | undefined;
@@ -122,7 +122,7 @@ export class MyUser {
         transaction.update(doc(db, "Users", this._user!.uid), {
           seguiti: this.userInfo!.seguiti - 1,
         });
-        let f_user = await DataBasaConn.getDB().getUserInfo(username);
+        let f_user = await UserInfosCache.getCache().getUserInfo(username);
         transaction.update(doc(db, "Users", f_user!.id), {
           Followers: f_user!.Followers - 1,
         });
@@ -148,7 +148,7 @@ export class MyUser {
       transaction.update(doc(db, "Users", this._user!.uid), {
         seguiti: this.userInfo!.seguiti + 1,
       });
-      let f_user = await DataBasaConn.getDB().getUserInfo(username);
+      let f_user = await UserInfosCache.getCache().getUserInfo(username);
       transaction.update(doc(db, "Users", f_user!.id), {
         Followers: f_user!.Followers + 1,
       });
