@@ -8,7 +8,8 @@
   import { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
   import { ChatCache } from "../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
-  import type { Timestamp } from "firebase/firestore";
+  import { Timestamp } from "firebase/firestore";
+  import { UserChatQueryBuilder } from "../stores/QueryBuilders/UserChatQueryBuilder";
 
   let { chatId }: { chatId: string } = $props();
 
@@ -17,7 +18,7 @@
 
   let text = $state("");
   let messagesBox = $state<HTMLDivElement>();
-  let before : Timestamp;
+  let before : string = "";
   let times = 1;
 
   let chat = $derived<ChatFeed | undefined>(
@@ -33,7 +34,8 @@
   //   // }
   // });
 
-  const printDate = (date: Timestamp): boolean => {
+  const printDate = (date: string): boolean => {
+    console.log(before , date)
     if (date == before) return false;
     before = date;
     return true;
@@ -83,7 +85,7 @@
           {/if}
           <!-- Nuovi messaggi -->
           {#each chat.newMessages as message}
-           {#if false }  <!-- printDate(message.data?.data?.split(" ")[1]) -->
+           {#if printDate(message.data.timestamp.split(" ")[1]) }  <!--  -->
             <div class="msg-cnt" in:fade>
               <div class="day">
                 {before}
@@ -100,14 +102,14 @@
                   {message.data.text}
                 </div>
                 <div class="time">
-                  {message.data.data}
+                  {message.data.timestamp.split(" ")[0]}
                 </div>
               </div>
             </div>
           {/each}
           <!-- Vecchi messaggi -->
           {#each messages as message}
-            {#if printDate(message.data.data)}
+            {#if printDate(message.data.timestamp.split(" ")[1])}
               <div class="msg-cnt">
                 <div class="day">
                   {before}
@@ -124,7 +126,7 @@
                   {message.data.text}
                 </div>
                 <div class="time">
-                  {message.data.data.toString}
+                  {message.data.timestamp.split(" ")[0]}
                 </div>
               </div>
             </div>
@@ -136,7 +138,7 @@
   
   <form class="text-box">
     <input type="text" bind:value={text} />
-    <button onclick={() => {if(!text) return; chat!.send(text); text = ""}}> Invia </button>
+    <button onclick={() => {if(!text) return; chat!.send(text); text = ""; before = ""}}> Invia </button>
   </form>
   
 </div>

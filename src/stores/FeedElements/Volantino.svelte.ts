@@ -1,12 +1,32 @@
 import { storage } from "$lib/firebase/firebase.client";
 import { DocumentReference, updateDoc } from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 import { FeedElement } from "./FeedElement.svelte";
-import { FeedPostLikeElement } from "./FeedPostLikeElement.svelte";
 
-export class Volantino extends FeedPostLikeElement<VolantinoSchema> {
+export class Volantino extends FeedElement {
+  private ref: DocumentReference;
+  private imgPath: string = "";
+
   constructor(reference: DocumentReference, data: VolantinoSchema, id: string) {
-    super(reference, data, id);
+    super(data, id);
+    this.ref = reference;
+
+    if (!this._data!.img) return;
+
+    this.imgPath = this._data!.img;
+    this._data!.img = "";
+
+    getDownloadURL(ref(storage, this.imgPath))
+      .then((url) => {
+        this._data!.img = url;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+  get data() {
+    return this._data as VolantinoSchema;
   }
 
   async edit(edits: Partial<VolantinoSchema>) {

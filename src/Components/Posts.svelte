@@ -2,15 +2,15 @@
   import PostComponent from "./PostComponent.svelte";
   import viewport from "./useViewportActions";
   import LoadIcon from "./LoadIcon.svelte";
-  import VolantinoComponent from "./VolantinoComponent.svelte";
-  import type { PostsFeed } from "../stores/Feeds/PostsFeed.svelte";
+  import type { Feed } from "../stores/Feeds/Feed.svelte";
+  import { Post } from "../stores/FeedElements/Post.svelte";
 
   let {
     feed,
     editable,
     inUserPage
   } : {
-    feed: PostsFeed;
+    feed: Feed;
     editable: boolean;
     inUserPage: boolean;
   } = $props();
@@ -28,7 +28,7 @@
   {:then elements} 
     {#if elements.length > 0}
       {#each { length: elements.length - 1 } as _, i}
-        <PostComponent post={elements[i]} {inUserPage} {editable} />
+        <PostComponent post={elements[i] as Post} {inUserPage} {editable} />
         <hr>
       {/each}
 
@@ -39,7 +39,7 @@
         use:viewport
         onenterViewport={handleEndPage}
       >
-        <PostComponent post={elements[elements.length - 1]} {inUserPage} {editable} />
+        <PostComponent post={elements[elements.length - 1] as Post} {inUserPage} {editable} />
       </div>
     {:else}
       <div class="nothing">

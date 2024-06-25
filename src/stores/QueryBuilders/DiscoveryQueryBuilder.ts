@@ -10,7 +10,6 @@ import {
 } from "firebase/firestore";
 import type { QueryBuilder } from "./QueryBuilder";
 import { db } from "$lib/firebase/firebase.client";
-import type { FeedObject } from "../FeedElements/FeedObject";
 import { MyUser } from "../userState.svelte";
 import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
@@ -29,7 +28,7 @@ export class DiscoveryQueryBuilder implements QueryBuilder {
     this.loadSize = loadSize;
   }
 
-  async getFetchQuery(element: FeedElement<FeedObject>): Promise<Query | null> {
+  async getFetchQuery(element: FeedElement): Promise<Query | null> {
     const result = await this.param;
     result.push(MyUser.getUser().userInfo!.Username);
 

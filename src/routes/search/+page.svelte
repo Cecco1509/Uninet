@@ -27,6 +27,8 @@
   let typing = $state(false);
   let timeout: any = undefined;
 
+  MenuStore.getMenu().currentSection = Positions.Search;
+
   async function getUsers() {
     console.log("called");
 

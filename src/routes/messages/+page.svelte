@@ -14,6 +14,7 @@
   import ChatComponent from "../../Components/ChatComponent.svelte";
   import { UserInfosCache } from "../../stores/caches/UserInfosCache.svelte";
   import { ChatCache } from "../../stores/caches/ChatCache.svelte";
+  import { MenuStore, Positions } from "../../stores/Menu.svelte";
 
   const userState = MyUser.getUser();
   const db = UserInfosCache.getCache();
@@ -21,6 +22,8 @@
   let searchUser = $state<string>("");
   let bindId = $state("");
   let chatId = $state("");
+
+  MenuStore.getMenu().currentSection = Positions.Messages;
 
 
   let messagesList = $derived(

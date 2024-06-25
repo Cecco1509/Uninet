@@ -1,4 +1,4 @@
 export interface Likable {
-  isLiked(): Promise<boolean>;
+  isLiked: boolean;
   like(): Promise<void>;
 }

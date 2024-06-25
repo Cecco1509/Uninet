@@ -3,14 +3,15 @@
     import viewport from "./useViewportActions";
     import LoadIcon from "./LoadIcon.svelte";
   import VolantinoComponent from "./VolantinoComponent.svelte";
-  import type { VolantiniFeed } from "../stores/Feeds/VolantiniFeed.svelte";
+  import type { Feed } from "../stores/Feeds/Feed.svelte";
+  import { Volantino } from "../stores/FeedElements/Volantino.svelte";
   
     let {
       feed,
       editable,
       inUserPage
     } : {
-      feed: VolantiniFeed;
+      feed: Feed;
       editable: boolean;
       inUserPage: boolean;
     } = $props();
@@ -25,7 +26,7 @@
   {:then volantini}
       {#if volantini.length > 0}
         {#each { length: volantini.length - 1 } as _, i}
-          <VolantinoComponent volantino={volantini[i]} {inUserPage} {editable} />
+          <VolantinoComponent volantino={volantini[i] as Volantino} {inUserPage} {editable} />
         {/each}
 
         <!-- {#if feed.size >= 10} 
@@ -35,7 +36,7 @@
           use:viewport
           onenterViewport={handleEndPage}
         >
-          <VolantinoComponent volantino={volantini[volantini.length - 1]} {inUserPage} {editable} />
+          <VolantinoComponent volantino={volantini[volantini.length - 1] as Volantino} {inUserPage} {editable} />
         </div>
       {:else}
       <div class="nothing">

@@ -193,11 +193,7 @@
 
           }}
         >
-          {#await post.isLiked()}
-            <LikeIcon liked={false} />
-          {:then like} 
-            <LikeIcon liked={like} />
-          {/await}
+          <LikeIcon liked={post.isLiked} />
         </button>
         <span>{post.data.likes}</span>
       </div>
@@ -501,17 +497,8 @@
     width: 100%;
     transition: all 0.3s;
     height: fit-content;
-    animation: slideInPost ease-in-out 1s;
+    animation: fade-in ease-in-out 1s;
     animation-fill-mode: forwards;
-  }
-
-  @keyframes slideInPost {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
   }
 
   .img-container {
@@ -525,7 +512,6 @@
       object-fit: cover;
       position: relative;
       z-index: 10;
-      background-color: rgba(255, 255, 255, 0.122);
       height: 100%;
       width: inherit;
       border: 0px;
@@ -536,14 +522,15 @@
         position: relative;
         height: 100%;
         width: inherit;
-        object-fit: contain;
+        object-fit: cover;
         z-index: 20;
+        background-color: rgb(255, 255, 255);
       }
     }
 
     .loader {
       z-index: 1;
-      width: calc(50dvw - 32px);
+      width: 500px;
       height: 500px;
       padding: 0px;
       transform: translateY(-100%);

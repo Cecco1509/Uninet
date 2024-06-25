@@ -25,6 +25,8 @@ import {
 } from "firebase/firestore";
 import { onIdChange } from "firebase/installations";
 import { UserInfosCache } from "./UserInfosCache.svelte";
+import { MessageFactory } from "../Factories/MessageFactory";
+import { UserChatQueryBuilder } from "../QueryBuilders/UserChatQueryBuilder";
 
 export type chatMap = {
   [key: string]: ChatFeed | undefined;
@@ -62,7 +64,14 @@ export class ChatCache {
                     this._chats[partecipants[1]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[1],
-                      snapshot.val() as chatInfo
+                      snapshot.val(),
+                      new UserChatQueryBuilder(
+                        "messages",
+                        snapshot.key!,
+                        "",
+                        30
+                      ),
+                      new MessageFactory()
                     );
                     this.unsubscribers.push(unsubscribe);
                   }
@@ -75,7 +84,14 @@ export class ChatCache {
                     this._chats[partecipants[0]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[0],
-                      snapshot.val() as chatInfo
+                      snapshot.val(),
+                      new UserChatQueryBuilder(
+                        "messages",
+                        snapshot.key!,
+                        "",
+                        30
+                      ),
+                      new MessageFactory()
                     );
                     this.unsubscribers.push(unsubscribe);
                   }
@@ -125,6 +141,13 @@ export class ChatCache {
       this._chats[username] = newChat;
       newChat.setId(MyUser.getUser().userInfo!.Username + "&" + username);
       await this.addChat(newChat.id!, username);
+      newChat.factory = new MessageFactory();
+      newChat.queryBuilder = new UserChatQueryBuilder(
+        "messages",
+        newChat.id!,
+        "",
+        30
+      );
       console.log(newChat.id);
     }
 

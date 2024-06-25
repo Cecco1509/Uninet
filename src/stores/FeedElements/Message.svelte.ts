@@ -2,11 +2,14 @@ import { storage } from "$lib/firebase/firebase.client";
 import { DocumentReference, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { update, type DatabaseReference } from "firebase/database";
-import { FeedMessageElement } from "./FeedChatLikeElement.svelte";
+import { FeedElement } from "./FeedElement.svelte";
 
-export class Message extends FeedMessageElement<MessageSchema> {
+export class Message extends FeedElement {
+  private ref: DatabaseReference;
+
   constructor(reference: DatabaseReference, data: MessageSchema, id: string) {
-    super(reference, data, id);
+    super(data, id);
+    this.ref = reference;
   }
 
   async edit(edits: Partial<MessageSchema>) {

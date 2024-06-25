@@ -18,88 +18,90 @@ import {
 } from "firebase/database";
 import { Timestamp } from "firebase/firestore";
 import { MyUser } from "../userState.svelte";
-import { format } from "prettier";
 import { ChatCache } from "../caches/ChatCache.svelte";
-import type { Feed, Send } from "./Feed";
-import type { FeedObject } from "../FeedElements/FeedObject";
-import type { FeedElement } from "../FeedElements/FeedElement.svelte";
+import type { IFeed, Send } from "./IFeed";
 import { Message } from "../FeedElements/Message.svelte";
+import type { IFeedElementFactory } from "../Factories/IFeedElementFactory";
+import type { UserChatQueryBuilder } from "../QueryBuilders/UserChatQueryBuilder";
+import type { MessageFactory } from "../Factories/MessageFactory";
 
-export class ChatFeed implements Feed, Send {
-  private _messages = $state<Message[]>([]);
-  private _newMessages = $state<Message[]>([]);
+export class ChatFeed implements IFeed, Send {
+  private _elements = $state<Message[]>([]);
+  private _newElements = $state<Message[]>([]);
   private _chatInfo = $state<chatInfo>();
-  private currentUnsubscriber: (() => void) | null;
+  private currentUnsubscriber: (() => void) | undefined;
   private _to: string;
   private _id = $state<string>();
-  private _fetchedAll = $state(false);
+  private _queryBuilder: UserChatQueryBuilder | undefined;
+  private _factory: MessageFactory | undefined;
+  private _fetchedAll: boolean = $state(false);
 
-  private static pageSize: number = 30;
+  set queryBuilder(q: UserChatQueryBuilder) {
+    this._queryBuilder = q;
+  }
 
-  constructor(id: string, to: string, chatInfo: chatInfo) {
+  set factory(f: MessageFactory) {
+    this._factory = f;
+  }
+
+  constructor(
+    id: string,
+    to: string,
+    chatInfo: chatInfo,
+    queryBuilder?: UserChatQueryBuilder,
+    factory?: MessageFactory
+  ) {
+    this._queryBuilder = queryBuilder;
+    this._factory = factory;
     this._id = id;
-    this.currentUnsubscriber = null;
     this._chatInfo = chatInfo;
-
     this._to = to;
+    this._fetchedAll = true;
   }
 
   async getElements(): Promise<Message[]> {
-    if (this._messages.length > 0) return this._messages;
+    if (this._elements.length > 0) return this._elements as Message[];
 
-    const q = query(
-      ref(realtimeDB, "messages/" + this._id),
-      orderByKey(),
-      limitToLast(ChatFeed.pageSize)
-    );
+    const q = await this._queryBuilder!.getQuery();
 
     const result = await get(q);
 
     result.forEach((snapshot) => {
-      this._messages.push(
-        new Message(
-          snapshot.ref,
-          snapshot.val() as MessageSchema,
-          snapshot.key!
-        )
+      this._elements.push(
+        this._factory!.create(snapshot.ref, snapshot.val(), snapshot.key!)
       );
     });
 
-    this._fetchedAll = this._messages.length < ChatFeed.pageSize;
+    this._fetchedAll = this._elements.length < this._queryBuilder!.loadSize;
 
-    if (this._messages.length > 0)
+    if (this._elements.length > 0)
       this.currentUnsubscriber = this.getUnsubscriber();
 
-    return this._messages;
+    return this._elements as Message[];
   }
 
   private getUnsubscriber(): () => void {
     let q1: Query | null = null;
 
-    if (this._messages.length > 0) {
+    if (this._elements.length > 0) {
       q1 = query(
         ref(realtimeDB, "messages/" + this._id),
         orderByKey(),
-        startAfter(this._messages[this._messages.length - 1].id)
+        startAfter(this._elements[this._elements.length - 1].id)
       );
     }
 
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "messages/" + this._id),
-      (snapshot) => {
-        this._messages.push(
-          new Message(
-            snapshot.ref,
-            snapshot.val() as MessageSchema,
-            snapshot.key!
-          )
-        );
-      }
+      (snapshot) =>
+        this._elements.push(
+          this._factory!.create(snapshot.ref, snapshot.val(), snapshot.key!)
+        )
     );
   }
 
   get newMessages() {
-    return this._newMessages;
+    return this._newElements;
   }
 
   setId(arg0: string) {
@@ -126,19 +128,19 @@ export class ChatFeed implements Feed, Send {
     return this._fetchedAll;
   }
 
-  async loadMore(): Promise<boolean> {
-    if (this._fetchedAll) return true;
+  async loadMore(): Promise<void> {
+    if (this._fetchedAll) return;
 
     const start =
       Number(
-        this._newMessages.length > 0
-          ? this._newMessages[0].id
-          : this._messages[0].id
-      ) - ChatFeed.pageSize;
+        this._newElements.length > 0
+          ? this._newElements[0].id
+          : this._elements[0].id
+      ) - this._queryBuilder!.loadSize;
     const end: string =
-      this._newMessages.length > 0
-        ? this._newMessages[0].id
-        : this._messages[0].id;
+      this._newElements.length > 0
+        ? this._newElements[0].id
+        : this._elements[0].id;
 
     console.log("startAt", start, "endBefore", end);
 
@@ -157,14 +159,13 @@ export class ChatFeed implements Feed, Send {
       console.log(message.key);
     });
 
-    if (this._newMessages.length == 0) this._newMessages = newMessages;
+    if (this._newElements.length == 0) this._newElements = newMessages;
     else {
-      this._messages = [...this._newMessages, ...this._messages];
-      this._newMessages = newMessages;
+      this._elements = [...this._newElements, ...this._elements];
+      this._newElements = newMessages;
     }
 
     this._fetchedAll = newMessages[0].id == "0";
-    return this._fetchedAll;
   }
 
   async send(text: string) {
@@ -190,10 +191,10 @@ export class ChatFeed implements Feed, Send {
     //this._chatInfo = { lastMessage: text, timestamp: strDate };
 
     let id = 0;
-    if (this._newMessages.length == 0 && this._messages.length > 0)
-      id = Number(this._messages[this._messages.length - 1].id) + 1;
-    else if (this._newMessages.length > 0)
-      id = Number(this._messages[this._messages.length - 1].id) + 1;
+    if (this._newElements.length == 0 && this._elements.length > 0)
+      id = Number(this._elements[this._elements.length - 1].id) + 1;
+    else if (this._newElements.length > 0)
+      id = Number(this._elements[this._elements.length - 1].id) + 1;
 
     await set(ref(realtimeDB, "messages/" + this._id + "/" + id), {
       text: text,
@@ -201,7 +202,7 @@ export class ChatFeed implements Feed, Send {
       sender: MyUser.getUser().userInfo!.Username,
     });
 
-    if (this._messages.length == 0)
+    if (this._elements.length == 0)
       this.currentUnsubscriber = this.getUnsubscriber();
   }
 }

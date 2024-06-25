@@ -11,7 +11,6 @@ import {
 import type { QueryBuilder } from "./QueryBuilder";
 import { db } from "$lib/firebase/firebase.client";
 import { MyUser } from "../userState.svelte";
-import type { FeedObject } from "../FeedElements/FeedObject";
 import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
 export class UserFeedQueryBuilder implements QueryBuilder {
@@ -25,7 +24,7 @@ export class UserFeedQueryBuilder implements QueryBuilder {
     this.loadSize = loadSize;
   }
 
-  async getFetchQuery(element: FeedElement<FeedObject>): Promise<Query> {
+  async getFetchQuery(element: FeedElement): Promise<Query> {
     return query(
       collection(db, this.collection),
       where("createdBy", "==", this.param),

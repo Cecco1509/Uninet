@@ -1,7 +1,7 @@
-import type { Feed } from "../Feeds/Feed";
+import type { IFeed } from "../Feeds/IFeed";
 
 export interface FeedsCache {
-  getHomeFeed(): Feed;
-  getUserFeed(user: string): Feed;
-  getDiscoveryFeed(): Feed;
+  getHomeFeed(): IFeed;
+  getUserFeed(user: string): IFeed;
+  getDiscoveryFeed(): IFeed;
 }

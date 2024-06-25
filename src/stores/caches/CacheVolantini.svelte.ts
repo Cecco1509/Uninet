@@ -17,18 +17,19 @@ import { HomeFeedQueryBuilder } from "../QueryBuilders/HomeFeedQueryBuilder";
 import { DiscoveryQueryBuilder } from "../QueryBuilders/DiscoveryQueryBuilder";
 import { UserFeedQueryBuilder } from "../QueryBuilders/UserFeedQueryBuilder";
 import { Volantino } from "../FeedElements/Volantino.svelte";
-import { VolantiniFeed } from "../Feeds/VolantiniFeed.svelte";
 import type { FeedsCache } from "./Cache";
-import type { Feed } from "../Feeds/Feed";
+import { Feed } from "../Feeds/Feed.svelte";
+import { FeedVolantinoFactory } from "../Factories/FeedVolantinoFactory";
 
 type userMap = {
-  [key: string]: VolantiniFeed;
+  [key: string]: Feed;
 };
 
 export class CacheVolantini implements FeedsCache {
-  private _cache = $state<VolantiniFeed>(); // Volantini di chi segue
+  private _cache = $state<Feed>(); // Volantini di chi segue
   private _usersCache = $state<userMap>({}); // Volantini degli utenti volantini
-  private _discover = $state<VolantiniFeed>(); // Volantini più recenti e popolari
+  private _discover = $state<Feed>(); // Volantini più recenti e popolari
+  private factory: FeedVolantinoFactory;
 
   private static instance: CacheVolantini | null = null;
 
@@ -37,28 +38,33 @@ export class CacheVolantini implements FeedsCache {
     return this.instance!;
   }
 
-  constructor() {}
+  constructor() {
+    this.factory = new FeedVolantinoFactory();
+  }
 
   getHomeFeed() {
     if (!this._cache)
-      this._cache = new VolantiniFeed(
-        new HomeFeedQueryBuilder("Volantini", MyUser.getUser().getFriends())
+      this._cache = new Feed(
+        new HomeFeedQueryBuilder("Volantini", MyUser.getUser().getFriends()),
+        this.factory
       );
     return this._cache;
   }
 
   getDiscoveryFeed() {
     if (!this._discover)
-      this._discover = new VolantiniFeed(
-        new DiscoveryQueryBuilder("Volantini", MyUser.getUser().getFriends())
+      this._discover = new Feed(
+        new DiscoveryQueryBuilder("Volantini", MyUser.getUser().getFriends()),
+        this.factory
       );
     return this._discover;
   }
 
   getUserFeed(user: string) {
     if (!this._usersCache[user])
-      this._usersCache[user] = new VolantiniFeed(
-        new UserFeedQueryBuilder("Volantini", user)
+      this._usersCache[user] = new Feed(
+        new UserFeedQueryBuilder("Volantini", user),
+        this.factory
       );
     return this._usersCache[user];
   }
@@ -77,8 +83,11 @@ export class CacheVolantini implements FeedsCache {
     };
 
     const ref = await addDoc(collection(db, "Volantini"), new_volantino);
-
-    const volantino: Volantino = new Volantino(ref, new_volantino, ref.id);
+    const volantino: Volantino = this.factory.create(
+      ref,
+      new_volantino,
+      ref.id
+    );
 
     this._usersCache[MyUser.getUser().userInfo!.Username].add(volantino);
     this.getHomeFeed().add(volantino);

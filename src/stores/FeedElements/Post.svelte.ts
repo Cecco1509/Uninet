@@ -16,37 +16,57 @@ import {
   addDoc,
   startAfter,
 } from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 import { MyUser } from "../userState.svelte";
 import { FeedElement } from "./FeedElement.svelte";
 import type { Likable } from "../Interfaces/likable";
-import { FeedPostLikeElement } from "./FeedPostLikeElement.svelte";
+import type { Delete } from "../Feeds/IFeed";
 
-export class Post extends FeedPostLikeElement<PostSchema> implements Likable {
-  private _isLiked = $state(false);
+export class Post extends FeedElement implements Likable, Delete {
   private likeRef: DocumentReference;
   private _comments = $state<CommentSchema[]>([]);
   private _fetchedAllComments = $state(false);
+  private ref: DocumentReference;
+  private imgPath: string = "";
+  private _isLiked = $state<boolean>(false);
 
   constructor(reference: DocumentReference, data: PostSchema, id: string) {
-    super(reference, data, id);
+    super(data, id);
+    this.ref = reference;
 
     this.likeRef = doc(
       db,
       "/Posts/" + id + "/Likes",
       MyUser.getUser().user!.uid
     );
-    this.isLiked();
+    this.checkIfIsLiked();
 
     this.initComments().then(() => {
       this._fetchedAllComments = this._comments.length < 5;
     });
+
+    if (!this._data!.img) return;
+
+    this.imgPath = this._data!.img;
+    this._data!.img = "";
+
+    getDownloadURL(ref(storage, this.imgPath))
+      .then((url) => {
+        this._data!.img = url;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+  get data() {
+    return this._data as PostSchema;
   }
 
   async edit(edits: Partial<PostSchema>) {
     try {
-      if (edits.img && this._data?.img)
-        await deleteObject(ref(storage, this._data.img));
+      if (edits.img && this.data.img)
+        await deleteObject(ref(storage, this.data.img));
       await updateDoc(this.ref, edits);
       this._data = { ...this._data!, ...edits };
     } catch (e) {
@@ -54,9 +74,12 @@ export class Post extends FeedPostLikeElement<PostSchema> implements Likable {
     }
   }
 
-  async isLiked(): Promise<boolean> {
-    if (!this.likeRef) return false;
+  private async checkIfIsLiked() {
+    if (!this.likeRef) return;
     this._isLiked = (await getDoc(this.likeRef)).exists();
+  }
+
+  get isLiked() {
     return this._isLiked;
   }
 
@@ -83,8 +106,8 @@ export class Post extends FeedPostLikeElement<PostSchema> implements Likable {
         if (!this._isLiked) transaction.delete(this.likeRef);
         else transaction.set(this.likeRef, {});
 
-        this._data!.likes = post.data().likes + modifier;
-        this._data!.comments = post.data().comments;
+        (this._data as PostSchema)!.likes = post.data().likes + modifier;
+        (this._data as PostSchema)!.comments = post.data().comments;
       });
       console.log("Transaction successfully committed!");
     } catch (e) {
@@ -141,8 +164,8 @@ export class Post extends FeedPostLikeElement<PostSchema> implements Likable {
           comments: post.data().comments + 1,
         });
 
-        this._data!.likes = post.data().likes;
-        this._data!.comments = post.data().comments;
+        this.data.likes = post.data().likes;
+        this.data.comments = post.data().comments;
       });
       console.log("Commento riuscito");
       this._comments = [newComment, ...this._comments];

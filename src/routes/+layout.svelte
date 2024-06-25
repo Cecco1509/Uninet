@@ -131,7 +131,7 @@
     color: white;
     border-left: 1px solid rgba(255, 255, 255, 0.201);
     border-right: 1px solid rgba(255, 255, 255, 0.201);
-    background-color: rgba(128, 128, 128, 0.102);
+    background-color: rgb(0, 0, 0);
     transition: all 0.4s;
   }
 

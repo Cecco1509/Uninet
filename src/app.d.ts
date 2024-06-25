@@ -53,7 +53,7 @@ declare global {
 
   type MessageSchema = {
     text: string;
-    data: Timestamp;
+    timestamp: string;
     sender: string;
   };
 

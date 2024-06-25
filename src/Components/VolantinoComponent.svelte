@@ -33,6 +33,8 @@
         width: 500px;
         margin: 11.25px;
         border-radius: 10px;
+        animation: fade-in ease-in-out 1s;
+        animation-fill-mode: forwards;
 
         img{
             width: 100%;
@@ -53,6 +55,15 @@
             color: white;
             margin: 10px;
             z-index: 2;
+        }
+
+        @keyframes fade-in {
+            0% {
+            opacity: 0;
+            }
+            100% {
+            opacity: 1;
+            }
         }
     }
 </style>

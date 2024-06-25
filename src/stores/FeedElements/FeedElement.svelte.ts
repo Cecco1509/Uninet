@@ -1,13 +1,10 @@
-import { storage } from "$lib/firebase/firebase.client";
-import { DocumentReference, deleteDoc } from "firebase/firestore";
-import { getDownloadURL, ref } from "firebase/storage";
-import type { FeedObject } from "./FeedObject";
+import { type DocumentData } from "firebase/firestore";
 
-export abstract class FeedElement<T extends FeedObject> {
-  protected _data = $state<T>();
+export abstract class FeedElement {
+  protected _data = $state<DocumentData>();
   protected _id: string;
 
-  constructor(data: T, id: string) {
+  constructor(data: DocumentData, id: string) {
     this._data = data;
     this._id = id;
   }
@@ -19,7 +16,9 @@ export abstract class FeedElement<T extends FeedObject> {
     return this._data!;
   }
 
-  async edit<T extends FeedObject>(edits: Partial<T>) {
+  async edit<T extends DocumentData>(edits: Partial<T>) {
     // FETCH LIKE SHIT
   }
+
+  async delete() {}
 }

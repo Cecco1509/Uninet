@@ -1,9 +1,11 @@
 <script lang="ts">
   import Loading from "../../Components/Loading.svelte";
   import Registration from "../../Components/Registration.svelte";
+  import { MenuStore, Positions } from "../../stores/Menu.svelte";
   import { MyUser } from "../../stores/userState.svelte";
 
   const userState = MyUser.getUser();
+  MenuStore.getMenu().currentSection = Positions.Registration;
 </script>
 
 <svelte:head>

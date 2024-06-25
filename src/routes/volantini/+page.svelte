@@ -7,6 +7,7 @@
   import { uuidv4 } from "@firebase/util";
   import { ref, uploadBytes } from "firebase/storage";
   import Volantini from "../../Components/Volantini.svelte";
+  import { MenuStore, Positions } from "../../stores/Menu.svelte";
 
     ////////////////////////////////////////////////////////
   let modal = $state<HTMLDivElement>()
@@ -19,6 +20,8 @@
   let titolo = $state("");
   let new_tag = $state("");
   let tags = $state<{[key : string] : boolean}>({});
+
+  MenuStore.getMenu().currentSection = Positions.Volantini;
 
   let tagList = $derived(Object.keys(tags))
  
@@ -55,18 +58,12 @@
       }
   }
 
-  window.onclick  = closeModal;
-
-  function handleEndOfPage(){
-    console.log("called")
-    feed.loadMore();
-  }
-
   function openModal(){
 
     body!.style.overflowY = "hidden";
     content!.style.opacity = "0.6";
     modal!.style.display = "grid";
+    window.onclick  = closeModal;
 
   }
 
@@ -216,7 +213,9 @@
         position: fixed;
         display: none;
         place-items: center;
-    }
+        padding-top : 60px;
+        z-index: 4;
+      }
 
     .inner-mdl{
         width: 70%;
@@ -320,7 +319,7 @@
         display: flex;
         justify-content: space-around;
         align-items: center;
-        z-index: 999;
+        z-index: 3;
     }
 
     input[type = text]{

@@ -9,6 +9,7 @@
   import { CacheVolantini } from "../../stores/caches/CacheVolantini.svelte";
   import { ChatCache } from "../../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../../stores/caches/UserInfosCache.svelte";
+  import { MenuStore, Positions } from "../../stores/Menu.svelte";
 
   const userState = MyUser.getUser();
   
@@ -20,6 +21,8 @@
 
   let feed = $state(postStore.getHomeFeed());
   let feedType = $state(0);
+
+  MenuStore.getMenu().currentSection = Positions.Feed;
 
   let postText = $state("");
   let error = $state("");
@@ -73,6 +76,10 @@
       error = (e as Error).message;
     } finally {
       postText = "";
+      input!.value="";
+      postImage= "";
+      feedType = 0;
+      feed = postStore.getHomeFeed();
     }
   }
 
@@ -164,6 +171,7 @@
     img{
       height: 500px;
       width: 500px;
+      object-fit: cover;
       opacity: 1;
       aspect-ratio: 1/1;
     }

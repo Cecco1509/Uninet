@@ -1,10 +1,10 @@
+import type { DocumentData, DocumentReference } from "firebase/firestore";
 import type { FeedElement } from "../FeedElements/FeedElement.svelte";
-import type { FeedObject } from "../FeedElements/FeedObject";
 
-export interface Feed {
+export interface IFeed {
   fetchedAll: boolean;
 
-  getElements(): Promise<FeedElement<FeedObject>[]>;
+  getElements(): Promise<FeedElement[]>;
   loadMore(): Promise<void>;
 }
 
@@ -13,7 +13,7 @@ export interface Delete {
 }
 
 export interface Add {
-  add(new_element: FeedElement<FeedObject>): void;
+  add(element: FeedElement): void;
 }
 
 export interface Send {

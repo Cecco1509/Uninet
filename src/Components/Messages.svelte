@@ -36,7 +36,7 @@
 
   const comparator = (a: ChatFeed, b: ChatFeed): number => {
     return (
-      stringToTimeDate(b?.chatInfo?.timestamp!) >= stringToTimeDate(a?.chatInfo?.timestamp!) ? 1 : -1
+      stringToTimeDate(b.chatInfo.timestamp) >= stringToTimeDate(a.chatInfo.timestamp) ? 1 : -1
     );
   };
 
@@ -77,8 +77,8 @@
               {chat?.chatInfo?.lastMessage.slice(
                 0,
                 10,
-              )}{chat?.chatInfo?.lastMessage.length! > 10 ? "..." : ""}
-              • {chat?.chatInfo?.timestamp}
+              )}{chat.chatInfo.lastMessage.length! > 10 ? "..." : ""}
+              • {chat.chatInfo.timestamp.split(" ")[0]}
             </span>
           </div>
         </div>

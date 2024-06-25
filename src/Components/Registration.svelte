@@ -19,6 +19,7 @@
   let avatar = $state<FileList>();
   let area = $state<number>(-1);
   let course=$state("");
+  let allowNotify = $state(false);
   const tester = new RegExp(/^[a-zA-Z0-9]+$/);
 
   const courses = [
@@ -191,8 +192,8 @@
         Username: username,
         private: false,
         posts: 0,
-        course: course
-        ,
+        course: course,
+        notify : allowNotify,
       });
       window.location.href = "/users/" + username;
     } catch (e) {
@@ -246,6 +247,18 @@
     <input bind:value={data} type="date" name="data" id="data" placeholder="2005-01-01" max="2005-12-31">
 
     {:else if step == 4}
+
+      <div style="margin: 5% 10px;">
+        <input type="checkbox" name="notify" id="notify" bind:checked={allowNotify}>
+        <label for="notify">
+          {#if allowNotify}
+            Assicurati di aver attivato le notifiche del browser
+          {:else}
+            Consenti a Uninet di inviarti delle notifiche
+          {/if}
+        </label>
+      </div>
+      
 
       <label for="area">Scegli l'area del tuo corso
       </label>
@@ -505,5 +518,24 @@
 
   .profile-img{
     padding-top: 10px;
+  }
+
+  input[type = checkbox]{
+    width: 1.3em;
+    height: 1.3em;
+    outline: none;
+    box-sizing: border-box !important;
+    background-color: #393e41;
+    color: white;
+    border: 2px solid #28736f;
+    padding: 0px 10px;
+    /*font-size: 16px;       */
+    transition: all 0.5s;
+    margin-bottom: 10%;
+    animation: fadeIn 0.7s forwards;
+
+    &:focus {
+      border-color: #21e3da;
+    }
   }
 </style>
