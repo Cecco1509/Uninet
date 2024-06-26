@@ -131,14 +131,23 @@ export class ChatCache {
             doc(db, "groupsChatsInfo/", group.id),
             (snapshot) => {
               const groupInfo = snapshot.data() as groupChatInfo;
-              this._groupChats[groupInfo.name] = new GroupChatFeed(
-                group.id,
-                groupInfo,
-                new ChatQueryBuilder("groupsMessages", groupInfo.name, "", 30),
-                new MessageFactory()
-              );
+              if (this._groupChats[groupInfo.name]) {
+                this._groupChats[groupInfo.name]!.chatInfo = groupInfo;
+              } else
+                this._groupChats[groupInfo.name] = new GroupChatFeed(
+                  group.id,
+                  groupInfo,
+                  new ChatQueryBuilder(
+                    "groupsMessages",
+                    groupInfo.name,
+                    "",
+                    30
+                  ),
+                  new MessageFactory()
+                );
             }
           );
+          console.log("GROUP ADDED");
           this.groupUnsubscribers.push(unsubscribe);
         });
       }
@@ -149,6 +158,7 @@ export class ChatCache {
     if (this.unsubscribers.length > 0) return this._chats;
 
     this.unsubscriber = this.getUnsubscriber();
+    // console.log("groupUnsubscriber getted chats");
 
     return this._chats;
   }
@@ -157,6 +167,8 @@ export class ChatCache {
     if (this.groupUnsubscribers.length > 0) return this._groupChats;
 
     this.groupUnsubscriber = this.getGroupsUnsubscriber();
+    // console.log("UNSUB", this.groupUnsubscribers.length);
+    // console.log("groupUnsubscriber getted groups");
 
     return this._groupChats;
   }

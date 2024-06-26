@@ -33,6 +33,7 @@ export abstract class Chat implements IFeed {
   protected _queryBuilder: ChatQueryBuilder | undefined;
   protected _factory: MessageFactory | undefined;
   protected _fetchedAll: boolean = $state(false);
+  protected _freshMessages = $state<Message[]>([]);
 
   set queryBuilder(q: ChatQueryBuilder) {
     this._queryBuilder = q;
@@ -40,6 +41,10 @@ export abstract class Chat implements IFeed {
 
   set factory(f: MessageFactory) {
     this._factory = f;
+  }
+
+  get freshMessages() {
+    return this._freshMessages;
   }
 
   constructor(
@@ -56,8 +61,11 @@ export abstract class Chat implements IFeed {
   async getElements(): Promise<Message[]> {
     if (this._elements.length > 0) return this._elements as Message[];
 
-    const q = await this._queryBuilder!.getQuery();
-
+    const q = query(
+      ref(realtimeDB, "messages/" + this.id),
+      orderByKey(),
+      limitToLast(30)
+    );
     const result = await get(q);
 
     result.forEach((snapshot) => {
@@ -87,16 +95,17 @@ export abstract class Chat implements IFeed {
     }
 
     return onChildAdded(
-      q1 ? q1 : ref(realtimeDB, "messages" + "/" + this._id),
+      q1 ? q1 : ref(realtimeDB, "messages/" + this._id),
       (message) => {
         console.log(
           "Message created: " + message.val(),
           this._queryBuilder?.collection,
           this._id
         );
-        this._elements.push(
+        this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
+        console.log(this._freshMessages);
       }
     );
   }

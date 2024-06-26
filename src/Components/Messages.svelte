@@ -65,12 +65,12 @@
           window.location.href.split("#")[0] + "#" + bindId;
       }}
     >
-     {#if usersInfoStore.getUserInfo(chat!.to, "MESSAGES").data}
+     {#await usersInfoStore.getUserInfo(chat!.to, "MESSAGES").waitForComplete() then userInfo}
         <div class="info">
-          <ProfileIcon img={usersInfoStore.getUserInfo(chat!.to, "MESSAGES").data!.img} inRegistration={false} dimension={"medium"} />
+          <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"medium"} />
           <div>
             <span>
-              {usersInfoStore.getUserInfo(chat!.to, "MESSAGES").data?.Username}
+              {userInfo!.Username}
             </span><br />
             <span class="flws">
               {chat?.chatInfo?.lastMessage.slice(
@@ -81,7 +81,7 @@
             </span>
           </div>
         </div>
-      {/if}
+      {/await}
     </div>
   {/each}
 {:else}

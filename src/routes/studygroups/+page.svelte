@@ -344,6 +344,7 @@
                         <!-- {/if} -->
                     {/each}
                 {/if}
+                
             {:else}
                 <LoadIcon />
             {/if}
@@ -472,12 +473,13 @@
     .cnt {
       display: flex;
     }
+    
     label{
-            padding-top: 20px;
-            font-size: 1.1em;
-            color: #5c5c5c;
-          }
-        
+        padding-top: 20px;
+        font-size: 1.1em;
+        color: #5c5c5c;
+    }
+    
   
     .msgs-cnt {
       width: 30%;

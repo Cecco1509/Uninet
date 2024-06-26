@@ -66,7 +66,9 @@ export class ChatFeed extends Chat implements Send {
     //this._chatInfo = { lastMessage: text, timestamp: strDate };
 
     let id = 0;
-    if (this._elements.length > 0)
+    if (this._freshMessages.length > 0)
+      id = Number(this._freshMessages[this._freshMessages.length - 1].id) + 1;
+    else if (this._elements.length > 0)
       id = Number(this._elements[this._elements.length - 1].id) + 1;
 
     if (this._elements.length == 0)

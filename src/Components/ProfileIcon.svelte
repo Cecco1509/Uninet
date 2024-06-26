@@ -3,8 +3,6 @@
   import { getDownloadURL, ref } from "firebase/storage";
   import userDefault from "$lib/assets/userDefault.png";
 
-
-
   let { img, inRegistration, dimension } : { img: string | null; inRegistration : boolean; dimension : string} = $props();
   let profileImg = $state<any>();
 

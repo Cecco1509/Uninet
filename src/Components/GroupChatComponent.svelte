@@ -1,46 +1,26 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { fade } from "svelte/transition";
-  import { MenuStore, Positions } from "../stores/Menu.svelte";
-  import { MyUser } from "../stores/userState.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
-  import { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
   import { ChatCache } from "../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
-  import { Timestamp } from "firebase/firestore";
-  import { ChatQueryBuilder } from "../stores/QueryBuilders/ChatQueryBuilder";
-  import type { GroupChatFeed } from "../stores/Feeds/GroupChatFeed.svelte";
-  import Message from "./Message.svelte";
-  
+  import MessageComponent from "./MessageComponent.svelte";
+  import ChatFeedComponent from "./ChatFeedComponent.svelte";
+
   let { chatId } : { chatId: string } = $props();
+
+  let text = $state("");
+  let messagesBox = $state<HTMLDivElement>();
 
   const chatsStore = ChatCache.getCache();
   const usersInfoStore = UserInfosCache.getCache();
 
-  let text = $state("");
-  let messagesBox = $state<HTMLDivElement>();
-  let before : string = "";
-  let times = 1;
-
-  let chat = $derived<GroupChatFeed | undefined>(chatsStore.getGroupChat(chatId));
-  // $effect(() => {
-  //   // console.log("CHAT ID =>" + chatId);
-  //   // chat = ;
-  //   // if (!chat) {
-  //   //   chat = new Chat("", chatId, { lastMessage: "", timestamp: "" });
-  //   // }
-  // });
-
-  const printDate = (date: string): boolean => {
-    console.log(before , date)
-    if (date == before) return false;
-    before = date;
-    return true;
-  };
+  let chat = $derived(chatsStore.getGroupChat(chatId));
 
   let membersDialog = $state<HTMLDivElement>();
-    let isOpen = $state(false)
+  let isOpen = $state(false)
+
 
   function openPartecipantsDialog() {
     membersDialog!.style.display = "block";
@@ -51,12 +31,14 @@
     membersDialog!.style.display = "none";
     isOpen = false;
   }
+
+  
 </script>
   
   
   <div id="chat">
-    {#if chat}
     <div class="info">
+      {#if chat}
         <div style="display: flex; align-items:center; gap:10px; width:90%">
           <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"}/>
           <button
@@ -64,11 +46,11 @@
             
           > <!-- onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}} -->
             <span style="display: inline-block;">
-              {chat.chatInfo.name}
+              {chat!.chatInfo.name}
             </span>
           </button>
         </div>
-        {#await chat.getPartecipants()}
+         {#await chat!.getPartecipants()}
             <LoadIcon/>
         {:then partecipants} 
             
@@ -83,101 +65,35 @@
             <div class="fixed-scrollbar" in:fade bind:this={membersDialog}>
               {#each partecipants as member}
                 <div class="scroll-bar-element">
-                {#if usersInfoStore.getUserInfo(member.name, "GROUPCHAT").data}
-                    <ProfileIcon img={usersInfoStore.getUserInfo(member.name, "GROUPCHAT")!.data!.img} inRegistration={false} dimension={"medium"}/>
+                {#await usersInfoStore.getUserInfo(member.name, "GROUPCHAT").waitForComplete() then info} 
+                    <ProfileIcon img={info!.img} inRegistration={false} dimension={"medium"}/>
                     <span class="link-name" onclick={() => goto("/users/"+member.name)}>{member.name}</span>
-                    <!--{userInfo!.online}-->
-                  {/if}
+                {/await}
+                    
                 </div>
               {/each}
             </div>
           
         {/await}
-        
+      {/if}
     </div>
     <div class="msgs-cnt" bind:this={messagesBox} >
       <div  class="inner">
-          {#await chat.getElements()}
-            <div class="loading">
-              <LoadIcon />
-            </div>
-          {:then messages}
-            {#if !chat.fetchedAll}
-              <div class="msg-cnt">
-                <div class="day">
-                  <button class="load" onclick={
-                    async () => 
-                      { 
-                          await chat.loadMore();
-                          //setTimeout(() => messagesBox!.scrollBy({top : 600, behavior: "smooth"}), 1000);
-                          //console.log(-100/times);
-                          //messagesBox!.scrollTop = -900
-                  }}>
-                    Carica
-                  </button>
-                </div>
-              </div>
-            {/if}
-            <!-- Nuovi messaggi -->
-            {#each chat.newMessages as message}
-             {#if printDate(message.data.timestamp.split(" ")[1]) }  <!--  -->
-              <div class="msg-cnt" in:fade>
-                <div class="day">
-                  {before}
-                </div>
-              </div>
-              {/if}
-              <Message {message} fade={true} />
-            {/each}
-            <!-- Vecchi messaggi -->
-            {#each messages as message}
-              {#if printDate(message.data.timestamp.split(" ")[1])}
-                <div class="msg-cnt">
-                  <div class="day">
-                    {before}
-                  </div>
-                </div>
-              {/if}
-                <Message {message} fade={false}/>
-            {/each}
-            {#key chat.freshMessages}
-              {#each chat.freshMessages as message}
-                <Message {message} fade={false}/>
-              {/each}
-            {/key}
-            
-          {/await}
+        {#if chat}
+          <ChatFeedComponent {chat} />
+        {/if}
       </div>
     </div>
     
     <form class="text-box">
       <input type="text" bind:value={text} />
-      <button onclick={() => {if(!text) return; chat!.send(text); text = ""; before = ""}}> Invia </button>
+      <button onclick={() => {if(!text) return; chat!.send(text); text = "";}}> Invia </button>
     </form>
-    {/if}
+    
   </div>
   
-  <style>
-  
-    .loading{
-      width: 100%;
-      height: 100dvh;
-    }
-  
-    .load{
-      border: none;
-      background: transparent;
-      width: 100%;
-      color: grey !important;
-      margin: 0px;
-      justify-self: center;
-      text-align: center;
-      font-size: 1.1em;
-  
-      &:hover {
-        background-color: transparent;
-      }
-    }
+<style>
+
   
     .link-name {
       border: none;
@@ -249,13 +165,6 @@
       padding-left: 15px;
     }
   
-    .msg-cnt {
-      display: grid;
-      width: 100%;
-      padding: 10px;
-      font-size: 1.1em;
-    }
-  
     button {
       border-radius: 25px;
       background-color: transparent;
@@ -276,17 +185,6 @@
       &:hover {
         background-color: rgba(33, 227, 217, 0.383);
       }
-    }
-  
-    .day {
-      color: grey !important;
-      justify-self: center;
-      text-align: center;
-      width: 100px;
-      border: 1px solid grey;
-      padding: 5px;
-      border-radius: 5px;
-      align-self: center;
     }
 
     .show{

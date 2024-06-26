@@ -28,7 +28,7 @@ export class GroupChatFeed extends Chat implements Send {
   private _chatInfo = $state<groupChatInfo>();
   private _partecipants = $state<{ name: string; timestamp: string }[]>([]);
   private partecipantsUnsubscribe: (() => void) | undefined;
-  private _freshMessages = $state<Message[]>([]);
+  //private _freshMessages = $state<Message[]>([]);
 
   constructor(
     id: string,
@@ -71,28 +71,36 @@ export class GroupChatFeed extends Chat implements Send {
 
     this._fetchedAll = this._elements.length < this._queryBuilder!.loadSize;
 
-    if (!this.currentUnsubscriber) {
-      let q1: Query | null = null;
-      if (this._elements.length > 0) {
-        q1 = query(
-          ref(realtimeDB, "groupsMessages" + "/" + this.chatInfo.name),
-          orderByKey(),
-          startAfter(this._elements[this._elements.length - 1].id)
-        );
-      }
+    if (this._elements.length > 0)
+      this.currentUnsubscriber = this.getUnsubscriber();
 
-      this.currentUnsubscriber = onChildAdded(
-        q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),
-        (message) => {
-          console.log("HEY");
-          this._freshMessages.push(
-            new Message(message.ref, message.val(), message.key!)
-          );
-        }
+    return this._elements as Message[];
+  }
+
+  protected getUnsubscriber(): () => void {
+    let q1: Query | null = null;
+    if (this._elements.length > 0) {
+      q1 = query(
+        ref(realtimeDB, "groupsMessages" + "/" + this.chatInfo.name),
+        orderByKey(),
+        startAfter(this._elements[this._elements.length - 1].id)
       );
     }
 
-    return this._elements as Message[];
+    return onChildAdded(
+      q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),
+      (message) => {
+        console.log(
+          "Message created: " + message.val(),
+          this._queryBuilder?.collection,
+          this._id
+        );
+        this._freshMessages.push(
+          new Message(message.ref, message.val(), message.key!)
+        );
+        console.log(this._freshMessages);
+      }
+    );
   }
 
   async loadMore(): Promise<void> {
@@ -160,18 +168,7 @@ export class GroupChatFeed extends Chat implements Send {
   }
 
   async send(text: string) {
-    const date = new Date();
-
-    const strDate =
-      date.getHours().toString().padStart(2, "0") +
-      ":" +
-      date.getMinutes().toString().padStart(2, "0") +
-      " " +
-      date.getDate().toString().padStart(2, "0") +
-      "/" +
-      date.getMonth().toString().padStart(2, "0") +
-      "/" +
-      date.getFullYear();
+    const strDate = ChatCache.getNowString();
 
     await ChatCache.getCache().setLastGroupMessage(this.chatInfo.name, {
       lastMessage: text,

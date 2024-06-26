@@ -83,7 +83,7 @@
       </div>
     {/each}
   {:else}
-      <LoadIcon />
+    <LoadIcon />
   {/if}
   
   <style>

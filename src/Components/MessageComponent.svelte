@@ -7,20 +7,20 @@
 
   let {message, fade} : {message : Message; fade:boolean} = $props();
   let sended = message.data.sender == MyUser.getUser().userInfo?.Username;
-  let userInfo = UserInfosCache.getCache().getUserInfo(message.data.sender, "MESSAGE").data;
-
 </script>
 
-{#if userInfo}
+
   <div class={fade ? "msg-cnt fade" : "msg-cnt"}>
-    
+      
     {#if !sended}
-      <div style="display: flex; gap:10px; align-items:center; margin-bottom: 5px; margin-left: 10px;">
-        
-          <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"small"} />
-        
-        <span>{message.data.sender}</span>
-      </div>
+      {#await UserInfosCache.getCache().getUserInfo(message.data.sender, "MESSAGE").waitForComplete() then userInfo}
+        <div style="display: flex; gap:10px; align-items:center; margin-bottom: 5px; margin-left: 10px;">
+          
+            <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"small"} />
+          
+          <span>{message.data.sender}</span>
+        </div>
+      {/await}
     {/if}
     
     <div
@@ -36,7 +36,8 @@
       </div>
     </div>
   </div>
-{/if}
+
+ 
 
 <style>
   .msg-cnt {
