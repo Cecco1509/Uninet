@@ -108,7 +108,7 @@
     </div>
   {:else if userState.userInfo}
     <div
-    class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini
+    class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini || menu.currentSection == Positions.MessGroups 
         ? "content-container plus"
         : "content-container"}
     >

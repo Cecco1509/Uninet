@@ -10,6 +10,7 @@
   import blurryGradient from "../lib/assets/blurry-gradient-haikei.png"
   import Registration from "./Registration.svelte";
   import { MyUser } from "../stores/userState.svelte";
+  import { MenuStore, Positions } from "../stores/Menu.svelte";
 
   const user = MyUser.getUser();
   let register = $state(false);
@@ -21,6 +22,8 @@
   let completing = $state<boolean>(false);
   let steps = $state<number>(0)
   let uid = $state("");
+
+  MenuStore.getMenu().currentSection = Positions.Login;
 
     $effect(() => {
       if(user.isLoading) return

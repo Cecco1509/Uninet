@@ -9,7 +9,8 @@
   import { ChatCache } from "../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
   import { Timestamp } from "firebase/firestore";
-  import { UserChatQueryBuilder } from "../stores/QueryBuilders/UserChatQueryBuilder";
+  import { ChatQueryBuilder } from "../stores/QueryBuilders/ChatQueryBuilder";
+  import type { Message } from "../stores/FeedElements/Message.svelte";
 
   let { chatId }: { chatId: string } = $props();
 
@@ -18,7 +19,7 @@
 
   let text = $state("");
   let messagesBox = $state<HTMLDivElement>();
-  let before : string = "";
+  let before : string[] = [];
   let times = 1;
 
   let chat = $derived<ChatFeed | undefined>(
@@ -34,10 +35,11 @@
   //   // }
   // });
 
-  const printDate = (date: string): boolean => {
+  const printDate = (date: string, messageBefore : Message | undefined, i : number): boolean => {
     console.log(before , date)
-    if (date == before) return false;
-    before = date;
+    if(i == 0) return true;
+    if(!messageBefore) return true;
+    if(date ==  messageBefore.data.timestamp.split(" ")[1]) return false;
     return true;
   };
 </script>
@@ -84,49 +86,49 @@
             </div>
           {/if}
           <!-- Nuovi messaggi -->
-          {#each chat.newMessages as message}
-           {#if printDate(message.data.timestamp.split(" ")[1]) }  <!--  -->
+          {#each {length : chat.newMessages.length} as _,i}
+           {#if printDate(chat.newMessages[i].data.timestamp.split(" ")[1],chat.newMessages[i-1], i)}  <!--  -->
             <div class="msg-cnt" in:fade>
               <div class="day">
-                {before}
+                {chat.newMessages[i].data.timestamp.split(" ")[1]}
               </div>
             </div>
             {/if}
             <div class="msg-cnt fade">
               <div
-                class={message.data.sender == MyUser.getUser().userInfo?.Username
+                class={chat.newMessages[i].data.sender == MyUser.getUser().userInfo?.Username
                   ? "sended msg-box"
                   : "received msg-box"}
               >
                 <div class="msg-text">
-                  {message.data.text}
+                  {chat.newMessages[i].data.text}
                 </div>
                 <div class="time">
-                  {message.data.timestamp.split(" ")[0]}
+                  {chat.newMessages[i].data.timestamp.split(" ")[0]}
                 </div>
               </div>
             </div>
           {/each}
           <!-- Vecchi messaggi -->
-          {#each messages as message}
-            {#if printDate(message.data.timestamp.split(" ")[1])}
+          {#each {length : messages.length} as _, i}
+            {#if printDate(messages[i].data.timestamp.split(" ")[1],messages[i-1], i)}
               <div class="msg-cnt">
                 <div class="day">
-                  {before}
+                  {messages[i].data.timestamp.split(" ")[1]}
                 </div>
               </div>
             {/if}
             <div class="msg-cnt">
               <div
-                class={message.data.sender == MyUser.getUser().userInfo?.Username
+                class={messages[i].data.sender == MyUser.getUser().userInfo?.Username
                   ? "sended msg-box"
                   : "received msg-box"}
               >
                 <div class="msg-text">
-                  {message.data.text}
+                  {messages[i].data.text}
                 </div>
                 <div class="time">
-                  {message.data.timestamp.split(" ")[0]}
+                  {messages[i].data.timestamp.split(" ")[0]}
                 </div>
               </div>
             </div>
@@ -138,7 +140,7 @@
   
   <form class="text-box">
     <input type="text" bind:value={text} />
-    <button onclick={() => {if(!text) return; chat!.send(text); text = ""; before = ""}}> Invia </button>
+    <button onclick={() => {if(!text) return; chat!.send(text); text = "";}}> Invia </button>
   </form>
   
 </div>

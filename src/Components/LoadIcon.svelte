@@ -10,8 +10,6 @@
 
 <style>
   .ld-cnt{
-    height: 100%;
-    width: 100%;
     display: grid;
     place-content: center;
   }

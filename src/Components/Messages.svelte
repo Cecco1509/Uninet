@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
-  import { ChatCache, type chatMap } from "../stores/caches/ChatCache.svelte";
+  import type { GroupChatFeed } from "../stores/Feeds/GroupChatFeed.svelte";
+  import { ChatCache, type ChatMap, type GroupChatMap } from "../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
   import LoadIcon from "./LoadIcon.svelte";
   import ProfileIcon from "./ProfileIcon.svelte";
@@ -14,12 +15,12 @@
   const chatsStore = ChatCache.getCache();
   const usersInfoStore = UserInfosCache.getCache();
 
-  let chatsMap : chatMap = $state(chatsStore.chats);
+  let chatsMap : ChatMap = $state(chatsStore.chats);
 
   let chatsValues = $derived(() =>{
-    let arr : ChatFeed[] = []
+    let arr : ChatFeed [] = []
     chats.forEach(chatID => {
-      if(chatsMap[chatID]) arr.push(chatsMap[chatID]!)
+      if(chatsMap[chatID]) arr.push(chatsMap[chatID]! as ChatFeed);
     });
     return arr;
   });
@@ -34,7 +35,7 @@
 
   }
 
-  const comparator = (a: ChatFeed, b: ChatFeed): number => {
+  const comparator = (a: ChatFeed | GroupChatFeed, b: ChatFeed | GroupChatFeed): number => {
     return (
       stringToTimeDate(b.chatInfo.timestamp) >= stringToTimeDate(a.chatInfo.timestamp) ? 1 : -1
     );
@@ -45,7 +46,7 @@
   });
 
 
-  $inspect(orderedChats)
+  $inspect("ordered Messages", orderedChats)
 
   
 </script>
@@ -56,7 +57,7 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- goto("/messages/"+chats[chatId]?.to -->
     <div
-      class={chatId == chat.to ? "usr-cnt active" : "usr-cnt"}
+      class={chatId == chat.to! ? "usr-cnt active" : "usr-cnt"}
       onclick={() => {
         bindId = chat.to!;
         chatId = chat.to!;

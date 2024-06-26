@@ -62,6 +62,14 @@ declare global {
     timestamp: string;
   };
 
+  type groupChatInfo = {
+    name: string;
+    lastMessage: string;
+    timestamp: string;
+    n_partecipants: number;
+    img: string | null;
+  };
+
   type FriendsSchema = {
     username: string;
     friendUsername: string;

@@ -13,7 +13,7 @@ import { db, realtimeDB } from "$lib/firebase/firebase.client";
 import { MyUser } from "../userState.svelte";
 import type { FeedElement } from "../FeedElements/FeedElement.svelte";
 
-export class UserChatQueryBuilder {
+export class ChatQueryBuilder {
   private param: string;
   public collection: string;
   public loadSize: number;
@@ -41,10 +41,19 @@ export class UserChatQueryBuilder {
   }
 
   async getQuery(): Promise<Query> {
+    console.log("getQuery", this.collection, this.id);
     return query(
-      ref(realtimeDB, "messages/" + this.id),
+      ref(realtimeDB, this.collection + "/" + this.id),
       orderByKey(),
       limitToLast(this.loadSize)
+    );
+  }
+
+  getListeningQuery(start: string): Query | null {
+    return query(
+      ref(realtimeDB, this.collection! + "/" + this.id),
+      orderByKey(),
+      startAfter(start)
     );
   }
 }

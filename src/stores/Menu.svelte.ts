@@ -45,6 +45,8 @@ export class MenuStore {
         return Positions.Search;
       case "volantini":
         return Positions.Volantini;
+      case "studygroups":
+        return Positions.MessGroups;
       default:
         return Positions.Login;
     }

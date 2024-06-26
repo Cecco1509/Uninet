@@ -32,47 +32,47 @@
 
 </script>
 
-<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini ? "menu-container collapsed" : "menu-container"}>
-     <button class={menu.currentSection == Positions.Feed ? "active" : ""} onclick={() => {goto("/feed"); }}>
-      <!--menu.currentSection = Positions.Feed -->
-      <HomeIcon/>
-      <span class="btn-span">Home</span>
-    </button>
-    <button class={menu.currentSection == Positions.Volantini ? "active" : ""} onclick={() => {goto("/volantini"); }} >
-      <!-- menu.currentSection = Positions.Volantini -->
-      <BoardIcon />
-      <span class="btn-span">Volantini</span>
-    </button>
-    <button class={menu.currentSection == Positions.Profile ? "active" : ""} onclick={() => {goto("/users/"+userID); }}>
-      <!-- menu.currentSection = Positions.Profile -->
-      <UserIcon/>
-      <span class="btn-span">Profilo</span>
-    </button>
-    <button class={menu.currentSection == Positions.Search ? "active" : ""} onclick={() => {goto("/search"); }}>
-      <!-- menu.currentSection = Positions.Search -->
-      <SearchIcon/>
-      <span class="btn-span">Ricerca</span>
-    </button>
-    <button class={menu.currentSection == Positions.Messages ? "active" : ""} onclick={() => {goto("/messages");}} > 
-      <!-- menu.currentSection = Positions.Messages -->
-      <MessIcon/>
-      <span class="btn-span">Messaggi</span>
-    </button>
-    <button class={menu.currentSection == Positions.MessGroups ? "active" : ""} onclick={() => {goto("/studygroups");}} >
-      <UserGroup/>
-      <span class="btn-span">Gruppi</span>
-    </button>
-    <button class={menu.currentSection == Positions.Notify ? "active" : ""} >
-      <BellIcon/>
-      <span class="btn-span">Notifiche</span>
-    </button>
-    <button onclick={handleSignOut}>
-      <LogoutIcon/>
-      <span class="btn-span">Logout</span>
-    </button>
+<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini || menu.currentSection == Positions.MessGroups  ? "menu-container collapsed" : "menu-container"}>
+  <button class={menu.currentSection == Positions.Feed ? "active" : ""} onclick={() => {goto("/feed"); }}>
+    <!--menu.currentSection = Positions.Feed -->
+    <HomeIcon/>
+    <span class="btn-span">Home</span>
+  </button>
+  <button class={menu.currentSection == Positions.Volantini ? "active" : ""} onclick={() => {goto("/volantini"); }} >
+    <!-- menu.currentSection = Positions.Volantini -->
+    <BoardIcon />
+    <span class="btn-span">Volantini</span>
+  </button>
+  <button class={menu.currentSection == Positions.Profile ? "active" : ""} onclick={() => {goto("/users/"+userID); }}>
+    <!-- menu.currentSection = Positions.Profile -->
+    <UserIcon/>
+    <span class="btn-span">Profilo</span>
+  </button>
+  <button class={menu.currentSection == Positions.Search ? "active" : ""} onclick={() => {goto("/search"); }}>
+    <!-- menu.currentSection = Positions.Search -->
+    <SearchIcon/>
+    <span class="btn-span">Ricerca</span>
+  </button>
+  <button class={menu.currentSection == Positions.Messages ? "active" : ""} onclick={() => {goto("/messages");}} > 
+    <!-- menu.currentSection = Positions.Messages -->
+    <MessIcon/>
+    <span class="btn-span">Messaggi</span>
+  </button>
+  <button class={menu.currentSection == Positions.MessGroups ? "active" : ""} onclick={() => {goto("/studygroups");}} >
+    <UserGroup/>
+    <span class="btn-span">Gruppi</span>
+  </button>
+  <button class={menu.currentSection == Positions.Notify ? "active" : ""} >
+    <BellIcon/>
+    <span class="btn-span">Notifiche</span>
+  </button>
+  <button onclick={handleSignOut}>
+    <LogoutIcon/>
+    <span class="btn-span">Logout</span>
+  </button>
 </div>
 
-<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini ? "hidden" : "footer"}>
+<div class={menu.currentSection == Positions.Messages || menu.currentSection == Positions.Volantini || menu.currentSection == Positions.MessGroups  ? "hidden" : "footer"}>
   <span>created with ❤️ by Lorenzo Ceccotti</span>
 </div>
 
@@ -138,7 +138,7 @@
       top: 0;
       left: 0;
       width: 25dvw;
-      padding: 10dvh 0dvh 2dvh 15dvh;
+      padding: 10dvh 0dvh 2dvh 4dvw;
       gap: 25px;
       transition: all 0.5s;
     }

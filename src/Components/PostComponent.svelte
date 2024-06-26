@@ -535,6 +535,7 @@
       padding: 0px;
       transform: translateY(-100%);
       position: absolute;
+      align-content: center;
     }
   }
 </style>
