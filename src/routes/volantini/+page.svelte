@@ -279,7 +279,6 @@
     }
 
     .cnt{
-        margin-top: 100px;
         display: grid;
         width: 100%;
         place-items: center;

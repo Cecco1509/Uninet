@@ -75,10 +75,7 @@
       return;
     }
 
-    userInfoStore.getUserInfo(post.data.createdBy).then((inf : UserInfo) => {
-      info = inf;
-      count++;
-    });
+    info = userInfoStore.getUserInfo(post.data.createdBy,"POST").data;
   });
 
   $inspect(count);
@@ -141,7 +138,7 @@
   <div class="post-container">
     {#if !inUserPage && info}
       <div class="profile-icon">
-        <ProfileIcon img={info.img ? info.img : null} inFeed={!inUserPage} />
+        <ProfileIcon img={info.img ? info.img : null} inRegistration={false} dimension={"medium"} />
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <span

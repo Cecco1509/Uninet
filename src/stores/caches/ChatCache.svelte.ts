@@ -180,7 +180,9 @@ export class ChatCache {
       doc(db, "Users/" + MyUser.getUser().user?.uid + "/chats", id),
       {}
     );
-    const userInfo = await UserInfosCache.getCache().getUserInfo(username);
+    const userInfo = await UserInfosCache.getCache()
+      .getUserInfo(username, "addChat")
+      .waitForComplete();
     await setDoc(doc(db, "Users/" + userInfo?.id + "/chats", id), {});
   }
 
@@ -225,7 +227,9 @@ export class ChatCache {
     );
 
     partecipants.forEach(async (partecipant) => {
-      const userInfo = await UserInfosCache.getCache().getUserInfo(partecipant);
+      const userInfo = await UserInfosCache.getCache()
+        .getUserInfo(partecipant, "addGroupChat")
+        .waitForComplete();
       await setDoc(
         doc(db, "Users/" + userInfo?.id + "/groupsChats", reference.id),
         {}

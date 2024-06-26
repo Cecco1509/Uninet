@@ -1,12 +1,19 @@
 import { db } from "$lib/firebase/firebase.client";
-import { query, collection, where, getDocs } from "firebase/firestore";
+import {
+  query,
+  collection,
+  where,
+  getDocs,
+  QuerySnapshot,
+} from "firebase/firestore";
+import { UserInfoObject } from "../userInfo.svelte";
 
 type UserInfoMap = {
-  [key: string]: UserInfo;
+  [key: string]: UserInfoObject;
 };
 
 export class UserInfosCache {
-  private userInfos: UserInfoMap = $state({});
+  private userInfos: UserInfoMap = {};
 
   private static instance: UserInfosCache;
 
@@ -17,23 +24,19 @@ export class UserInfosCache {
 
   constructor() {}
 
-  async getUserInfo(username: string): Promise<UserInfo> {
-    if (this.userInfos[username]) {
-      console.log("not info");
+  getUserInfo(username: string, dove: string): UserInfoObject {
+    if (this.userInfos[username] && this.userInfos[username].data) {
+      console.log("not info", username, dove);
       return this.userInfos[username];
     }
 
-    console.log(this.userInfos[username], username);
+    console.log(this.userInfos[username], username, dove);
     const q = query(collection(db, "Users"), where("Username", "==", username));
-    const result = await getDocs(q);
-    let userData: UserInfo | null = null;
 
-    if (result.empty) return null;
-    result.forEach((row) => {
-      userData = { ...row.data(), id: row.id } as UserInfo;
-    });
+    if (this.userInfos[username] == null) {
+      this.userInfos[username] = new UserInfoObject(null, "", getDocs(q));
+    }
 
-    this.userInfos[username] = userData;
-    return userData;
+    return this.userInfos[username];
   }
 }

@@ -122,7 +122,9 @@ export class MyUser {
         transaction.update(doc(db, "Users", this._user!.uid), {
           seguiti: this.userInfo!.seguiti - 1,
         });
-        let f_user = await UserInfosCache.getCache().getUserInfo(username);
+        let f_user = await UserInfosCache.getCache()
+          .getUserInfo(username, "unFollowUserStore")
+          .waitForComplete();
         transaction.update(doc(db, "Users", f_user!.id), {
           Followers: f_user!.Followers - 1,
         });
@@ -148,7 +150,9 @@ export class MyUser {
       transaction.update(doc(db, "Users", this._user!.uid), {
         seguiti: this.userInfo!.seguiti + 1,
       });
-      let f_user = await UserInfosCache.getCache().getUserInfo(username);
+      let f_user = await UserInfosCache.getCache()
+        .getUserInfo(username, "followUserStore")
+        .waitForComplete();
       transaction.update(doc(db, "Users", f_user!.id), {
         Followers: f_user!.Followers + 1,
       });

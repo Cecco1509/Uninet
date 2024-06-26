@@ -1,87 +1,106 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { fade } from "svelte/transition";
-    import { MenuStore, Positions } from "../stores/Menu.svelte";
-    import { MyUser } from "../stores/userState.svelte";
-    import LoadIcon from "./LoadIcon.svelte";
-    import ProfileIcon from "./ProfileIcon.svelte";
-    import { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
-    import { ChatCache } from "../stores/caches/ChatCache.svelte";
-    import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
-    import { Timestamp } from "firebase/firestore";
-    import { ChatQueryBuilder } from "../stores/QueryBuilders/ChatQueryBuilder";
+  import { goto } from "$app/navigation";
+  import { fade } from "svelte/transition";
+  import { MenuStore, Positions } from "../stores/Menu.svelte";
+  import { MyUser } from "../stores/userState.svelte";
+  import LoadIcon from "./LoadIcon.svelte";
+  import ProfileIcon from "./ProfileIcon.svelte";
+  import { ChatFeed } from "../stores/Feeds/ChatFeed.svelte";
+  import { ChatCache } from "../stores/caches/ChatCache.svelte";
+  import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
+  import { Timestamp } from "firebase/firestore";
+  import { ChatQueryBuilder } from "../stores/QueryBuilders/ChatQueryBuilder";
   import type { GroupChatFeed } from "../stores/Feeds/GroupChatFeed.svelte";
+  import Message from "./Message.svelte";
   
-    let { chatId } : { chatId: string } = $props();
-  
-    const chatsStore = ChatCache.getCache();
-    const usersInfoStore = UserInfosCache.getCache();
-  
-    let text = $state("");
-    let messagesBox = $state<HTMLDivElement>();
-    let before : string = "";
-    let times = 1;
-  
-    let chat = $derived<GroupChatFeed | undefined>(chatsStore.getGroupChat(chatId));
-    // $effect(() => {
-    //   // console.log("CHAT ID =>" + chatId);
-    //   // chat = ;
-    //   // if (!chat) {
-    //   //   chat = new Chat("", chatId, { lastMessage: "", timestamp: "" });
-    //   // }
-    // });
-  
-    const printDate = (date: string): boolean => {
-      console.log(before , date)
-      if (date == before) return false;
-      before = date;
-      return true;
-    };
-  </script>
+  let { chatId } : { chatId: string } = $props();
+
+  const chatsStore = ChatCache.getCache();
+  const usersInfoStore = UserInfosCache.getCache();
+
+  let text = $state("");
+  let messagesBox = $state<HTMLDivElement>();
+  let before : string = "";
+  let times = 1;
+
+  let chat = $derived<GroupChatFeed | undefined>(chatsStore.getGroupChat(chatId));
+  // $effect(() => {
+  //   // console.log("CHAT ID =>" + chatId);
+  //   // chat = ;
+  //   // if (!chat) {
+  //   //   chat = new Chat("", chatId, { lastMessage: "", timestamp: "" });
+  //   // }
+  // });
+
+  const printDate = (date: string): boolean => {
+    console.log(before , date)
+    if (date == before) return false;
+    before = date;
+    return true;
+  };
+
+  let membersDialog = $state<HTMLDivElement>();
+    let isOpen = $state(false)
+
+  function openPartecipantsDialog() {
+    membersDialog!.style.display = "block";
+    isOpen = true;
+  }
+
+  function closePartecipantsDialog() {
+    membersDialog!.style.display = "none";
+    isOpen = false;
+  }
+</script>
   
   
   <div id="chat">
     {#if chat}
     <div class="info">
-        <ProfileIcon img={chat!.chatInfo.img!} inFeed={true} />
-        <button
-          class="link-name"
-          
-        > <!-- onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}} -->
-          <span>
-            {chat.chatInfo.name}
-          </span>
-        </button>
+        <div style="display: flex; align-items:center; gap:10px; width:90%">
+          <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"}/>
+          <button
+            class="link-name"
+            
+          > <!-- onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}} -->
+            <span style="display: inline-block;">
+              {chat.chatInfo.name}
+            </span>
+          </button>
+        </div>
         {#await chat.getPartecipants()}
             <LoadIcon/>
         {:then partecipants} 
-            <div style="opacity: 0.8; font-size:0.9em;">
-                {#if partecipants.length == 3}
-                    <span>
-                    {partecipants[0].name}, 
-                    {partecipants[1].name}, 
-                    {partecipants[2].name}
-                </span>
-                {:else if partecipants.length > 3}
-                    <span>
-                    {partecipants[0].name} 
-                    {partecipants[1].name} 
-                    {partecipants[2].name} ...
-                    <button><span>
-                        Mostra tutti
-                    </span></button>
-                </span>
-                {/if}
-            </div>
             
+              <button class="show" style="margin-right: 10px;" onclick={membersDialog?.style.display != "block" ? openPartecipantsDialog : closePartecipantsDialog}>
+                {#if !isOpen}
+                  Partecipanti
+                {:else}
+                  Chiudi
+                {/if}
+              </button>
+            
+            <div class="fixed-scrollbar" in:fade bind:this={membersDialog}>
+              {#each partecipants as member}
+                <div class="scroll-bar-element">
+                {#if usersInfoStore.getUserInfo(member.name, "GROUPCHAT").data}
+                    <ProfileIcon img={usersInfoStore.getUserInfo(member.name, "GROUPCHAT")!.data!.img} inRegistration={false} dimension={"medium"}/>
+                    <span class="link-name" onclick={() => goto("/users/"+member.name)}>{member.name}</span>
+                    <!--{userInfo!.online}-->
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          
         {/await}
+        
     </div>
     <div class="msgs-cnt" bind:this={messagesBox} >
       <div  class="inner">
           {#await chat.getElements()}
-          <div class="loading">
-            <LoadIcon />
-          </div>
+            <div class="loading">
+              <LoadIcon />
+            </div>
           {:then messages}
             {#if !chat.fetchedAll}
               <div class="msg-cnt">
@@ -108,20 +127,7 @@
                 </div>
               </div>
               {/if}
-              <div class="msg-cnt fade">
-                <div
-                  class={message.data.sender == MyUser.getUser().userInfo?.Username
-                    ? "sended msg-box"
-                    : "received msg-box"}
-                >
-                  <div class="msg-text">
-                    {message.data.text}
-                  </div>
-                  <div class="time">
-                    {message.data.timestamp.split(" ")[0]}
-                  </div>
-                </div>
-              </div>
+              <Message {message} fade={true} />
             {/each}
             <!-- Vecchi messaggi -->
             {#each messages as message}
@@ -132,21 +138,14 @@
                   </div>
                 </div>
               {/if}
-              <div class="msg-cnt">
-                <div
-                  class={message.data.sender == MyUser.getUser().userInfo?.Username
-                    ? "sended msg-box"
-                    : "received msg-box"}
-                >
-                  <div class="msg-text">
-                    {message.data.text}
-                  </div>
-                  <div class="time">
-                    {message.data.timestamp.split(" ")[0]}
-                  </div>
-                </div>
-              </div>
+                <Message {message} fade={false}/>
             {/each}
+            {#key chat.freshMessages}
+              {#each chat.freshMessages as message}
+                <Message {message} fade={false}/>
+              {/each}
+            {/key}
+            
           {/await}
       </div>
     </div>
@@ -195,7 +194,7 @@
   
     .info {
       width: 100%;
-      height: 8dvh;
+      height: 80px;
       position: relative; /* Change from fixed to relative */
       background-color: rgba(255, 255, 255, 0.1);
       border-bottom: 1px solid #21e3da;
@@ -215,7 +214,7 @@
     .text-box {
       position: relative; /* Change from fixed to relative */
       width: 100%;
-      height: 6.5dvh;
+      height: 60px;
       background-color: rgba(255, 255, 255, 0.1);
       padding: 5px;
       display: flex;
@@ -225,7 +224,7 @@
   
     .msgs-cnt {
       width: 100%;
-      height: 85.5dvh;
+      height: calc(100dvh - 140px);
       overflow-y: auto;
       display: flex;
       flex-direction: column-reverse;
@@ -257,22 +256,6 @@
       font-size: 1.1em;
     }
   
-    .fade{
-      animation: fade-in .5s forwards ease-in-out;
-      transform: translateY(-5dvh);
-    }
-  
-    @keyframes fade-in{
-      0%{
-        opacity: 0;
-        transform: translateY(-5dvh);
-      }
-      100%{
-        opacity: 1;
-        transform: translateY(0dvh);
-      }
-    }
-  
     button {
       border-radius: 25px;
       background-color: transparent;
@@ -295,38 +278,6 @@
       }
     }
   
-    .msg-box {
-      padding: 10px;
-      width: 200px;
-      border-radius: 15px;
-      width: 40%;
-      display: grid;
-      border: 2px solid black;
-    }
-  
-    .sended {
-      background-color: #21e3d927;
-      background-color: #21e3d989;
-      border-color: #21e3da;
-      justify-self: flex-end;
-      padding-right: 20px;
-    }
-  
-    .received {
-      background-color: #ffffff23;
-      border-color: #ffffff33;
-      justify-self: flex-start;
-    }
-  
-    .time {
-      justify-self: flex-end;
-    }
-  
-    .msg-text {
-      width: 100%;
-      padding-bottom: 5px;
-    }
-  
     .day {
       color: grey !important;
       justify-self: center;
@@ -336,6 +287,58 @@
       padding: 5px;
       border-radius: 5px;
       align-self: center;
+    }
+
+    .show{
+      cursor: pointer;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      width: auto;
+      padding: 8px;
+      transition: all 0.3s;
+      font-size: 1.3em;
+      background-color: #e6c96022;
+
+      &:hover {
+        background-color: #e6c9605c;
+      }
+    }
+
+    .fixed-scrollbar{
+      position: fixed;
+      height: 500px;
+      width: 300px;
+      overflow-y: auto;
+      z-index: 20;
+      display: none;
+      top: 80px;
+      right: 0px;
+
+      animation: grow 1s forwards;
+    }
+
+    @keyframes grow{
+      0%{
+        height: 0px;
+      }
+      100%{
+        height: 500px;
+      }
+    }
+
+    .scroll-bar-element{
+      width: 100%;
+      border-bottom : 1px solid black;
+      height: 100px;
+      background-color: rgb(48, 48, 48);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3em;
     }
   </style>
   

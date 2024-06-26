@@ -28,6 +28,7 @@ export class GroupChatFeed extends Chat implements Send {
   private _chatInfo = $state<groupChatInfo>();
   private _partecipants = $state<{ name: string; timestamp: string }[]>([]);
   private partecipantsUnsubscribe: (() => void) | undefined;
+  private _freshMessages = $state<Message[]>([]);
 
   constructor(
     id: string,
@@ -45,6 +46,10 @@ export class GroupChatFeed extends Chat implements Send {
 
   set chatInfo(info: groupChatInfo) {
     this._chatInfo = info;
+  }
+
+  get freshMessages() {
+    return this._freshMessages;
   }
 
   async getElements(): Promise<Message[]> {
@@ -79,7 +84,8 @@ export class GroupChatFeed extends Chat implements Send {
       this.currentUnsubscriber = onChildAdded(
         q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),
         (message) => {
-          this._elements.push(
+          console.log("HEY");
+          this._freshMessages.push(
             new Message(message.ref, message.val(), message.key!)
           );
         }
@@ -177,7 +183,9 @@ export class GroupChatFeed extends Chat implements Send {
     //this._chatInfo = { lastMessage: text, timestamp: strDate };
 
     let id = 0;
-    if (this._elements.length > 0)
+    if (this._freshMessages.length > 0)
+      id = Number(this._freshMessages[this._freshMessages.length - 1].id) + 1;
+    else if (this._elements.length > 0)
       id = Number(this._elements[this._elements.length - 1].id) + 1;
 
     console.log(id);

@@ -8,7 +8,6 @@
   import Loading from "./Loading.svelte";
   import { CacheVolantini } from "../stores/caches/CacheVolantini.svelte";
   import Volantini from "./Volantini.svelte";
-  import type { PostsFeed } from "../stores/Feeds/PostsFeed.svelte";
   import { ChatCache } from "../stores/caches/ChatCache.svelte";
   import { PostCache } from "../stores/caches/PostCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
@@ -34,13 +33,7 @@
     //userPosts = userInfosStore.getUserPosts(username);
 
     if (username !== user.userInfo?.Username) {
-      userInfosStore.getUserInfo(username)
-        .then((u) => {
-          userInfo = u;
-        })
-        .catch((e) => {
-          console.log("errore: ", e);
-        });
+      userInfo = userInfosStore.getUserInfo(username, "USERPAGE").data;
     } else {
       userInfo = user.userInfo;
     }
@@ -64,7 +57,7 @@
   <div class="top-wrapper">
     {#key userInfo}
       {#if userInfo}
-        <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={false} />
+        <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"big"} />
         <div class="top-info">
           <div class="number-wrapper">
             <span class="number">{userInfo.posts}</span><span>Posts</span>

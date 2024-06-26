@@ -177,7 +177,7 @@
                 <span> Seleziona un'immagine profilo </span>
                 <div style="display: flex; align-items:center; margin-top:10px; gap: 10px;">
                     <div class="profile-img">
-                    <ProfileIcon img={profileImage} inFeed={false} inRegistration={true}/>
+                        <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"}/>
                     </div>
                     
                     <div class="file-inp">
@@ -228,7 +228,7 @@
                         {#if !partecipantsUsers.find(e => e?.Username == element?.Username)}
                             <div class="usr-cnt">
                                 <div class="info">
-                                <ProfileIcon img={element!.img} inFeed={true} />
+                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"} />
                                 <div>
                                     <span>
                                     {element?.Username}
@@ -260,7 +260,7 @@
             {#each partecipantsUsers as user}
             <div class="usr-cnt">
                 <div class="info">
-                <ProfileIcon img={user!.img} inFeed={true} />
+                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} />
                 <div>
                     <span>
                     {user?.Username}
@@ -319,7 +319,7 @@
                         <!-- {#if !partecipantsUsers.find(e => e?.name == element?.name)} -->
                             <div class="usr-cnt">
                                 <div class="info">
-                                <ProfileIcon img={element!.img} inFeed={true} />
+                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"} />
                                 <div>
                                     <span>
                                     {element?.name}
@@ -356,7 +356,7 @@
             {#each partecipantsUsers as user}
             <div class="usr-cnt">
                 <div class="info">
-                <ProfileIcon img={user!.img} inFeed={true} />
+                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} />
                 <div>
                     <span>
                     {user?.Username}

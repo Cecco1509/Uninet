@@ -212,7 +212,7 @@
     <div class="center">
       <label for="profileImg"> Seleziona un'immagine profilo </label>
       <div class="profile-img">
-      <ProfileIcon img={profileImage} inFeed={false} inRegistration={true}/>
+      <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"}/>
       </div>
     
       <div class="file-inp">

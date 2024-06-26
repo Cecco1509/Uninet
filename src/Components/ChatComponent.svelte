@@ -42,15 +42,15 @@
     if(date ==  messageBefore.data.timestamp.split(" ")[1]) return false;
     return true;
   };
+
+  let userInfo = usersInfoStore.getUserInfo(chat!.to, "CHAT").data;
 </script>
 
 
 <div id="chat">
   <div class="info">
-    {#await usersInfoStore.getUserInfo(chat!.to)}
-      <LoadIcon />
-    {:then userInfo}
-      <ProfileIcon img={userInfo?.img ? userInfo.img : null} inFeed={true} />
+    {#if userInfo }
+      <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"medium"}/>
       <button
         class="link-name"
         onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}}
@@ -59,7 +59,7 @@
           {userInfo?.Username}
         </span>
       </button>
-    {/await}
+    {/if}
   </div>
   <div class="msgs-cnt" bind:this={messagesBox} >
     <div  class="inner">
