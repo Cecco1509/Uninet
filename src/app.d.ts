@@ -49,6 +49,8 @@ declare global {
     Username: string;
     posts: number;
     id: string;
+    course: string;
+    notify: boolean;
   } | null;
 
   type MessageSchema = {
@@ -68,6 +70,7 @@ declare global {
     timestamp: string;
     n_partecipants: number;
     img: string | null;
+    sender: string;
   };
 
   type FriendsSchema = {

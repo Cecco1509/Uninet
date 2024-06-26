@@ -140,7 +140,7 @@ export class GroupChatFeed extends Chat implements Send {
       this._newElements = newMessages;
     }
 
-    this._fetchedAll = newMessages[0].id == "0";
+    this._fetchedAll = newMessages.length == 0 || newMessages[0].id == "0";
   }
 
   async getPartecipants() {

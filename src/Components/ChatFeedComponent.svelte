@@ -6,10 +6,15 @@
   import type { Chat } from "../stores/Feeds/Chat.svelte";
 
   let {chat} : {chat: Chat} = $props();
-
   
   let before : string[] = [];
   let posMap : {[key : number] : number} = {};
+
+  $effect(() =>{
+    chat.id;
+    before = [];
+    posMap = {};
+  })
 
   const printDate = (date: string, i : number): boolean => {
   //console.log(before , date)

@@ -56,6 +56,8 @@ export abstract class Chat implements IFeed {
     this._factory = factory;
     this._id = id;
     this._fetchedAll = true;
+
+    //if (this._id) this.currentUnsubscriber = this.getUnsubscriber();
   }
 
   async getElements(): Promise<Message[]> {
@@ -76,7 +78,7 @@ export abstract class Chat implements IFeed {
 
     this._fetchedAll = this._elements.length < this._queryBuilder!.loadSize;
 
-    if (this._elements.length > 0)
+    if (this._elements.length > 0 && !this.currentUnsubscriber)
       this.currentUnsubscriber = this.getUnsubscriber();
 
     return this._elements as Message[];
@@ -105,6 +107,7 @@ export abstract class Chat implements IFeed {
         this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
+
         console.log(this._freshMessages);
       }
     );
@@ -153,7 +156,7 @@ export abstract class Chat implements IFeed {
     let newMessages: Message[] = [];
 
     result.forEach((message) => {
-      newMessages.push({ ...message.val(), id: message.key });
+      newMessages.push(new Message(message.ref, message.val(), message.key));
       console.log(message.key);
     });
 

@@ -32,6 +32,9 @@ import { MessageFactory } from "../Factories/MessageFactory";
 import { ChatQueryBuilder } from "../QueryBuilders/ChatQueryBuilder";
 import { GroupChatFeed } from "../Feeds/GroupChatFeed.svelte";
 import User from "../../Components/User.svelte";
+import logo from "$lib/assets/hero.png";
+import { MenuStore, Positions } from "../Menu.svelte";
+import { goto } from "$app/navigation";
 
 export type ChatMap = {
   [key: string]: ChatFeed | undefined;
@@ -72,7 +75,10 @@ export class ChatCache {
     return strDate;
   }
 
-  private constructor() {}
+  private constructor() {
+    this.unsubscriber = this.getUnsubscriber();
+    this.groupUnsubscriber = this.getGroupsUnsubscriber();
+  }
 
   private getUnsubscriber() {
     return onSnapshot(
@@ -84,10 +90,18 @@ export class ChatCache {
             (snapshot) => {
               if (snapshot.exists()) {
                 const partecipants = snapshot.key!.split("&");
+                const chatInfo = snapshot.val() as chatInfo;
+
                 if (MyUser.getUser().userInfo!.Username == partecipants[0]) {
+                  console.log("MESSAGGIO ARRIVATO");
                   if (this._chats[partecipants[1]]) {
-                    this._chats[partecipants[1]]!.chatInfo =
-                      snapshot.val() as chatInfo;
+                    this._chats[partecipants[1]]!.chatInfo = chatInfo;
+                    this.notifyUser(
+                      chatInfo.lastMessage,
+                      partecipants[1],
+                      "",
+                      Positions.Messages
+                    );
                   } else {
                     this._chats[partecipants[1]] = new ChatFeed(
                       snapshot.key!,
@@ -97,11 +111,15 @@ export class ChatCache {
                       new MessageFactory()
                     );
                   }
-                  console.log(partecipants[1]);
                 } else {
                   if (this._chats[partecipants[0]]) {
-                    this._chats[partecipants[0]]!.chatInfo =
-                      snapshot.val() as chatInfo;
+                    this._chats[partecipants[0]]!.chatInfo = chatInfo;
+                    this.notifyUser(
+                      chatInfo.lastMessage,
+                      partecipants[0],
+                      "",
+                      Positions.Messages
+                    );
                   } else {
                     this._chats[partecipants[0]] = new ChatFeed(
                       snapshot.key!,
@@ -121,6 +139,47 @@ export class ChatCache {
       }
     );
   }
+  notifyUser(
+    message: string,
+    from: string,
+    sender: string,
+    position: Positions
+  ): void {
+    console.log(
+      "-----------------------------------------------------------CALLED NOTIFY"
+    );
+    if (MenuStore.getMenu().currentSection == position && !document.hidden) {
+      console.log(
+        "POSITIONS ------------------------------------------------------------------------->",
+        position,
+        MenuStore.getMenu().currentSection
+      );
+      return;
+    }
+    console.log(logo);
+    if (MyUser.getUser().userInfo?.notify) {
+      if (!("Notification" in window)) {
+        alert("Questo browser non supporta le notifiche");
+      } else if (Notification.permission === "granted") {
+        var notification = new Notification(from, {
+          lang: "it",
+          icon: logo,
+          body: sender + (sender ? ": " : "") + message,
+        });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            const notification = new Notification("Hi there!", {
+              body: "ciao",
+              icon: "",
+              requireInteraction: true,
+            });
+            notification.close();
+          }
+        });
+      }
+    }
+  }
 
   private getGroupsUnsubscriber(): (() => void) | null {
     return onSnapshot(
@@ -132,7 +191,19 @@ export class ChatCache {
             (snapshot) => {
               const groupInfo = snapshot.data() as groupChatInfo;
               if (this._groupChats[groupInfo.name]) {
-                this._groupChats[groupInfo.name]!.chatInfo = groupInfo;
+                this._groupChats[groupInfo.name]!.chatInfo = {
+                  ...this._groupChats[groupInfo.name]!.chatInfo,
+                  sender: groupInfo.sender,
+                  lastMessage: groupInfo.lastMessage,
+                  timestamp: groupInfo.timestamp,
+                  n_partecipants: groupInfo.n_partecipants,
+                };
+                this.notifyUser(
+                  groupInfo.lastMessage,
+                  groupInfo.name,
+                  groupInfo.sender,
+                  Positions.MessGroups
+                );
               } else
                 this._groupChats[groupInfo.name] = new GroupChatFeed(
                   group.id,
@@ -155,21 +226,10 @@ export class ChatCache {
   }
 
   get chats() {
-    if (this.unsubscribers.length > 0) return this._chats;
-
-    this.unsubscriber = this.getUnsubscriber();
-    // console.log("groupUnsubscriber getted chats");
-
     return this._chats;
   }
 
   get groupChats() {
-    if (this.groupUnsubscribers.length > 0) return this._groupChats;
-
-    this.groupUnsubscriber = this.getGroupsUnsubscriber();
-    // console.log("UNSUB", this.groupUnsubscribers.length);
-    // console.log("groupUnsubscriber getted groups");
-
     return this._groupChats;
   }
 
@@ -218,6 +278,7 @@ export class ChatCache {
     const group: groupChatInfo = {
       name: name,
       timestamp: ChatCache.getNowString(),
+      sender: MyUser.getUser().userInfo!.Username,
       lastMessage: "Creato",
       n_partecipants: partecipants.length + 1,
       img: img,
@@ -305,13 +366,11 @@ export class ChatCache {
 
   async setLastGroupMessage(id: string, newInfo: chatInfo) {
     if (this._groupChats[id])
-      await updateDoc(
-        doc(db, "groupsChatsInfo", this._groupChats[id].id!),
-        newInfo
-      );
+      await updateDoc(doc(db, "groupsChatsInfo", this._groupChats[id].id!), {
+        ...newInfo,
+        sender: MyUser.getUser().userInfo?.Username,
+      });
     else console.log("ID", id, "Qualcosa è andato storto");
-
-    /******** NOTIFICARE USER **********/
   }
 
   async join(name: string): Promise<{ joined: Boolean; errMessage: string }> {

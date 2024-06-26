@@ -8,8 +8,10 @@
   import PostComponent from "../Components/PostComponent.svelte";
   import User from "../Components/User.svelte";
   import firebase from "firebase/compat/app";
+  import { ChatCache } from "../stores/caches/ChatCache.svelte";
 
   const userState = MyUser.getUser();
+
   let menu = MenuStore.getMenu();
   let loading = $state(true)
 
@@ -24,6 +26,7 @@
       window.location.pathname == "/"
     ) {
       if (userState.userInfo) {
+        ChatCache.getCache();
         goto("/feed");
         menu.currentSection = Positions.Feed;
         loading = false;
@@ -62,6 +65,7 @@
       !userState.isLoading &&
       userState.userInfo
     ){
+      const chatChace = ChatCache.getCache();
       loading = false
     }
 
