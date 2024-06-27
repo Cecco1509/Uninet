@@ -1,38 +1,22 @@
-# create-svelte
+# Passi da eseguire per avviare l'app
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+- Scaricare il codice da github con il seguente comando - git clone git@github.com:Cecco1509/Uninet.git
 
-## Creating a project
+- eseguire il comando "npm install"
 
-If you're seeing this, you've probably already done this step. Congrats!
+- creare un file con nome ".env" e aggiungerlo alla directory principale ed aggiungere le seguenti informazioni
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+  VITE_APIKEY = **********\*\***********
+  VITE_AUTHDOMAIN = **********\*\***********
+  VITE_DATABASEURL= **********\*\***********
+  VITE_PROJECTID = **********\*\***********
+  VITE_STORAGEBUCKET = **********\*\***********
+  VITE_MESSAGINGSENDERID = **********\*\***********
+  VITE_APPID = **********\*\***********
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+- eseguire quindi "npm run dev" per avviare l'applicazione
 
-## Developing
+- Credenziali per l’account (si può creare un account nuovo se si vuole)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+  username : provaprof@uninet.com
+  password : 123456
