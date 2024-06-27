@@ -36,7 +36,7 @@ export class GroupChatFeed extends Chat implements Send {
     queryBuilder?: ChatQueryBuilder,
     factory?: MessageFactory
   ) {
-    super(id, queryBuilder, factory);
+    super(id);
     this._chatInfo = chatInfo;
   }
 
@@ -67,11 +67,12 @@ export class GroupChatFeed extends Chat implements Send {
       this._elements.push(
         new Message(message.ref, message.val(), message.key!)
       );
+      this._lastId = message.key;
     });
 
-    this._fetchedAll = this._elements.length < this._queryBuilder!.loadSize;
+    this._fetchedAll = this._elements.length < 30;
 
-    if (this._elements.length > 0)
+    if (this._elements.length > 0 && !this.currentUnsubscriber)
       this.currentUnsubscriber = this.getUnsubscriber();
 
     return this._elements as Message[];
@@ -79,26 +80,28 @@ export class GroupChatFeed extends Chat implements Send {
 
   protected getUnsubscriber(): () => void {
     let q1: Query | null = null;
+
+    let id = this._elements[this._elements.length - 1].id;
+    if (this._freshMessages.length > 0)
+      id = this._freshMessages[this._freshMessages.length - 1].id;
+
     if (this._elements.length > 0) {
       q1 = query(
         ref(realtimeDB, "groupsMessages" + "/" + this.chatInfo.name),
         orderByKey(),
-        startAfter(this._elements[this._elements.length - 1].id)
+        startAfter(id)
       );
     }
 
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),
       (message) => {
-        console.log(
-          "Message created: " + message.val(),
-          this._queryBuilder?.collection,
-          this._id
-        );
+        console.log("Message created: " + message.val(), this._id);
         this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
         console.log(this._freshMessages);
+        this._lastId = message.key!;
       }
     );
   }
@@ -111,7 +114,7 @@ export class GroupChatFeed extends Chat implements Send {
         this._newElements.length > 0
           ? this._newElements[0].id
           : this._elements[0].id
-      ) - this._queryBuilder!.loadSize;
+      ) - 30;
     const end: string =
       this._newElements.length > 0
         ? this._newElements[0].id

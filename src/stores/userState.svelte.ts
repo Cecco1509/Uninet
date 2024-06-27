@@ -55,10 +55,17 @@ export class MyUser {
         this.isInfoLoading = false;
         return;
       }
-      let unsubscribe = onSnapshot(doc(db, "Users", this._user.uid), (doc) => {
-        this._userInfo = doc.data() as UserInfo;
-        this.isInfoLoading = false;
-      });
+      let unsubscribe = onSnapshot(
+        doc(db, "Users", this._user.uid),
+        (doc) => {
+          this._userInfo = doc.data() as UserInfo;
+          this.isInfoLoading = false;
+        },
+        (err) => {
+          console.log("----------------------------------ERROREEEEE", err);
+        },
+        () => {}
+      );
 
       return () => {
         try {

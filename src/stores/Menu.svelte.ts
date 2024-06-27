@@ -14,6 +14,7 @@ export class MenuStore {
   private _currentSection = $state<Positions | null>();
 
   private static instance: MenuStore;
+  public offline: boolean = $state(false);
 
   static getMenu(position?: Positions | null | undefined): MenuStore {
     if (!this.instance)
@@ -50,5 +51,9 @@ export class MenuStore {
       default:
         return Positions.Login;
     }
+  }
+
+  setOffline(arg: boolean) {
+    this.offline = arg;
   }
 }

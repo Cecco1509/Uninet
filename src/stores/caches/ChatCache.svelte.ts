@@ -45,6 +45,41 @@ export type GroupChatMap = {
 };
 
 export class ChatCache {
+  static removeAllListeners() {
+    if (!this.instance) return;
+
+    console.log(
+      "------------------------------------------------------NO SUBSCRIBERS"
+    );
+
+    this.instance?.unsubscribers.forEach((unsubscribe) => {
+      unsubscribe?.();
+    });
+    Object.values(this.instance._chats).forEach((chat) => {
+      chat?.unsubscribe();
+    });
+    this.instance?.groupUnsubscribers.forEach((unsubscribe) => {
+      unsubscribe?.();
+    });
+    if (!this.instance) return;
+    Object.values(this.instance._groupChats).forEach((chat) => {
+      chat?.unsubscribe();
+    });
+
+    this.instance.unsubscriber?.();
+    this.instance.groupUnsubscriber?.();
+    this.instance.groupUnsubscriber = null;
+    this.instance.unsubscriber = null;
+    this.instance.groupUnsubscribers = [];
+    this.instance.unsubscribers = [];
+  }
+
+  subscribe() {
+    this.unsubscriber = this.getUnsubscriber();
+    this.groupUnsubscriber = this.getGroupsUnsubscriber();
+    console.log("---------------------------------------------SUBSCRIBERS");
+  }
+
   private _chats = $state<ChatMap>({});
   private _groupChats = $state<GroupChatMap>({});
   private unsubscribers: (() => void)[] = [];
@@ -56,6 +91,10 @@ export class ChatCache {
 
   static getCache() {
     if (!this.instance) this.instance = new ChatCache();
+    else {
+      if (!this.instance.unsubscriber && !this.instance.groupUnsubscriber)
+        this.instance.subscribe();
+    }
     return this.instance;
   }
 
@@ -76,8 +115,7 @@ export class ChatCache {
   }
 
   private constructor() {
-    this.unsubscriber = this.getUnsubscriber();
-    this.groupUnsubscriber = this.getGroupsUnsubscriber();
+    this.subscribe();
   }
 
   private getUnsubscriber() {
@@ -94,7 +132,11 @@ export class ChatCache {
 
                 if (MyUser.getUser().userInfo!.Username == partecipants[0]) {
                   console.log("MESSAGGIO ARRIVATO");
-                  if (this._chats[partecipants[1]]) {
+                  if (
+                    this._chats[partecipants[1]] &&
+                    this._chats[partecipants[1]]!.chatInfo.lastMessage !=
+                      chatInfo.lastMessage
+                  ) {
                     this._chats[partecipants[1]]!.chatInfo = chatInfo;
                     this.notifyUser(
                       chatInfo.lastMessage,
@@ -106,13 +148,15 @@ export class ChatCache {
                     this._chats[partecipants[1]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[1],
-                      snapshot.val(),
-                      new ChatQueryBuilder("messages", snapshot.key!, "", 30),
-                      new MessageFactory()
+                      snapshot.val()
                     );
                   }
                 } else {
-                  if (this._chats[partecipants[0]]) {
+                  if (
+                    this._chats[partecipants[0]] &&
+                    this._chats[partecipants[0]]!.chatInfo.lastMessage !=
+                      chatInfo.lastMessage
+                  ) {
                     this._chats[partecipants[0]]!.chatInfo = chatInfo;
                     this.notifyUser(
                       chatInfo.lastMessage,
@@ -124,9 +168,7 @@ export class ChatCache {
                     this._chats[partecipants[0]] = new ChatFeed(
                       snapshot.key!,
                       partecipants[0],
-                      snapshot.val(),
-                      new ChatQueryBuilder("messages", snapshot.key!, "", 30),
-                      new MessageFactory()
+                      snapshot.val()
                     );
                   }
                   console.log(partecipants[0]);
@@ -190,7 +232,13 @@ export class ChatCache {
             doc(db, "groupsChatsInfo/", group.id),
             (snapshot) => {
               const groupInfo = snapshot.data() as groupChatInfo;
-              if (this._groupChats[groupInfo.name]) {
+              if (
+                this._groupChats[groupInfo.name] &&
+                this._groupChats[groupInfo.name]!.chatInfo.lastMessage !=
+                  groupInfo.lastMessage &&
+                this._groupChats[groupInfo.name]!.chatInfo.sender !=
+                  groupInfo.sender
+              ) {
                 this._groupChats[groupInfo.name]!.chatInfo = {
                   ...this._groupChats[groupInfo.name]!.chatInfo,
                   sender: groupInfo.sender,
@@ -262,9 +310,9 @@ export class ChatCache {
     name: string,
     partecipants: string[],
     img: string
-  ): Promise<{ created: boolean; errMessage: string }> {
+  ): Promise<{ created: boolean; message: string }> {
     if (partecipants.length < 2)
-      return { created: false, errMessage: "Partecipanti insufficienti" };
+      return { created: false, message: "Partecipanti insufficienti" };
 
     if (
       this._groupChats[name] ||
@@ -272,7 +320,7 @@ export class ChatCache {
     )
       return {
         created: false,
-        errMessage: "Esiste già un gruppo con questo nome",
+        message: "Esiste già un gruppo con questo nome",
       };
 
     const group: groupChatInfo = {
@@ -336,7 +384,7 @@ export class ChatCache {
     //   new MessageFactory()
     // );
 
-    return { created: true, errMessage: "" };
+    return { created: true, message: "" };
   }
 
   async setLastMessage(
@@ -348,20 +396,11 @@ export class ChatCache {
       this._chats[username] = newChat;
       newChat.setId(MyUser.getUser().userInfo!.Username + "&" + username);
       await this.addChat(newChat.id!, username);
-      newChat.factory = new MessageFactory();
-      newChat.queryBuilder = new ChatQueryBuilder(
-        "messages",
-        newChat.id!,
-        "",
-        30
-      );
       console.log(newChat.id);
     }
 
     console.log(this._chats[username]?.id);
     await set(ref(realtimeDB, "chats/" + this._chats[username]?.id), newInfo);
-
-    /******** NOTIFICARE USER **********/
   }
 
   async setLastGroupMessage(id: string, newInfo: chatInfo) {
@@ -373,10 +412,10 @@ export class ChatCache {
     else console.log("ID", id, "Qualcosa è andato storto");
   }
 
-  async join(name: string): Promise<{ joined: Boolean; errMessage: string }> {
+  async join(name: string): Promise<{ esito: boolean; message: string }> {
     // check if the group exists in the cache
     if (this.groupChats[name])
-      return { joined: false, errMessage: "Sei già un membro" };
+      return { esito: false, message: "Sei già un membro" };
 
     // check if the group exists in the database
     const q = query(
@@ -390,7 +429,7 @@ export class ChatCache {
     });
 
     if (!group?.exists())
-      return { joined: false, errMessage: "Il gruppo " + name + " non esiste" };
+      return { esito: false, message: "Il gruppo " + name + " non esiste" };
 
     // check if the user is already a member of this group
 
@@ -407,7 +446,7 @@ export class ChatCache {
         )
       ).exists()
     )
-      return { joined: false, errMessage: "Sei già un membro" };
+      return { esito: false, message: "Sei già un membro" };
 
     // add participant to the group realtime database
 
@@ -436,7 +475,7 @@ export class ChatCache {
       );
     });
 
-    return { joined: true, errMessage: "" };
+    return { esito: true, message: "Sei entrato nel gruppo!" };
   }
 
   // async addChat(searchUser : string, initInfo : chatInfo) {

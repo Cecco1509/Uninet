@@ -34,51 +34,50 @@
 
 
 </script>
-
-{#await chat.getElements() then messages}
-    {#if !chat.fetchedAll}
-        <div class="msg-cnt">
-        <div class="day">
-            <button class="load" onclick={
-            async () => 
-                { 
-                    await chat.loadMore();
-                    //setTimeout(() => messagesBox!.scrollBy({top : 600, behavior: "smooth"}), 1000);
-                    //console.log(-100/times);
-                    //messagesBox!.scrollTop = -900
-            }}>
-            Carica
-            </button>
-        </div>
-        </div>
-    {/if}
-    <!-- Nuovi messaggi -->
-    {#each {length : chat.newMessages.length} as _,i}
-        {#if printDate(chat.newMessages[i].data.timestamp.split(" ")[1], i)}  <!--  -->
-        <div class="msg-cnt" in:fade>
-        <div class="day">
-            {before[posMap[i]]}
-        </div>
-        </div>
-        {/if}
-        <MessageComponent message={chat.newMessages[i]} fade={true} />
-    {/each}
-    <!-- Vecchi messaggi -->
-    {#each {length : messages.length} as _, i}
-        {#if printDate(messages[i].data.timestamp.split(" ")[1], i)}
-        <div class="msg-cnt">
-            <div class="day">
-            {before[posMap[i]]}
-            </div>
-        </div>
-        {/if}
-        <MessageComponent message={messages[i]} fade={false}/>
-    {/each}
-    <!-- Messaggi appena arrivati e mandati -->
-    {#each chat.freshMessages as message}
-        <MessageComponent {message} fade={false}/>
-    {/each}
-{/await}
+  {#await chat.getElements() then messages}
+      {#if !chat.fetchedAll}
+          <div class="msg-cnt">
+          <div class="day">
+              <button class="load" onclick={
+              async () => 
+                  { 
+                      await chat.loadMore();
+                      //setTimeout(() => messagesBox!.scrollBy({top : 600, behavior: "smooth"}), 1000);
+                      //console.log(-100/times);
+                      //messagesBox!.scrollTop = -900
+              }}>
+              Carica
+              </button>
+          </div>
+          </div>
+      {/if}
+      <!-- Nuovi messaggi -->
+      {#each {length : chat.newMessages.length} as _,i}
+          {#if printDate(chat.newMessages[i].data.timestamp.split(" ")[1], i)}  <!--  -->
+          <div class="msg-cnt" in:fade>
+          <div class="day">
+              {before[posMap[i]]}
+          </div>
+          </div>
+          {/if}
+          <MessageComponent message={chat.newMessages[i]} fade={true} />
+      {/each}
+      <!-- Vecchi messaggi -->
+      {#each {length : messages.length} as _, i}
+          {#if printDate(messages[i].data.timestamp.split(" ")[1], i)}
+          <div class="msg-cnt">
+              <div class="day">
+              {before[posMap[i]]}
+              </div>
+          </div>
+          {/if}
+          <MessageComponent message={messages[i]} fade={false}/>
+      {/each}
+      <!-- Messaggi appena arrivati e mandati -->
+      {#each chat.freshMessages as message}
+          <MessageComponent {message} fade={false}/>
+      {/each}
+  {/await}
 
 
 <style>

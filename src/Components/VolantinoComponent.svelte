@@ -24,7 +24,7 @@
         
         <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantino.data.createdBy)}} >Contatta</button>
     </div>
-    <img src={volantino.data.img} alt="" />
+    <img src={MenuStore.getMenu().offline ? "" : volantino.data.img} alt="" />
 </div>
 
 <style>

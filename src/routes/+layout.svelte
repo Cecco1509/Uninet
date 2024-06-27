@@ -9,6 +9,8 @@
   import User from "../Components/User.svelte";
   import firebase from "firebase/compat/app";
   import { ChatCache } from "../stores/caches/ChatCache.svelte";
+  import { ref } from "firebase/database";
+  import { realtimeDB } from "$lib/firebase/firebase.client";
 
   const userState = MyUser.getUser();
 
@@ -18,6 +20,12 @@
   let { children } = $props();
 
   $effect(() => {
+    
+    if(MenuStore.getMenu().offline && !navigator.onLine) {
+      loading= false;
+      goto("/offline");
+      return;
+    }
     //console.log(userState.user, userState.userInfo);
     if (
       browser &&
@@ -65,11 +73,11 @@
       !userState.isLoading &&
       userState.userInfo
     ){
-      const chatChace = ChatCache.getCache();
+      ChatCache.getCache();
       loading = false
     }
 
-    loading  = false;
+    loading = false;
   });
 
   $inspect(menu.currentSection);
@@ -79,6 +87,10 @@
       window.location.pathname.split("/")[1],
     );
   });
+
+  $effect(() => {
+    //if(MenuStore.getMenu().offline && !loading) ChatCache.removeAllListeners();
+  })
 
   // $effect(() => {
   //   if (!("Notification" in window)) {

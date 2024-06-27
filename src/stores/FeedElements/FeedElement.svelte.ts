@@ -1,4 +1,4 @@
-import { type DocumentData } from "firebase/firestore";
+import { deleteDoc, type DocumentData } from "firebase/firestore";
 
 export abstract class FeedElement {
   protected _data = $state<DocumentData>();

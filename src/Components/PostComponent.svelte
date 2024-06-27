@@ -15,6 +15,7 @@
   import type { Post } from "../stores/FeedElements/Post.svelte";
   import { PostCache } from "../stores/caches/PostCache.svelte";
   import { UserInfosCache } from "../stores/caches/UserInfosCache.svelte";
+  import { MenuStore } from "../stores/Menu.svelte";
 
   let {
     post,

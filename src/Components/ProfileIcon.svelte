@@ -3,12 +3,13 @@
   import { getDownloadURL, ref } from "firebase/storage";
   import userDefault from "$lib/assets/userDefault.png";
   import groupDefault from "$lib/assets/userDefault.png";
+  import { MenuStore } from "../stores/Menu.svelte";
 
   let { img, inRegistration, dimension, groupIcon} : { img: string | null; inRegistration : boolean; groupIcon : boolean; dimension : string} = $props();
   let profileImg = $state<any>();
 
   $effect(() => {
-    if (!img ||inRegistration) return;
+    if (!img ||inRegistration || MenuStore.getMenu().offline) return;
     if( profileImg == null || profileImg.src == null) return;
 
     try {
@@ -28,11 +29,11 @@
 </script>
 
 {#if dimension == "big"}
-  <div class={groupIcon ? "groupBorder userPageImg" : "Border userPageImg"}>
+  <div class={groupIcon ? "groupBorder userPageImg" : "border userPageImg"}>
     <img bind:this={profileImg} src={inRegistration && img ? img : (groupIcon ? groupDefault : userDefault)} alt=""/>
   </div>
 {:else if dimension == "medium"}
-  <div class={groupIcon ? "groupBorder userPostImg" : "Border userPostImg"}>
+  <div class={groupIcon ? "groupBorder userPostImg" : "border userPostImg"}>
     <img bind:this={profileImg} src={(groupIcon ? groupDefault : userDefault)} alt=""/>
   </div>
 {:else if dimension == "small"}

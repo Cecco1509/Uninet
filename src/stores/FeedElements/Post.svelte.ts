@@ -15,12 +15,14 @@ import {
   Timestamp,
   addDoc,
   startAfter,
+  deleteDoc,
 } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 import { MyUser } from "../userState.svelte";
 import { FeedElement } from "./FeedElement.svelte";
 import type { Likable } from "../Interfaces/likable";
 import type { Delete } from "../Feeds/IFeed";
+import { MenuStore } from "../Menu.svelte";
 
 export class Post extends FeedElement implements Likable, Delete {
   private likeRef: DocumentReference;
@@ -50,13 +52,14 @@ export class Post extends FeedElement implements Likable, Delete {
     this.imgPath = this._data!.img;
     this._data!.img = "";
 
-    getDownloadURL(ref(storage, this.imgPath))
-      .then((url) => {
-        this._data!.img = url;
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    if (!MenuStore.getMenu().offline)
+      getDownloadURL(ref(storage, this.imgPath))
+        .then((url) => {
+          this._data!.img = url;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
   }
 
   get data() {
@@ -197,5 +200,16 @@ export class Post extends FeedElement implements Likable, Delete {
     this._fetchedAllComments = result.size < 5;
 
     return;
+  }
+
+  async delete(): Promise<void> {
+    try {
+      await deleteDoc(this.ref);
+      await updateDoc(doc(db, "Users/" + MyUser.getUser().user?.uid), {
+        posts: MyUser.getUser().userInfo!.posts - 1,
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
 }

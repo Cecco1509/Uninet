@@ -30,14 +30,8 @@ export class ChatFeed extends Chat implements Send {
   private _chatInfo = $state<chatInfo>();
   private _to: string;
 
-  constructor(
-    id: string,
-    to: string,
-    chatInfo: chatInfo,
-    queryBuilder?: ChatQueryBuilder,
-    factory?: MessageFactory
-  ) {
-    super(id, queryBuilder, factory);
+  constructor(id: string, to: string, chatInfo: chatInfo) {
+    super(id);
     this._chatInfo = chatInfo;
     this._to = to;
   }

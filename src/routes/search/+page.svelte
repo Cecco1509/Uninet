@@ -123,7 +123,7 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="usr-cnt">
         <div class="info">
-          <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} />
+          <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
           <div>
             <span>
               {user?.Username}

@@ -3,7 +3,10 @@
   import { auth } from "$lib/firebase/firebase.client";
   import { FirebaseError } from "firebase/app";
   import {
+  browserLocalPersistence,
+  browserSessionPersistence,
     createUserWithEmailAndPassword,
+    setPersistence,
     signInWithEmailAndPassword,
   } from "firebase/auth";
   import LoadIcon from "./LoadIcon.svelte";
@@ -11,6 +14,7 @@
   import Registration from "./Registration.svelte";
   import { MyUser } from "../stores/userState.svelte";
   import { MenuStore, Positions } from "../stores/Menu.svelte";
+  import { goto } from "$app/navigation";
 
   const user = MyUser.getUser();
   let register = $state(false);
@@ -20,26 +24,38 @@
   let error = $state<string | null>("");
   let submitted = $state<boolean>(false);
   let completing = $state<boolean>(false);
-  let steps = $state<number>(0)
+  let rememberMe = $state(true);
   let uid = $state("");
 
   MenuStore.getMenu().currentSection = Positions.Login;
 
-    $effect(() => {
-      if(user.isLoading) return
+  $effect(() => {
+    if(user.isLoading) return
 
-      completing = !user.userInfo && user.user ? true : false;
-      console.log(completing)
-    })
+    completing = !user.userInfo && user.user ? true : false;
+    console.log(completing)
+  })
 
   async function handleSubmit() {
+    if(user.isLoading) {
+      console.log("LOADING...");
+      return
+    }
     if (!email || !password || (register && !confirmPassword)) {
+      submitted = false;
+      return;
+    }
+
+    if(MenuStore.getMenu().offline) {
+      console.log("SEI OFFLINE MI DISP")
       submitted = false;
       return;
     }
 
     if (register && password === confirmPassword) {
       try {
+        if (!rememberMe) await setPersistence(auth, browserSessionPersistence)
+        else await setPersistence(auth, browserLocalPersistence);
         const user = await createUserWithEmailAndPassword(auth, email, password)
         completing = true;
         uid = user.user.uid;
@@ -49,6 +65,8 @@
       }
     } else {
       try {
+        if (!rememberMe) await setPersistence(auth, browserSessionPersistence)
+        else await setPersistence(auth, browserLocalPersistence);
         await signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
         error = (e as FirebaseError).code;
@@ -97,6 +115,14 @@
                 <input bind:value={confirmPassword} type="password" id="conf-pass" placeholder="••••••••••••"/>
               </div>  
             {/if}
+
+            <div class="input-wrapper">
+              <input type="checkbox" name="remember" id="remember" bind:checked={rememberMe}>
+              <label for="remember">
+                Rimanere connessi
+              </label>
+            </div>
+            
 
             <button
               onclick={() => {
@@ -320,6 +346,27 @@
       font-size: 3em;
     }
     
+  }
+
+  input[type = checkbox]{
+    width: 1.3em;
+    height: 1.3em;
+    outline: none;
+    box-sizing: border-box !important;
+    background-color: #393e41;
+    color: white;
+    border: 2px solid #28736f;
+    padding: 0px 10px;
+    /*font-size: 16px;       */
+    transition: all 0.5s;
+    margin-bottom: 10%;
+    animation: fadeIn 0.7s forwards;
+    margin-left: 10px;
+
+    &:focus {
+      border-color: #21e3da;
+      box-shadow: none;
+    }
   }
 
   @media only screen and (max-width: 600px) {

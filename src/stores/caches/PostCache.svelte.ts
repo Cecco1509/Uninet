@@ -76,7 +76,10 @@ export class PostCache implements FeedsCache {
     );
   }
 
-  async publishPost(postText: string, photoUrl: string) {
+  async publishPost(
+    postText: string,
+    photoUrl: string
+  ): Promise<{ esito: boolean; message: string }> {
     const newPostSchema: PostSchema = {
       data: Timestamp.fromDate(new Date()),
       text: postText,
@@ -102,6 +105,9 @@ export class PostCache implements FeedsCache {
       console.log("ADD request");
     } catch (e) {
       console.log("Errore", e);
+      return { esito: false, message: "Si è verificato un errore" };
     }
+
+    return { esito: true, message: "Post pubblicato!" };
   }
 }

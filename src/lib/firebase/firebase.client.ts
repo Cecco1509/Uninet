@@ -19,9 +19,12 @@ import {
   getFirestore,
   initializeFirestore,
   persistentLocalCache,
+  persistentMultipleTabManager,
   type Firestore,
 } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { MenuStore } from "../../stores/Menu.svelte";
+import { ChatCache } from "../../stores/caches/ChatCache.svelte";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -36,26 +39,35 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let firebaseApp: FirebaseApp;
+let firestoreDB: Firestore;
 if (!getApps().length) {
   firebaseApp = initializeApp(firebaseConfig);
+  firestoreDB = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({}),
+  });
 } else {
   firebaseApp = getApp();
   deleteApp(firebaseApp);
   firebaseApp = initializeApp(firebaseConfig);
-  //firestoreDB = initializeFirestore(firebaseApp, {localCache: persistentLocalCache({}), })
+  firestoreDB = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  });
 }
 
 export const auth: Auth = getAuth(firebaseApp);
-export const db: Firestore = getFirestore();
+export const db: Firestore = firestoreDB;
 export const storage: FirebaseStorage = getStorage();
 export const realtimeDB: Database = getDatabase();
-
 const connectedRef = ref(realtimeDB, ".info/connected");
 
 onValue(connectedRef, (snap) => {
   if (snap.val() === true) {
     console.log("connected");
+    MenuStore.getMenu().offline = false;
   } else {
     console.log("not connected");
+    MenuStore.getMenu().offline = true;
   }
 });

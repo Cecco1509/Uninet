@@ -30,32 +30,35 @@ export abstract class Chat implements IFeed {
   protected _newElements = $state<Message[]>([]);
   protected currentUnsubscriber: (() => void) | undefined;
   protected _id = $state<string>();
-  protected _queryBuilder: ChatQueryBuilder | undefined;
-  protected _factory: MessageFactory | undefined;
+  // protected _queryBuilder: ChatQueryBuilder | undefined;
+  // protected _factory: MessageFactory | undefined;
   protected _fetchedAll: boolean = $state(false);
   protected _freshMessages = $state<Message[]>([]);
+  protected _lastId: string;
 
-  set queryBuilder(q: ChatQueryBuilder) {
-    this._queryBuilder = q;
+  unsubscribe(): void {
+    this.currentUnsubscriber?.();
+    this.currentUnsubscriber = undefined;
   }
 
-  set factory(f: MessageFactory) {
-    this._factory = f;
-  }
+  // set queryBuilder(q: ChatQueryBuilder) {
+  //   this._queryBuilder = q;
+  // }
+
+  // set factory(f: MessageFactory) {
+  //   this._factory = f;
+  // }
 
   get freshMessages() {
     return this._freshMessages;
   }
 
-  constructor(
-    id: string,
-    queryBuilder?: ChatQueryBuilder,
-    factory?: MessageFactory
-  ) {
-    this._queryBuilder = queryBuilder;
-    this._factory = factory;
+  constructor(id: string) {
+    // this._queryBuilder = queryBuilder;
+    // this._factory = factory;
     this._id = id;
     this._fetchedAll = true;
+    this._lastId = "0";
 
     //if (this._id) this.currentUnsubscriber = this.getUnsubscriber();
   }
@@ -72,11 +75,12 @@ export abstract class Chat implements IFeed {
 
     result.forEach((snapshot) => {
       this._elements.push(
-        this._factory!.create(snapshot.ref, snapshot.val(), snapshot.key!)
+        new Message(snapshot.ref, snapshot.val(), snapshot.key!)
       );
+      this._lastId = snapshot.key;
     });
 
-    this._fetchedAll = this._elements.length < this._queryBuilder!.loadSize;
+    this._fetchedAll = this._elements.length < 30;
 
     if (this._elements.length > 0 && !this.currentUnsubscriber)
       this.currentUnsubscriber = this.getUnsubscriber();
@@ -88,27 +92,31 @@ export abstract class Chat implements IFeed {
     console.log("getUnsubscriber Called", this._id);
     let q1: Query | null = null;
 
+    let id =
+      this._elements.length > 0
+        ? this._elements[this._elements.length - 1].id
+        : "0";
+    if (this._freshMessages.length > 0)
+      id = this._freshMessages[this._freshMessages.length - 1].id;
+
     if (this._elements.length > 0) {
       q1 = query(
         ref(realtimeDB, "messages" + "/" + this._id),
         orderByKey(),
-        startAfter(this._elements[this._elements.length - 1].id)
+        startAfter(id)
       );
     }
 
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "messages/" + this._id),
       (message) => {
-        console.log(
-          "Message created: " + message.val(),
-          this._queryBuilder?.collection,
-          this._id
-        );
+        console.log("Message created: " + message.val(), this._id);
         this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
 
         console.log(this._freshMessages);
+        this._lastId = message.key!;
       }
     );
   }
@@ -137,7 +145,7 @@ export abstract class Chat implements IFeed {
         this._newElements.length > 0
           ? this._newElements[0].id
           : this._elements[0].id
-      ) - this._queryBuilder!.loadSize;
+      ) - 30;
     const end: string =
       this._newElements.length > 0
         ? this._newElements[0].id

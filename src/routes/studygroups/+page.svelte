@@ -17,6 +17,7 @@
   import Loading from "../../Components/Loading.svelte";
   import GroupChat from "../../Components/GroupChat.svelte";
   import GroupChatComponent from "../../Components/GroupChatComponent.svelte";
+  import Popup from "../../Components/Popup.svelte";
   
     const userState = MyUser.getUser();
     const userBD = UserInfosCache.getCache();
@@ -133,7 +134,6 @@
     const result = await ChatCache.getCache().addGroupChat(newGroupName, partecipanti, await uploadCurrentPhoto())
 
     if(result.created) closeModal(null);
-    else console.log(result.errMessage);
     creating = false;
   }
 
@@ -150,12 +150,24 @@
 
     const result = await ChatCache.getCache().join(name)
 
-    if(result.joined) closeModal(null);
-    else console.log(result.errMessage);
+    if(result.esito) {
+        closeModal(null)
+    };
+
+    popup = {result: result, i : popup ? popup.i + 1 : 0};
 
     creating = false;
   }
+
+
+  let popup = $state<{result : {esito : boolean, message : string}, i : number} | undefined>();
 </script>
+
+{#if popup}
+  {#key popup.i}
+    <Popup message={popup?.result.message} success={popup?.result.esito} />
+  {/key}
+{/if}
 
 <div class="outer-mdl" bind:this={modal}>
     <div class="inner-mdl">
@@ -177,7 +189,7 @@
                 <span> Seleziona un'immagine profilo </span>
                 <div style="display: flex; align-items:center; margin-top:10px; gap: 10px;">
                     <div class="profile-img">
-                        <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"}/>
+                        <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"} groupIcon={true}/>
                     </div>
                     
                     <div class="file-inp">
@@ -228,7 +240,7 @@
                         {#if !partecipantsUsers.find(e => e?.Username == element?.Username)}
                             <div class="usr-cnt">
                                 <div class="info">
-                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"} />
+                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"}  groupIcon={false}/>
                                 <div>
                                     <span>
                                     {element?.Username}
@@ -260,7 +272,7 @@
             {#each partecipantsUsers as user}
             <div class="usr-cnt">
                 <div class="info">
-                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} />
+                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"}  groupIcon={false}/>
                 <div>
                     <span>
                     {user?.Username}
@@ -319,7 +331,7 @@
                         <!-- {#if !partecipantsUsers.find(e => e?.name == element?.name)} -->
                             <div class="usr-cnt">
                                 <div class="info">
-                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"} />
+                                <ProfileIcon img={element!.img} inRegistration={false} dimension={"medium"}  groupIcon={true}/>
                                 <div>
                                     <span>
                                     {element?.name}
@@ -357,7 +369,7 @@
             {#each partecipantsUsers as user}
             <div class="usr-cnt">
                 <div class="info">
-                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} />
+                <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"}  groupIcon={false}/>
                 <div>
                     <span>
                     {user?.Username}

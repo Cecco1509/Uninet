@@ -1,7 +1,8 @@
 import { storage } from "$lib/firebase/firebase.client";
-import { DocumentReference, updateDoc } from "firebase/firestore";
+import { deleteDoc, DocumentReference, updateDoc } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 import { FeedElement } from "./FeedElement.svelte";
+import { MenuStore } from "../Menu.svelte";
 
 export class Volantino extends FeedElement {
   private ref: DocumentReference;
@@ -16,13 +17,14 @@ export class Volantino extends FeedElement {
     this.imgPath = this._data!.img;
     this._data!.img = "";
 
-    getDownloadURL(ref(storage, this.imgPath))
-      .then((url) => {
-        this._data!.img = url;
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    if (!MenuStore.getMenu().offline)
+      getDownloadURL(ref(storage, this.imgPath))
+        .then((url) => {
+          this._data!.img = url;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
   }
 
   get data() {
@@ -38,6 +40,14 @@ export class Volantino extends FeedElement {
       this._data = { ...this._data!, ...edits };
     } catch (e) {
       console.log("Not Updated", e);
+    }
+  }
+
+  async delete(): Promise<void> {
+    try {
+      await deleteDoc(this.ref);
+    } catch (e) {
+      console.log(e);
     }
   }
 }

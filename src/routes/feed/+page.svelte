@@ -10,6 +10,7 @@
   import { ChatCache } from "../../stores/caches/ChatCache.svelte";
   import { UserInfosCache } from "../../stores/caches/UserInfosCache.svelte";
   import { MenuStore, Positions } from "../../stores/Menu.svelte";
+  import Popup from "../../Components/Popup.svelte";
 
   const userState = MyUser.getUser();
   
@@ -29,21 +30,15 @@
   let avatar = $state<FileList | null>();
   let input = $state<HTMLInputElement>();
   let postImage = $state("");
+  let popup = $state<{result : {esito : boolean, message : string}, i : number} | undefined>();
 
   async function uploadCurrentPhoto(): Promise<string> {
     if (!avatar || avatar.length == 0) return "";
 
     let url = "postImages/" + uuidv4() + "." + avatar[0].type.split("/")[1];
-
-    try {
-      const imageRef = ref(storage, url);
-      await uploadBytes(imageRef, avatar[0]);
-    } catch (e) {
-      url = "";
-    } finally {
-      input!.value = "";
-    }
-
+    const imageRef = ref(storage, url);
+    await uploadBytes(imageRef, avatar[0]);
+    
     return url;
   }
 
@@ -58,7 +53,6 @@
       postImage = reader.result as string;
     });
     reader.readAsDataURL(file);
-
     }
 
   const deleteSelection = () => {
@@ -67,11 +61,15 @@
   }
 
   async function handleSubmit() {
-    if (!postText && !postImage) return;
+    if (!postText && !postImage) {
+      popup = {result : {esito : false, message: "Inserisci un immagine o del testo"}, i : popup ? popup.i + 1 : 0};
+      return;
+    };
 
     try {
-      await postStore.publishPost(postText, await uploadCurrentPhoto());
-      console.log("Pubblicato");
+      const r = await postStore.publishPost(postText, await uploadCurrentPhoto());
+      popup = {result : r, i : popup ? popup.i + 1 : 0};
+      console.log(popup);
     } catch (e) {
       error = (e as Error).message;
     } finally {
@@ -101,6 +99,13 @@
 <svelte:head>
   <title>Uninet | Feed</title>
 </svelte:head>
+
+{#if popup}
+  {#key popup.i}
+    <Popup message={popup?.result.message} success={popup?.result.esito} />
+  {/key}
+{/if}
+
 <div class="publish">
   <br />
   <h1>Feed</h1>

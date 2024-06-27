@@ -68,7 +68,7 @@
      {#await usersInfoStore.getUserInfo(chat!.to, "MESSAGES").waitForComplete() then userInfo}
         <div class="info">
           <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
-          <div>
+          <div class="chatInfo">
             <span>
               {userInfo!.Username}
             </span><br />
@@ -106,31 +106,6 @@
     vertical-align: middle;
   }
 
-  /* .empty-list{
-        height: 100px;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    button{
-        cursor: pointer;
-        margin-left: 10px;
-        border: none;
-        border-radius: 5px;
-        background-color: transparent;
-        color: white;
-        width: auto;
-        padding: 8px;
-        transition: all 0.3s;
-
-        &:hover{
-            background-color: #e6c9605c;
-
-        }
-    } */
-
   .usr-cnt {
     margin: 10px;
     border: 1px solid gray;
@@ -153,5 +128,11 @@
   .flws {
     color: rgba(255, 255, 255, 0.744);
     font-size: 1em;
+  }
+
+  @media (max-width: 1024px){
+    .chatInfo{
+      display: none;
+    }
   }
 </style>
