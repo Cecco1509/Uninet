@@ -14,7 +14,9 @@ export class UserInfoObject {
     this._id = id;
     this._promise = promise;
     promise.then((data) => {
-      data.forEach((user) => (this._data = user.data() as UserInfo));
+      data.forEach((user) => {
+        (this._data = user.data() as UserInfo), (this._id = user.id);
+      });
     });
   }
 
@@ -35,6 +37,7 @@ export class UserInfoObject {
 
   async waitForComplete(): Promise<UserInfo> {
     await this._promise;
-    return this._data;
+    console.log("ID" + this._id);
+    return { ...this._data!, id: this._id };
   }
 }
