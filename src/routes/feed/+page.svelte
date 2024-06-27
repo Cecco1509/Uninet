@@ -105,7 +105,6 @@
     <Popup message={popup?.result.message} success={popup?.result.esito} />
   {/key}
 {/if}
-
 <div class="publish">
   <br />
   <h1>Feed</h1>
@@ -140,16 +139,6 @@
   <hr />
   <Posts feed={feed} inUserPage={false} editable={false} />
 </div>
-
-<!-- Cose da fare qui
-
-    - Far vedere i post della gente
-    - Box per creare un post (Ora)
-    - barra in alto?
-    - barra in basso? (✔️)
-    - Barra laterale?
-
--->
 
 <style>
 
@@ -233,12 +222,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-
-  .consigliati{
-    height: 200px;
-    width: 100%;
-    background-color: blue;
   }
 
   .publish {

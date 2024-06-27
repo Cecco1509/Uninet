@@ -35,7 +35,7 @@
     ) {
       if (userState.userInfo) {
         ChatCache.getCache();
-        window.location.href = "/feed"
+        goto("/feed")
         loading = false;
       }else{
         Positions.Registration;
@@ -60,7 +60,7 @@
       !userState.userInfo &&
       window.location.pathname !== "/"
     ) {
-      window.location.href = "/"
+      //window.location.href = "/"
       menu.currentSection = Positions.Registration;
       loading = false;
     }
@@ -86,29 +86,6 @@
     );
   });
 
-  $effect(() => {
-    //if(MenuStore.getMenu().offline && !loading) ChatCache.removeAllListeners();
-  })
-
-  // $effect(() => {
-  //   if (!("Notification" in window)) {
-  //     alert("This browser does not support desktop notification");
-  //   }else if (Notification.permission === "granted") {
-  //     var notification = new Notification( "Hello!", {
-  //       lang : "it",
-  //       body: "Testo della notifica", //200ms pausa, 200ms, image: 'imgurl',
-  //       } );
-
-  //   } else if (Notification.permission !== "denied") {
-
-  //     Notification.requestPermission().then((permission) => {
-  //       if (permission === "granted") {
-  //         const notification = new Notification("Hi there!", {body : "ciao", icon: "", requireInteraction: true});
-  //         notification.close();
-  //       }
-  //     });
-  //   }
-  // })
 </script>
 
 {#if !userState.isLoading && !loading}
@@ -129,10 +106,6 @@
       {@render children()}
     </div>
   {/if}
-  
-  <!-- <footer>
-      <span>Uninet | Created with ❤️ by Lorenzo Ceccotti</span>
-    </footer> -->
 {:else}
   <Loading />
 {/if}

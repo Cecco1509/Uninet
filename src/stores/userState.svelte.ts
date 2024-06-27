@@ -62,7 +62,7 @@ export class MyUser {
           this.isInfoLoading = false;
         },
         (err) => {
-          console.log("----------------------------------ERROREEEEE", err);
+          console.log(err);
         },
         () => {}
       );
