@@ -40,7 +40,10 @@
     <div class="info">
       {#if chat}
         <div style="display: flex; align-items:center; gap:10px; width:90%">
-          <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"} groupIcon={true}/>
+          {#key chat}
+            <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"} groupIcon={true}/>
+          {/key}
+          
           <button
             class="link-name"
             

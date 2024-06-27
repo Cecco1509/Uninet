@@ -39,27 +39,19 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let firebaseApp: FirebaseApp;
-let firestoreDB: Firestore;
 if (!getApps().length) {
   firebaseApp = initializeApp(firebaseConfig);
-  firestoreDB = initializeFirestore(firebaseApp, {
-    localCache: persistentLocalCache({}),
-  });
 } else {
   firebaseApp = getApp();
   deleteApp(firebaseApp);
   firebaseApp = initializeApp(firebaseConfig);
-  firestoreDB = initializeFirestore(firebaseApp, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
-  });
 }
 
 export const auth: Auth = getAuth(firebaseApp);
-export const db: Firestore = firestoreDB;
+export const db: Firestore = getFirestore(firebaseApp);
 export const storage: FirebaseStorage = getStorage();
 export const realtimeDB: Database = getDatabase();
+
 const connectedRef = ref(realtimeDB, ".info/connected");
 
 onValue(connectedRef, (snap) => {

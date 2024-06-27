@@ -66,7 +66,9 @@
         }}
       >
       <div class="info">
-        <ProfileIcon img={chat.chatInfo!.img} inRegistration={false} dimension={"medium"} groupIcon={true}/>
+        {#key chat}
+          <ProfileIcon img={chat.chatInfo!.img} inRegistration={false} dimension={"medium"} groupIcon={true}/>
+        {/key}
         <div>
           <span>
             {chat.chatInfo!.name}

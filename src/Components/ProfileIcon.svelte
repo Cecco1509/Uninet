@@ -2,7 +2,7 @@
   import { storage } from "$lib/firebase/firebase.client";
   import { getDownloadURL, ref } from "firebase/storage";
   import userDefault from "$lib/assets/userDefault.png";
-  import groupDefault from "$lib/assets/userDefault.png";
+  import groupDefault from "$lib/assets/groupDefault.png";
   import { MenuStore } from "../stores/Menu.svelte";
 
   let { img, inRegistration, dimension, groupIcon} : { img: string | null; inRegistration : boolean; groupIcon : boolean; dimension : string} = $props();

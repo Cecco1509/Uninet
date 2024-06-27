@@ -255,14 +255,7 @@ export class ChatCache {
               } else
                 this._groupChats[groupInfo.name] = new GroupChatFeed(
                   group.id,
-                  groupInfo,
-                  new ChatQueryBuilder(
-                    "groupsMessages",
-                    groupInfo.name,
-                    "",
-                    30
-                  ),
-                  new MessageFactory()
+                  groupInfo
                 );
             }
           );

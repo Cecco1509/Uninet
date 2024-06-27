@@ -30,14 +30,10 @@ export class GroupChatFeed extends Chat implements Send {
   private partecipantsUnsubscribe: (() => void) | undefined;
   //private _freshMessages = $state<Message[]>([]);
 
-  constructor(
-    id: string,
-    chatInfo: groupChatInfo,
-    queryBuilder?: ChatQueryBuilder,
-    factory?: MessageFactory
-  ) {
+  constructor(id: string, chatInfo: groupChatInfo) {
     super(id);
     this._chatInfo = chatInfo;
+    this.currentUnsubscriber = this.getUnsubscriber();
   }
 
   get chatInfo() {
@@ -81,7 +77,10 @@ export class GroupChatFeed extends Chat implements Send {
   protected getUnsubscriber(): () => void {
     let q1: Query | null = null;
 
-    let id = this._elements[this._elements.length - 1].id;
+    let id =
+      this._elements.length > 0
+        ? this._elements[this._elements.length - 1].id
+        : "0";
     if (this._freshMessages.length > 0)
       id = this._freshMessages[this._freshMessages.length - 1].id;
 
@@ -92,6 +91,13 @@ export class GroupChatFeed extends Chat implements Send {
         startAfter(id)
       );
     }
+
+    console.log(
+      "-----------------------------------------------------------------------------------------------------------------------",
+      this.chatInfo.name,
+      q1,
+      id
+    );
 
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),

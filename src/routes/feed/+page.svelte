@@ -137,9 +137,6 @@
   </div>
 </div>
 <div>
-
-  <hr>
-  <div class="consigliati"></div>
   <hr />
   <Posts feed={feed} inUserPage={false} editable={false} />
 </div>
