@@ -30,7 +30,6 @@
   MenuStore.getMenu().currentSection = Positions.Search;
 
   async function getUsers() {
-
     found = false;
     notFound = false;
     foundKeyLength = 0;
@@ -120,7 +119,12 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div class="usr-cnt">
         <div class="info">
-          <ProfileIcon img={user!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
+          <ProfileIcon
+            img={user!.img}
+            inRegistration={false}
+            dimension={"medium"}
+            groupIcon={false}
+          />
           <div>
             <span>
               {user?.Username}
