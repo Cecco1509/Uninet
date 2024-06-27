@@ -57,7 +57,7 @@
   <div class="top-wrapper">
     {#key userInfo}
       {#if userInfo}
-        <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"big"} />
+        <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"big"} groupIcon={false}/>
         <div class="top-info">
           <div class="number-wrapper">
             <span class="number">{userInfo.posts}</span><span>Posts</span>

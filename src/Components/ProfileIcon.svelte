@@ -2,8 +2,9 @@
   import { storage } from "$lib/firebase/firebase.client";
   import { getDownloadURL, ref } from "firebase/storage";
   import userDefault from "$lib/assets/userDefault.png";
+  import groupDefault from "$lib/assets/userDefault.png";
 
-  let { img, inRegistration, dimension } : { img: string | null; inRegistration : boolean; dimension : string} = $props();
+  let { img, inRegistration, dimension, groupIcon} : { img: string | null; inRegistration : boolean; groupIcon : boolean; dimension : string} = $props();
   let profileImg = $state<any>();
 
   $effect(() => {
@@ -27,16 +28,16 @@
 </script>
 
 {#if dimension == "big"}
-  <div class="border userPageImg">
-    <img bind:this={profileImg} src={inRegistration && img ? img : userDefault} alt=""/>
+  <div class={groupIcon ? "groupBorder userPageImg" : "Border userPageImg"}>
+    <img bind:this={profileImg} src={inRegistration && img ? img : (groupIcon ? groupDefault : userDefault)} alt=""/>
   </div>
 {:else if dimension == "medium"}
-  <div class="border userPostImg">
-    <img bind:this={profileImg} src={userDefault} alt=""/>
+  <div class={groupIcon ? "groupBorder userPostImg" : "Border userPostImg"}>
+    <img bind:this={profileImg} src={(groupIcon ? groupDefault : userDefault)} alt=""/>
   </div>
 {:else if dimension == "small"}
   <div class="border userMessageImg">
-    <img bind:this={profileImg} src={userDefault} alt=""/>
+    <img bind:this={profileImg} src={(groupIcon ? groupDefault : userDefault)} alt=""/>
   </div>
 {/if}
 
@@ -47,6 +48,14 @@
   .border{
     background: linear-gradient(white, white) padding-box,
               linear-gradient(60deg, #ffffff8d, #21d2b5) border-box;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    /* border-image: linear-gradient(to right, #ffffff8d, #21d2b5) 1; */
+  }
+
+  .groupBorder{
+    background: linear-gradient(white, white) padding-box,
+              linear-gradient(60deg, #ffffff8d, #e6c960) border-box;
     border-radius: 50px;
     border: 2px solid transparent;
     /* border-image: linear-gradient(to right, #ffffff8d, #21d2b5) 1; */

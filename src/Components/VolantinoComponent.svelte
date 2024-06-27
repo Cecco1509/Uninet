@@ -21,7 +21,7 @@
 <div class="volantino">
     <div class="info">
         <span class="titolo">{volantino.data.text}</span>
-
+        
         <button onclick={() => {MenuStore.getMenu().currentSection = Positions.Messages; goto("/messages#"+volantino.data.createdBy)}} >Contatta</button>
     </div>
     <img src={volantino.data.img} alt="" />

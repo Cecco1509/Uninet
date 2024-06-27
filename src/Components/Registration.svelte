@@ -5,6 +5,7 @@
   import CanceIcon from "./Icons/CanceIcon.svelte";
   import { ref, uploadBytes } from "firebase/storage";
   import { uuidv4 } from "@firebase/util";
+  import { goto } from "$app/navigation";
 
   let { userID } : {userID: string} = $props();
 
@@ -20,6 +21,7 @@
   let area = $state<number>(-1);
   let course=$state("");
   let allowNotify = $state(false);
+  let rememberMe = $state(true)
   const tester = new RegExp(/^[a-zA-Z0-9]+$/);
 
   const courses = [
@@ -194,8 +196,9 @@
         posts: 0,
         course: course,
         notify : allowNotify,
+        rememberMe : true,
       });
-      window.location.href = "/users/" + username;
+      goto("/users/" + username);
     } catch (e) {
       console.log(e);
     }
@@ -212,7 +215,7 @@
     <div class="center">
       <label for="profileImg"> Seleziona un'immagine profilo </label>
       <div class="profile-img">
-      <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"}/>
+      <ProfileIcon img={profileImage} inRegistration={true} dimension={"big"} groupIcon={false}/>
       </div>
     
       <div class="file-inp">
@@ -258,7 +261,13 @@
           {/if}
         </label>
       </div>
-      
+
+      <div style="margin: 5% 10px;">
+        <input type="checkbox" name="remember" id="remember" bind:checked={rememberMe}>
+        <label for="remember">
+          Rimanere connessi
+        </label>
+      </div>
 
       <label for="area">Scegli l'area del tuo corso
       </label>

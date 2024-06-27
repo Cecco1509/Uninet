@@ -57,7 +57,7 @@
 <div id="chat">
   <div class="info">
     {#await usersInfoStore.getUserInfo(chat!.to, "CHAT").waitForComplete() then userInfo}
-      <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"medium"}/>
+      <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"medium"} groupIcon={false}/>
       <button
         class="link-name"
         onclick={() => {MenuStore.getMenu(null).currentSection = Positions.Profile; goto("/users/"+chat!.to)}}

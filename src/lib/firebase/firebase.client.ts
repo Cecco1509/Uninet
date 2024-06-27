@@ -14,9 +14,14 @@ import {
   inMemoryPersistence,
   type Auth,
 } from "firebase/auth";
-import { Database, getDatabase } from "firebase/database";
-import { getFirestore, type Firestore } from "firebase/firestore";
-import { getStorage, ref, type FirebaseStorage } from "firebase/storage";
+import { Database, getDatabase, onValue, ref } from "firebase/database";
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  type Firestore,
+} from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -37,9 +42,20 @@ if (!getApps().length) {
   firebaseApp = getApp();
   deleteApp(firebaseApp);
   firebaseApp = initializeApp(firebaseConfig);
+  //firestoreDB = initializeFirestore(firebaseApp, {localCache: persistentLocalCache({}), })
 }
 
 export const auth: Auth = getAuth(firebaseApp);
 export const db: Firestore = getFirestore();
 export const storage: FirebaseStorage = getStorage();
 export const realtimeDB: Database = getDatabase();
+
+const connectedRef = ref(realtimeDB, ".info/connected");
+
+onValue(connectedRef, (snap) => {
+  if (snap.val() === true) {
+    console.log("connected");
+  } else {
+    console.log("not connected");
+  }
+});

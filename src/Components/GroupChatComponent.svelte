@@ -40,7 +40,7 @@
     <div class="info">
       {#if chat}
         <div style="display: flex; align-items:center; gap:10px; width:90%">
-          <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"}/>
+          <ProfileIcon img={chat!.chatInfo.img!} inRegistration={false} dimension={"medium"} groupIcon={true}/>
           <button
             class="link-name"
             
@@ -66,8 +66,8 @@
               {#each partecipants as member}
                 <div class="scroll-bar-element">
                 {#await usersInfoStore.getUserInfo(member.name, "GROUPCHAT").waitForComplete() then info} 
-                    <ProfileIcon img={info!.img} inRegistration={false} dimension={"medium"}/>
-                    <span class="link-name" onclick={() => goto("/users/"+member.name)}>{member.name}</span>
+                    <ProfileIcon img={info!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
+                    <button class="link-name" onclick={() => goto("/users/"+member.name)}>{member.name}</button>
                 {/await}
                     
                 </div>

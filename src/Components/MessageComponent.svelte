@@ -16,7 +16,7 @@
       {#await UserInfosCache.getCache().getUserInfo(message.data.sender, "MESSAGE").waitForComplete() then userInfo}
         <div style="display: flex; gap:10px; align-items:center; margin-bottom: 5px; margin-left: 10px;">
           
-            <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"small"} />
+            <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"small"} groupIcon={false} />
           
           <span>{message.data.sender}</span>
         </div>

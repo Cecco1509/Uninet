@@ -138,7 +138,7 @@
   <div class="post-container">
     {#if !inUserPage && info}
       <div class="profile-icon">
-        <ProfileIcon img={info.img ? info.img : null} inRegistration={false} dimension={"medium"} />
+        <ProfileIcon img={info.img ? info.img : null} inRegistration={false} dimension={"medium"} groupIcon={false} />
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <span

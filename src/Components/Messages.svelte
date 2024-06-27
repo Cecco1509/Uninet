@@ -67,7 +67,7 @@
     >
      {#await usersInfoStore.getUserInfo(chat!.to, "MESSAGES").waitForComplete() then userInfo}
         <div class="info">
-          <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"medium"} />
+          <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
           <div>
             <span>
               {userInfo!.Username}
