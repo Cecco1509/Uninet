@@ -37,9 +37,11 @@
         ChatCache.getCache();
         goto("/feed")
         loading = false;
+        return;
       }else{
         Positions.Registration;
         loading = false;
+        return;
       }
     }
 
@@ -51,6 +53,7 @@
     ) {
       window.location.href = "/"
       loading = false;
+      return;
     }
 
     if (
@@ -63,6 +66,7 @@
       //window.location.href = "/"
       menu.currentSection = Positions.Registration;
       loading = false;
+      return;
     }
 
     if (
@@ -73,6 +77,7 @@
     ){
       ChatCache.getCache();
       loading = false
+      return;
     }
 
     loading = false;
