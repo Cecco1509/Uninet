@@ -65,7 +65,7 @@
           window.location.href.split("#")[0] + "#" + bindId;
       }}
     >
-     {#await usersInfoStore.getUserInfo(chat!.to, "MESSAGES").waitForComplete() then userInfo}
+     {#await usersInfoStore.getUserInfo(chat!.to).waitForComplete() then userInfo}
         <div class="info">
           <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
           <div class="chatInfo">

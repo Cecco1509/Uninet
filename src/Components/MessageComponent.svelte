@@ -13,7 +13,7 @@
   <div class={fade ? "msg-cnt fade" : "msg-cnt"}>
       
     {#if !sended}
-      {#await UserInfosCache.getCache().getUserInfo(message.data.sender, "MESSAGE").waitForComplete() then userInfo}
+      {#await UserInfosCache.getCache().getUserInfo(message.data.sender).waitForComplete() then userInfo}
         <div style="display: flex; gap:10px; align-items:center; margin-bottom: 5px; margin-left: 10px;">
           
             <ProfileIcon img={userInfo!.img} inRegistration={false} dimension={"small"} groupIcon={false} />

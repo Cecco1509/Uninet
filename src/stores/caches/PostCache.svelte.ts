@@ -21,6 +21,10 @@ type UsersFeedMap = {
 };
 
 export class PostCache implements FeedsCache {
+  static delete() {
+    this.instance._discoveryFeed = null;
+    this.instance._homeFeed = null;
+  }
   private usersFeedMap: UsersFeedMap = {};
   private _homeFeed: Feed | null = null;
   private _discoveryFeed: Feed | null = null;
@@ -54,7 +58,6 @@ export class PostCache implements FeedsCache {
         new HomeFeedQueryBuilder("Posts", MyUser.getUser().getFriends()),
         this.factory
       );
-    else console.log("not feed");
     return this._homeFeed;
   }
 
@@ -64,7 +67,6 @@ export class PostCache implements FeedsCache {
         new DiscoveryQueryBuilder("Posts", MyUser.getUser().getFriends()),
         this.factory
       );
-    else console.log("not feed");
     return this._discoveryFeed;
   }
 
@@ -102,7 +104,6 @@ export class PostCache implements FeedsCache {
         this.usersFeedMap[MyUser.getUser().userInfo!.Username].add(newPost);
 
       await MyUser.getUser().addPost();
-      console.log("ADD request");
     } catch (e) {
       console.log("Errore", e);
       return { esito: false, message: "Si è verificato un errore" };

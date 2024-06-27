@@ -89,7 +89,6 @@ export abstract class Chat implements IFeed {
   }
 
   protected getUnsubscriber(): () => void {
-    console.log("getUnsubscriber Called", this._id);
     let q1: Query | null = null;
 
     let id =
@@ -110,12 +109,10 @@ export abstract class Chat implements IFeed {
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "messages/" + this._id),
       (message) => {
-        console.log("Message created: " + message.val(), this._id);
         this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
 
-        console.log(this._freshMessages);
         this._lastId = message.key!;
       }
     );
@@ -151,8 +148,6 @@ export abstract class Chat implements IFeed {
         ? this._newElements[0].id
         : this._elements[0].id;
 
-    console.log("startAt", start, "endBefore", end);
-
     const q = query(
       ref(realtimeDB, "messages" + "/" + this.id),
       orderByKey(),
@@ -165,7 +160,6 @@ export abstract class Chat implements IFeed {
 
     result.forEach((message) => {
       newMessages.push(new Message(message.ref, message.val(), message.key));
-      console.log(message.key);
     });
 
     if (this._newElements.length == 0) this._newElements = newMessages;

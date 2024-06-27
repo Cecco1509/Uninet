@@ -47,7 +47,6 @@
     $effect(() => {
       chatId = window.location.href.split("#")[1];
       if (chatId == "") chatId = bindId;
-      //if(chatId == selectedChat) return
     });
 
     let modal = $state<HTMLDivElement>()
@@ -133,7 +132,10 @@
     partecipantsUsers.forEach(user => {partecipanti.push(user!.Username)})
     const result = await ChatCache.getCache().addGroupChat(newGroupName, partecipanti, await uploadCurrentPhoto())
 
-    if(result.created) closeModal(null);
+    if(result.esito) closeModal(null);
+
+    popup = {result: result, i : popup ? popup.i + 1 : 0};
+
     creating = false;
   }
 
@@ -162,6 +164,10 @@
 
   let popup = $state<{result : {esito : boolean, message : string}, i : number} | undefined>();
 </script>
+
+<svelte:head>
+  <title>Uninet | Gruppi</title>
+</svelte:head>
 
 {#if popup}
   {#key popup.i}
@@ -283,7 +289,7 @@
                 </div>
                 </div>
                 <div>
-                    <button onclick={()=> {partecipantsUsers = partecipantsUsers.filter((u)=> u?.Username != user?.Username); console.log(partecipantsUsers)}}>
+                    <button onclick={()=> partecipantsUsers = partecipantsUsers.filter((u)=> u?.Username != user?.Username)}>
                         Rimuovi
                     </button>
                 </div>
@@ -380,7 +386,7 @@
                 </div>
                 </div>
                 <div>
-                    <button onclick={()=> {partecipantsUsers = partecipantsUsers.filter((u)=> u?.Username != user?.Username); console.log(partecipantsUsers)}}>
+                    <button onclick={()=> partecipantsUsers = partecipantsUsers.filter((u)=> u?.Username != user?.Username)}>
                         Rimuovi
                     </button>
                 </div>
@@ -485,13 +491,6 @@
     .cnt {
       display: flex;
     }
-    
-    label{
-        padding-top: 20px;
-        font-size: 1.1em;
-        color: #5c5c5c;
-    }
-    
   
     .msgs-cnt {
       width: 30%;

@@ -68,7 +68,7 @@
             <div class="fixed-scrollbar" in:fade bind:this={membersDialog}>
               {#each partecipants as member}
                 <div class="scroll-bar-element">
-                {#await usersInfoStore.getUserInfo(member.name, "GROUPCHAT").waitForComplete() then info} 
+                {#await usersInfoStore.getUserInfo(member.name).waitForComplete() then info} 
                     <ProfileIcon img={info!.img} inRegistration={false} dimension={"medium"} groupIcon={false}/>
                     <button class="link-name" onclick={() => goto("/users/"+member.name)}>{member.name}</button>
                 {/await}

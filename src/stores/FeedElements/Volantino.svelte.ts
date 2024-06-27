@@ -39,7 +39,7 @@ export class Volantino extends FeedElement {
       await updateDoc(this.ref, edits);
       this._data = { ...this._data!, ...edits };
     } catch (e) {
-      console.log("Not Updated", e);
+      console.log(e);
     }
   }
 

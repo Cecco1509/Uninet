@@ -76,7 +76,7 @@
       return;
     }
 
-    info = userInfoStore.getUserInfo(post.data.createdBy,"POST").data;
+    info = userInfoStore.getUserInfo(post.data.createdBy).data;
   });
 
   $inspect(count);
@@ -122,10 +122,8 @@
 
   async function handleCommentSubmit() {
     sendingComment = true;
-    console.log("prova Commentato");
     if (!commentText) return;
     await post.publishComment(commentText);
-    console.log("Commentato");
     commentText = "";
     commenting = false;
     sendingComment = false;
@@ -324,8 +322,6 @@
     button {
       display: block;
       width: 100%;
-      /* transform: translateY(-100%);
-      -webkit-transform: -webkit-translateY(-100%); */
       margin-top: 0px !important;
       margin-bottom: 0px !important;
       height: 50px !important;
@@ -380,7 +376,6 @@
 
   .send-cmt-btn {
     width: 100px !important;
-    /* margin-left: calc((100% - 100px) - 16px); */
     border: 1px solid #e6c960;
     padding: 10px;
     border-radius: 15px;

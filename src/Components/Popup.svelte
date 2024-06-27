@@ -15,13 +15,16 @@
         position: fixed;
         top:-50dvh;
         left: calc(50dvw - 150px);
-        width: 300px;
-        height: auto;
+        width: 400px;
+        min-height: auto;
         padding: 20px;
-        box-shadow: 0px 0px 3px grey;
+        box-shadow: 0px 0px 3px rgba(255, 255, 255, 0.231)(128, 128, 128, 0.469);
         backdrop-filter: blur(20px);
         --webkit-backdrop-filter: blur(20px);
         animation: slide-in 1s ease-in-out forwards;
+        z-index: 999;
+        border-radius: 10px;
+        align-content: center;
     }
 
     @keyframes slide-in{
@@ -45,13 +48,13 @@
 
     .success{
         background-color: rgba(1, 214, 1, 0.201);
-        border-radius: 5px;
+        
         border: 1px solid rgb(1, 214, 1);
     }
 
     .error{
         background-color: rgba(214, 1, 1, 0.201);
-        border-radius: 5px;
+        
         border: 1px solid rgb(214, 1, 1);
     }
 
@@ -65,7 +68,7 @@
     }
 
     span{
-        font-size: 1.3em;
+        font-size: 1.5em;
         color: white;
     }
 </style>

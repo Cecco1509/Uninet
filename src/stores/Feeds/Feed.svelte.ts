@@ -31,8 +31,7 @@ export class Feed implements IFeed, Add, Delete {
     if (!q) return this._elements;
 
     const result = await getDocs(q);
-    //.then((result) => {
-    console.log(result.size);
+
     result.forEach((element) => {
       const newElement = this.factory.create(
         element.ref,
@@ -41,12 +40,9 @@ export class Feed implements IFeed, Add, Delete {
       );
 
       this._elements.push(newElement);
-      //DataBasaConn.getDB().getUserInfo(volantino.data().createdBy);
     });
     this._size += result.size;
     this._fetchedAll = this._size < this.queryBuilder.loadSize;
-
-    //  });
 
     return this._elements;
   }
@@ -54,14 +50,6 @@ export class Feed implements IFeed, Add, Delete {
   get factory() {
     return this._factory;
   }
-
-  // get isLoading() {
-  //   return this._isLoading;
-  // }
-
-  // get posts(): Post[] {
-  //   return this._elements;
-  // }
 
   get size(): number {
     return this._size;
@@ -83,7 +71,6 @@ export class Feed implements IFeed, Add, Delete {
 
     result.forEach((post) => {
       this._elements.push(this.factory.create(post.ref, post.data(), post.id));
-      console.log(post.id);
     });
 
     this._size += result.size;

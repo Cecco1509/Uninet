@@ -14,6 +14,8 @@
   import { MenuStore, Positions } from "../stores/Menu.svelte";
   import Messages from "./Messages.svelte";
   import BoardIcon from "./Icons/boardIcon.svelte";
+  import { ChatCache } from "../stores/caches/ChatCache.svelte";
+  import { PostCache } from "../stores/caches/PostCache.svelte";
 
   let { userID, page = $bindable() } : {userID : string; page : number} = $props();
 
@@ -23,7 +25,6 @@
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      goto("/");
       return;
     } catch (e) {
       console.log((e as FirebaseError).code);
@@ -61,10 +62,6 @@
   <button class={menu.currentSection == Positions.MessGroups ? "active" : ""} onclick={() => {goto("/studygroups");}} >
     <UserGroup/>
     <span class="btn-span">Gruppi</span>
-  </button>
-  <button class={menu.currentSection == Positions.Notify ? "active" : ""} >
-    <BellIcon/>
-    <span class="btn-span">Notifiche</span>
   </button>
   <button onclick={handleSignOut}>
     <LogoutIcon/>

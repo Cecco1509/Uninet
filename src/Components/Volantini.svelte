@@ -1,6 +1,6 @@
 <script lang="ts">
     import PostComponent from "./PostComponent.svelte";
-    import viewport from "./useViewportActions";
+    import viewport from "../lib/useViewportActions";
     import LoadIcon from "./LoadIcon.svelte";
   import VolantinoComponent from "./VolantinoComponent.svelte";
   import type { Feed } from "../stores/Feeds/Feed.svelte";
@@ -17,7 +17,6 @@
     } = $props();
 
     const handleEndPage = () => {
-      console.log("Load")
       feed.loadMore()
     }
   </script>

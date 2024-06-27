@@ -39,9 +39,12 @@
   $effect(() => {
     chatId = window.location.href.split("#")[1];
     if (chatId == "") chatId = bindId;
-    //if(chatId == selectedChat) return
   });
 </script>
+
+<svelte:head>
+  <title>Uninet | Messaggi</title>
+</svelte:head>
 
 <div class="cnt">
   <div class="msgs-cnt">

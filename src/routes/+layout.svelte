@@ -26,7 +26,7 @@
       goto("/offline");
       return;
     }
-    //console.log(userState.user, userState.userInfo);
+    
     if (
       browser &&
       userState.user &&
@@ -35,8 +35,7 @@
     ) {
       if (userState.userInfo) {
         ChatCache.getCache();
-        goto("/feed");
-        menu.currentSection = Positions.Feed;
+        window.location.href = "/feed"
         loading = false;
       }else{
         Positions.Registration;
@@ -50,8 +49,7 @@
       !userState.isLoading &&
       window.location.pathname !== "/"
     ) {
-      goto("/");
-      menu.currentSection = Positions.Login;
+      window.location.href = "/"
       loading = false;
     }
 
@@ -62,7 +60,7 @@
       !userState.userInfo &&
       window.location.pathname !== "/"
     ) {
-      goto("/");
+      window.location.href = "/"
       menu.currentSection = Positions.Registration;
       loading = false;
     }

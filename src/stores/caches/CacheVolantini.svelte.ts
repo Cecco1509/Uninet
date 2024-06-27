@@ -69,7 +69,11 @@ export class CacheVolantini implements FeedsCache {
     return this._usersCache[user];
   }
 
-  async publishVolantino(img: string, titolo: string, tagList: string[]) {
+  async publishVolantino(
+    img: string,
+    titolo: string,
+    tagList: string[]
+  ): Promise<{ esito: boolean; message: string }> {
     const new_volantino = {
       createdBy: MyUser.getUser().userInfo!.Username,
       data: Timestamp.fromDate(new Date()),
@@ -82,15 +86,21 @@ export class CacheVolantini implements FeedsCache {
       likes: 0,
     };
 
-    const ref = await addDoc(collection(db, "Volantini"), new_volantino);
-    const volantino: Volantino = this.factory.create(
-      ref,
-      new_volantino,
-      ref.id
-    );
+    try {
+      const ref = await addDoc(collection(db, "Volantini"), new_volantino);
+      const volantino: Volantino = this.factory.create(
+        ref,
+        new_volantino,
+        ref.id
+      );
+      this._usersCache[MyUser.getUser().userInfo!.Username].add(volantino);
+      this.getHomeFeed().add(volantino);
+    } catch (error) {
+      console.log(error);
+      return { esito: false, message: "Volantino non pubblicato" };
+    }
 
-    this._usersCache[MyUser.getUser().userInfo!.Username].add(volantino);
-    this.getHomeFeed().add(volantino);
+    return { esito: true, message: "Volantino pubblicato!" };
   }
 
   delete(id: string): void {

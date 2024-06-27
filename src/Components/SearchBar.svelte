@@ -13,16 +13,15 @@
 
 
     async function getElements() {
-        console.log("called");
 
         found = false;
         notFound = false;
         foundKeyLength = 0;
 
         const q = query(
-        collection(db, collectionName),
-        where(field, ">=", searchText),
-        where(field, "<=", searchText + "z"),
+            collection(db, collectionName),
+            where(field, ">=", searchText),
+            where(field, "<=", searchText + "z"),
         );
 
         const result = await getDocs(q);
@@ -32,8 +31,6 @@
             elements.push(user.data() as UserInfo);
         });
         typing = false;
-
-        console.log(elements);
 
         if (result.size == 1) {
             found = true;

@@ -56,7 +56,7 @@
 
 <div id="chat">
   <div class="info">
-    {#await usersInfoStore.getUserInfo(chat!.to, "CHAT").waitForComplete() then userInfo}
+    {#await usersInfoStore.getUserInfo(chat!.to).waitForComplete() then userInfo}
       <ProfileIcon img={userInfo?.img ? userInfo.img : null} inRegistration={false} dimension={"medium"} groupIcon={false}/>
       <button
         class="link-name"

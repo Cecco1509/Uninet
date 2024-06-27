@@ -24,13 +24,11 @@ export class UserInfosCache {
 
   constructor() {}
 
-  getUserInfo(username: string, dove: string): UserInfoObject {
+  getUserInfo(username: string): UserInfoObject {
     if (this.userInfos[username] && this.userInfos[username].data) {
-      console.log("not info", username, dove);
       return this.userInfos[username];
     }
 
-    console.log(this.userInfos[username], username, dove);
     const q = query(collection(db, "Users"), where("Username", "==", username));
 
     if (this.userInfos[username] == null) {

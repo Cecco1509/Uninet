@@ -33,7 +33,6 @@ export class GroupChatFeed extends Chat implements Send {
   constructor(id: string, chatInfo: groupChatInfo) {
     super(id);
     this._chatInfo = chatInfo;
-    this.currentUnsubscriber = this.getUnsubscriber();
   }
 
   get chatInfo() {
@@ -68,13 +67,13 @@ export class GroupChatFeed extends Chat implements Send {
 
     this._fetchedAll = this._elements.length < 30;
 
-    if (this._elements.length > 0 && !this.currentUnsubscriber)
+    if (!this.currentUnsubscriber)
       this.currentUnsubscriber = this.getUnsubscriber();
 
     return this._elements as Message[];
   }
 
-  protected getUnsubscriber(): () => void {
+  public getUnsubscriber(): () => void {
     let q1: Query | null = null;
 
     let id =
@@ -92,21 +91,12 @@ export class GroupChatFeed extends Chat implements Send {
       );
     }
 
-    console.log(
-      "-----------------------------------------------------------------------------------------------------------------------",
-      this.chatInfo.name,
-      q1,
-      id
-    );
-
     return onChildAdded(
       q1 ? q1 : ref(realtimeDB, "groupsMessages/" + this._chatInfo?.name),
       (message) => {
-        console.log("Message created: " + message.val(), this._id);
         this._freshMessages.push(
           new Message(message.ref, message.val(), message.key!)
         );
-        console.log(this._freshMessages);
         this._lastId = message.key!;
       }
     );
@@ -126,8 +116,6 @@ export class GroupChatFeed extends Chat implements Send {
         ? this._newElements[0].id
         : this._elements[0].id;
 
-    console.log("startAt", start, "endBefore", end, this.chatInfo.name);
-
     const q = query(
       ref(realtimeDB, "groupsMessages" + "/" + this.chatInfo.name),
       orderByKey(),
@@ -140,7 +128,6 @@ export class GroupChatFeed extends Chat implements Send {
 
     result.forEach((message) => {
       newMessages.push(new Message(message.ref, message.val(), message.key));
-      console.log(message.key);
     });
 
     if (this._newElements.length == 0) this._newElements = newMessages;
@@ -194,13 +181,11 @@ export class GroupChatFeed extends Chat implements Send {
     else if (this._elements.length > 0)
       id = Number(this._elements[this._elements.length - 1].id) + 1;
 
-    console.log(id);
     const newMessage: MessageSchema = {
       text: text,
       timestamp: strDate,
       sender: MyUser.getUser().userInfo!.Username,
     };
-    console.log("groupsMessages/", this.chatInfo.name, id, newMessage);
 
     await set(
       ref(realtimeDB, "groupsMessages/" + this.chatInfo.name + "/" + "" + id),

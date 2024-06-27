@@ -16,19 +16,6 @@
   <title>Uninet | User</title>
 </svelte:head>
 
-<!-- Menù a sinistra , meno importante-->
-
-<!-- Icona bro, impotante-->
-
-<!-- Followers&Seguiti -->
-
-<!-- User Infos, importante -->
-
-<div>
-  <!-- User posts, impotante -->
-  <!-- User thouths, impotante -->
-</div>
-
 <!-- Sezione voti a destra, meno importante(poi si fa)-->
 {#if !userState.isLoading}
   <User username={data.id} />

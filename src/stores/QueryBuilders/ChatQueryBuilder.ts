@@ -41,7 +41,6 @@ export class ChatQueryBuilder {
   }
 
   async getQuery(): Promise<Query> {
-    console.log("getQuery", this.collection, this.id);
     return query(
       ref(realtimeDB, this.collection + "/" + this.id),
       orderByKey(),

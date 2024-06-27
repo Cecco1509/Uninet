@@ -33,12 +33,10 @@
     if(user.isLoading) return
 
     completing = !user.userInfo && user.user ? true : false;
-    console.log(completing)
   })
 
   async function handleSubmit() {
     if(user.isLoading) {
-      console.log("LOADING...");
       return
     }
     if (!email || !password || (register && !confirmPassword)) {
@@ -47,7 +45,6 @@
     }
 
     if(MenuStore.getMenu().offline) {
-      console.log("SEI OFFLINE MI DISP")
       submitted = false;
       return;
     }

@@ -155,21 +155,10 @@
       await uploadBytes(imageRef, avatar[0]);
     } catch (e) {
       url = "";
-      console.log("ERRORE UPLOAD")
     }
 
     return url;
   }
-
-  // const handleSubmitUser = () => {
-  //   if (!inputUser!.checkValidity()) {
-  //           if (!inputUser!.username.checkValidity()) {
-  //               console.log("Name is required.");
-  //           }
-  //       } else {
-  //           console.log("DAJE")
-  //       }
-  // }
 
   const handleSubmit = async (e: Event) => {
 

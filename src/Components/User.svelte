@@ -30,10 +30,8 @@
   $effect(() => {
     if (!username || user.isLoading) return;
 
-    //userPosts = userInfosStore.getUserPosts(username);
-
     if (username !== user.userInfo?.Username) {
-      userInfo = userInfosStore.getUserInfo(username, "USERPAGE").data;
+      userInfo = userInfosStore.getUserInfo(username).data;
     } else {
       userInfo = user.userInfo;
     }
@@ -197,7 +195,6 @@
   .user-info-box {
     width: 100%;
     padding: 10px;
-    /* background-color: rgba(255, 255, 255, 0.3); */
   }
 
   .top-wrapper {

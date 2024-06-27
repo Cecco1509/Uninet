@@ -8,6 +8,7 @@
   import { ref, uploadBytes } from "firebase/storage";
   import Volantini from "../../Components/Volantini.svelte";
   import { MenuStore, Positions } from "../../stores/Menu.svelte";
+  import Popup from "../../Components/Popup.svelte";
 
     ////////////////////////////////////////////////////////
   let modal = $state<HTMLDivElement>()
@@ -83,19 +84,25 @@
     return url;
   }
 
+  let popup = $state<{result : {esito : boolean, message : string}, i : number} | undefined>();
+  
   async function handlePublish() {
     if(!profileImage || !titolo) return;
 
-    cacheVolantini.publishVolantino(await uploadCurrentPhoto(), titolo, tagList);
+    const result = await cacheVolantini.publishVolantino(await uploadCurrentPhoto(), titolo, tagList);
 
-    titolo = ""
-    tags = {}
-    input!.value = ""
-    closeModal(null);
+    if(result.esito){
+      titolo = ""
+      tags = {}
+      input!.value = ""
+      closeModal(null);
+    }
+
+    popup = {result: result, i : popup ? popup.i + 1 : 0};
 
   }
 
-    /////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////
 
   const cacheVolantini = CacheVolantini.getCache()
   let feed = $state(cacheVolantini.getHomeFeed());
@@ -108,15 +115,23 @@
         break;
       case 1:
         feed = cacheVolantini.getDiscoveryFeed();
-        console.log("discovery");
         break;
       default:
         break;
     }
   }
-
   
 </script>
+
+<svelte:head>
+  <title>Uninet | Volantini</title>
+</svelte:head>
+
+{#if popup}
+  {#key popup.i}
+    <Popup message={popup?.result.message} success={popup?.result.esito} />
+  {/key}
+{/if}
 
 <div class="top-bar-cnt">
     <div class="top-bar">

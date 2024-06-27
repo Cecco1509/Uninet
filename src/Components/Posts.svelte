@@ -1,6 +1,6 @@
 <script lang="ts">
   import PostComponent from "./PostComponent.svelte";
-  import viewport from "./useViewportActions";
+  import viewport from "../lib/useViewportActions";
   import LoadIcon from "./LoadIcon.svelte";
   import type { Feed } from "../stores/Feeds/Feed.svelte";
   import { Post } from "../stores/FeedElements/Post.svelte";
@@ -18,7 +18,6 @@
   $inspect(feed);
 
   const handleEndPage = () => {
-    console.log("Tried fetching", feed.fetchedAll)
     feed.loadMore();
   }
 </script>
@@ -32,9 +31,6 @@
         <hr>
       {/each}
 
-      <!-- {#if feed.size >= 10} 
-        <div class="posts-spacer"></div>
-      {/if} -->
       <div
         use:viewport
         onenterViewport={handleEndPage}

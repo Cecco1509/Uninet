@@ -45,12 +45,22 @@ export type GroupChatMap = {
 };
 
 export class ChatCache {
+  private _chats = $state<ChatMap>({});
+  private _groupChats = $state<GroupChatMap>({});
+  private unsubscribers: (() => void)[] = [];
+  private groupUnsubscribers: (() => void)[] = [];
+  private unsubscriber: (() => void) | null = null;
+  private groupUnsubscriber: (() => void) | null = null;
+
+  private static instance: ChatCache | null = null;
+
+  static delete() {
+    this.removeAllListeners();
+    this.instance!._chats = {};
+    this.instance!._groupChats = {};
+  }
   static removeAllListeners() {
     if (!this.instance) return;
-
-    console.log(
-      "------------------------------------------------------NO SUBSCRIBERS"
-    );
 
     this.instance?.unsubscribers.forEach((unsubscribe) => {
       unsubscribe?.();
@@ -77,17 +87,7 @@ export class ChatCache {
   subscribe() {
     this.unsubscriber = this.getUnsubscriber();
     this.groupUnsubscriber = this.getGroupsUnsubscriber();
-    console.log("---------------------------------------------SUBSCRIBERS");
   }
-
-  private _chats = $state<ChatMap>({});
-  private _groupChats = $state<GroupChatMap>({});
-  private unsubscribers: (() => void)[] = [];
-  private groupUnsubscribers: (() => void)[] = [];
-  private unsubscriber: (() => void) | null = null;
-  private groupUnsubscriber: (() => void) | null = null;
-
-  private static instance: ChatCache | null = null;
 
   static getCache() {
     if (!this.instance) this.instance = new ChatCache();
@@ -131,12 +131,7 @@ export class ChatCache {
                 const chatInfo = snapshot.val() as chatInfo;
 
                 if (MyUser.getUser().userInfo!.Username == partecipants[0]) {
-                  console.log("MESSAGGIO ARRIVATO");
-                  if (
-                    this._chats[partecipants[1]] &&
-                    this._chats[partecipants[1]]!.chatInfo.lastMessage !=
-                      chatInfo.lastMessage
-                  ) {
+                  if (this._chats[partecipants[1]]) {
                     this._chats[partecipants[1]]!.chatInfo = chatInfo;
                     this.notifyUser(
                       chatInfo.lastMessage,
@@ -152,11 +147,7 @@ export class ChatCache {
                     );
                   }
                 } else {
-                  if (
-                    this._chats[partecipants[0]] &&
-                    this._chats[partecipants[0]]!.chatInfo.lastMessage !=
-                      chatInfo.lastMessage
-                  ) {
+                  if (this._chats[partecipants[0]]) {
                     this._chats[partecipants[0]]!.chatInfo = chatInfo;
                     this.notifyUser(
                       chatInfo.lastMessage,
@@ -171,7 +162,6 @@ export class ChatCache {
                       snapshot.val()
                     );
                   }
-                  console.log(partecipants[0]);
                 }
               }
             }
@@ -187,18 +177,9 @@ export class ChatCache {
     sender: string,
     position: Positions
   ): void {
-    console.log(
-      "-----------------------------------------------------------CALLED NOTIFY"
-    );
     if (MenuStore.getMenu().currentSection == position && !document.hidden) {
-      console.log(
-        "POSITIONS ------------------------------------------------------------------------->",
-        position,
-        MenuStore.getMenu().currentSection
-      );
       return;
     }
-    console.log(logo);
     if (MyUser.getUser().userInfo?.notify) {
       if (!("Notification" in window)) {
         alert("Questo browser non supporta le notifiche");
@@ -232,13 +213,7 @@ export class ChatCache {
             doc(db, "groupsChatsInfo/", group.id),
             (snapshot) => {
               const groupInfo = snapshot.data() as groupChatInfo;
-              if (
-                this._groupChats[groupInfo.name] &&
-                this._groupChats[groupInfo.name]!.chatInfo.lastMessage !=
-                  groupInfo.lastMessage &&
-                this._groupChats[groupInfo.name]!.chatInfo.sender !=
-                  groupInfo.sender
-              ) {
+              if (this._groupChats[groupInfo.name]) {
                 this._groupChats[groupInfo.name]!.chatInfo = {
                   ...this._groupChats[groupInfo.name]!.chatInfo,
                   sender: groupInfo.sender,
@@ -259,7 +234,7 @@ export class ChatCache {
                 );
             }
           );
-          console.log("GROUP ADDED");
+
           this.groupUnsubscribers.push(unsubscribe);
         });
       }
@@ -294,7 +269,7 @@ export class ChatCache {
       {}
     );
     const userInfo = await UserInfosCache.getCache()
-      .getUserInfo(username, "addChat")
+      .getUserInfo(username)
       .waitForComplete();
     await setDoc(doc(db, "Users/" + userInfo?.id + "/chats", id), {});
   }
@@ -303,16 +278,16 @@ export class ChatCache {
     name: string,
     partecipants: string[],
     img: string
-  ): Promise<{ created: boolean; message: string }> {
+  ): Promise<{ esito: boolean; message: string }> {
     if (partecipants.length < 2)
-      return { created: false, message: "Partecipanti insufficienti" };
+      return { esito: false, message: "Partecipanti insufficienti" };
 
     if (
       this._groupChats[name] ||
       (await get(ref(realtimeDB, "groupsPartecipants/" + name))).exists()
     )
       return {
-        created: false,
+        esito: false,
         message: "Esiste già un gruppo con questo nome",
       };
 
@@ -342,7 +317,7 @@ export class ChatCache {
 
     partecipants.forEach(async (partecipant) => {
       const userInfo = await UserInfosCache.getCache()
-        .getUserInfo(partecipant, "addGroupChat")
+        .getUserInfo(partecipant)
         .waitForComplete();
       await setDoc(
         doc(db, "Users/" + userInfo?.id + "/groupsChats", reference.id),
@@ -377,7 +352,7 @@ export class ChatCache {
     //   new MessageFactory()
     // );
 
-    return { created: true, message: "" };
+    return { esito: true, message: "Gruppo creato!" };
   }
 
   async setLastMessage(
@@ -389,10 +364,8 @@ export class ChatCache {
       this._chats[username] = newChat;
       newChat.setId(MyUser.getUser().userInfo!.Username + "&" + username);
       await this.addChat(newChat.id!, username);
-      console.log(newChat.id);
     }
 
-    console.log(this._chats[username]?.id);
     await set(ref(realtimeDB, "chats/" + this._chats[username]?.id), newInfo);
   }
 
@@ -402,7 +375,6 @@ export class ChatCache {
         ...newInfo,
         sender: MyUser.getUser().userInfo?.Username,
       });
-    else console.log("ID", id, "Qualcosa è andato storto");
   }
 
   async join(name: string): Promise<{ esito: boolean; message: string }> {
@@ -470,21 +442,4 @@ export class ChatCache {
 
     return { esito: true, message: "Sei entrato nel gruppo!" };
   }
-
-  // async addChat(searchUser : string, initInfo : chatInfo) {
-
-  //     //AGGIUNGERE CONTROLLI DI SICUREZZA
-
-  //     console.log(MyUser.getUser().userInfo?.Username+"&"+searchUser)
-
-  //     // Controllo se esiste
-  //     if(this._chats[searchUser+"&"+MyUser.getUser().userInfo?.Username]) return searchUser+"&"+MyUser.getUser().userInfo?.Username;
-  //     if(this._chats[MyUser.getUser().userInfo?.Username+"&"+searchUser]) return MyUser.getUser().userInfo?.Username+"&"+searchUser;
-
-  //     set(ref(realtimeDB, "chats/" + MyUser.getUser().userInfo?.Username+"&"+searchUser), initInfo)
-
-  //     setDoc(doc(db, "Users/"+MyUser.getUser().user?.uid+"/chats", MyUser.getUser().userInfo?.Username+"&"+searchUser), {});
-
-  //     return MyUser.getUser().userInfo?.Username+"&"+searchUser
-  // }
 }

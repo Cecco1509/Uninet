@@ -30,7 +30,6 @@
   MenuStore.getMenu().currentSection = Positions.Search;
 
   async function getUsers() {
-    console.log("called");
 
     found = false;
     notFound = false;
@@ -49,8 +48,6 @@
       users.push(user.data() as UserInfo);
     });
     typing = false;
-
-    console.log(users);
 
     if (result.size == 1) {
       found = true;
