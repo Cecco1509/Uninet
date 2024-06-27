@@ -251,13 +251,6 @@
         </label>
       </div>
 
-      <div style="margin: 5% 10px;">
-        <input type="checkbox" name="remember" id="remember" bind:checked={rememberMe}>
-        <label for="remember">
-          Rimanere connessi
-        </label>
-      </div>
-
       <label for="area">Scegli l'area del tuo corso
       </label>
       <select name="area" id="uni" bind:value={area}>
